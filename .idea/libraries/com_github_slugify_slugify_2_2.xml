@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="com.github.slugify:slugify:2.2" type="repository">
+    <properties maven-id="com.github.slugify:slugify:2.2" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/slugify/slugify/2.2/slugify-2.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/ibm/icu/icu4j/60.1/icu4j-60.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/slugify/slugify/2.2/slugify-2.2-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/ibm/icu/icu4j/60.1/icu4j-60.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/slugify/slugify/2.2/slugify-2.2-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/ibm/icu/icu4j/60.1/icu4j-60.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
