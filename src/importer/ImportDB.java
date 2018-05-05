@@ -1,11 +1,18 @@
 package importer;
 
-import com.github.slugify.Slugify;
+import com.google.gson.Gson;
 import comparator.Lev;
 import config.Config;
 import data.Article;
 import data.Author;
-import deduplicator.InterDeduplicator;
+import data.Organization;
+import deduplicator.Deduplicator;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -16,7 +23,6 @@ import util.DataUtl;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -35,8 +41,6 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
  */
 
 public class ImportDB {
-
-    private static Slugify slg = new Slugify();
 
     /**
      * Main insert function
@@ -72,9 +76,11 @@ public class ImportDB {
         pstmInsertArticle.setInt(17, article.isISI() ? 1 : 0);
         pstmInsertArticle.setInt(18, article.isVCI() ? 1 : 0);
         pstmInsertArticle.setInt(19, 1);
-        pstmInsertArticle.setString(20, slg.slugify(article.getTitle()));
+        pstmInsertArticle.setString(20, "add-slug-here");
 
-        int articleID = pstmInsertArticle.executeUpdate();
+        pstmInsertArticle.executeUpdate();
+
+        int articleID = DataUtl.getAutoIncrementID(pstmInsertArticle);
 
         // Link articles and authors
         if (pstmInsertArticleAuthors == null) {
@@ -89,6 +95,8 @@ public class ImportDB {
         }
 
         pstmInsertArticleAuthors.executeBatch();
+
+        System.out.println("created " + (article.isScopus() ? "scopus " : "isi ") + articleID + "    " + article.getTitle());
     }
 
     /**
@@ -112,23 +120,23 @@ public class ImportDB {
             QueryBuilder builder = QueryBuilders.matchQuery("issn", article.getISSN());
             SearchHits hits = DataUtl.queryES("available_journals", builder);
 
-            if (hits.getTotalHits() != 0) {
-                Map map = hits.getAt(0).getSourceAsMap();
+            for (SearchHit hit : hits) {
+                Map map = hit.getSourceAsMap();
                 String hitISSN = (String) map.get("issn");
 
                 // God almighty
                 if (hitISSN != null && hitISSN.equals(article.getISSN())) {
-                    boolean is_isi = ((String) map.get("is_isi")).equals("1");
-                    boolean is_scopus = ((String) map.get("is_scopus")).equals("1");
+                    boolean is_isi = map.get("is_isi").equals(Boolean.TRUE);
+                    boolean is_scopus = map.get("is_scopus").equals(Boolean.TRUE);
 
-                    if (is_isi != article.isISI() || is_scopus != article.isScopus() ) {
+                    if (is_isi != article.isISI() || is_scopus != article.isScopus()) {
                         // Need to update
-                        updateJournal(article, (String) map.get("original_id"), false);
+                        updateJournal(article, (Integer) map.get("original_id"));
                     }
 
-                    article.setVCI(((String) map.get("is_vci")).equals("1"));
+                    article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
 
-                    return Integer.valueOf((String) hits.getAt(0).getSourceAsMap().get("original_id"));
+                    return (Integer) map.get("original_id");
                 }
             }
         }
@@ -136,32 +144,38 @@ public class ImportDB {
         QueryBuilder builder = QueryBuilders.matchQuery("name", article.getJournal());
         SearchHits hits = DataUtl.queryES("available_journals", builder);
 
-        if (hits.getTotalHits() != 0) {
+        for (SearchHit hit : hits) {
             // The condition is quite strict, as journal names are messy and need a separate deduplication
             // - Only the closest match is examined
             // - error_threshold is pretty low
 
-            Map map = hits.getAt(0).getSourceAsMap();
+            Map map = hit.getSourceAsMap();
 
-            boolean is_isi = ((String) map.get("is_isi")).equals("1");
-            boolean is_scopus = ((String) map.get("is_scopus")).equals("1");
             String issn = (String) map.get("issn");    // Ha ha ha java in a nutshell: Foo bar = (Foo) null;
+            String name = (String) map.get("name");
 
-            if (is_isi != article.isISI() || is_scopus != article.isScopus() || issn == null) {
-                // Need update
-                updateJournal(article, (String) map.get("original_id"), issn == null);
-            }
+            if (Lev.distanceNormStr(article.getJournal(), name) < 0.1d) {
+                boolean is_isi = map.get("is_isi").equals(Boolean.TRUE);
+                boolean is_scopus = map.get("is_scopus").equals(Boolean.TRUE);
 
-            if (Lev.distanceNormStr(article.getJournal(), (String) map.get("name")) < 0.1d) {
-                article.setVCI(((String) map.get("is_vci")).equals("1"));
+                if (issn != null && article.getISSN() == null) {
+                    article.setISSN(issn);
+                }
 
-                return Integer.valueOf((String) map.get("original_id"));
+                if (is_isi != article.isISI() || is_scopus != article.isScopus() || issn == null) {
+                    // Need update
+                    updateJournal(article, (Integer) map.get("original_id"));
+                }
+
+                article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
+
+                return (Integer) map.get("original_id");
             }
         }
 
         // No match, create a new one
         if (pstmInsertJournal == null) {
-            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.journals (name, issn, is_scopus, is_isi, is_vci, is_international, type) VALUES(?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertJournal.setString(1, article.getJournal());
@@ -171,8 +185,14 @@ public class ImportDB {
         pstmInsertJournal.setInt(5, 0);
         pstmInsertJournal.setInt(6, 1);
         pstmInsertJournal.setString(7, article.getType());
+        pstmInsertJournal.setString(8, "add-slug-here");
+        pstmInsertJournal.setString(9, "");
+        pstmInsertJournal.setString(10, "");
+        pstmInsertJournal.setInt(11, 0);
 
-        int journalID = pstmInsertJournal.executeUpdate();
+        pstmInsertJournal.executeUpdate();
+
+        int journalID = DataUtl.getAutoIncrementID(pstmInsertJournal);
 
         // Index it in ES
         DataUtl.indexES("available_journals", "articles", String.valueOf(journalID),
@@ -181,6 +201,9 @@ public class ImportDB {
                     .field("original_id", journalID)
                     .field("name", article.getJournal())
                     .field("issn", article.getISSN())
+                    .field("is_isi", article.isISI())
+                    .field("is_scopus", article.isScopus())
+                    .field("is_vci", false)
                 .endObject()
         );
 
@@ -188,7 +211,9 @@ public class ImportDB {
     }
 
     /**
-     *
+     * Update journal information
+     * If an article is duplicated in both ISI and Scopus data, its journal must also be marked is_isi and is_scopus
+     * If an article has a text issn
      *
      * @param article
      * @param journalID
@@ -197,35 +222,28 @@ public class ImportDB {
      * @throws IOException
      */
     private static PreparedStatement pstmUpdateJournal = null;
-    public static void updateJournal(Article article, String journalID, boolean isNeedUpdateISSN) throws SQLException, IOException {
+    public static void updateJournal(Article article, int journalID) throws SQLException, IOException {
         // Update in DB
         if (pstmUpdateJournal == null) {
-            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.journals SET is_isi = ?, is_scopus = ? WHERE id = ?");
+            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.journals SET is_isi = ?, is_scopus = ?, issn = ? WHERE id = ?");
         }
 
         pstmUpdateJournal.setInt(1, article.isISI() ? 1 : 0);
         pstmUpdateJournal.setInt(2, article.isScopus() ? 1 : 0);
-        pstmUpdateJournal.setInt(3, Integer.parseInt(journalID));
+        pstmUpdateJournal.setString(3, article.getISSN());
+        pstmUpdateJournal.setInt(4, journalID);
 
         pstmUpdateJournal.executeUpdate();
 
         // Update in ES
-        UpdateRequest request = new UpdateRequest("available_journals", "articles", journalID);
+        UpdateRequest request = new UpdateRequest("available_journals", "articles", String.valueOf(journalID));
 
-        if (isNeedUpdateISSN) {
-            request.doc(jsonBuilder()
-                    .startObject()
-                    .field("is_isi", article.isISI() ? "1" : "0")
-                    .field("is_scopus", article.isScopus() ? "1" : "0")
-                    .field("issn", article.getISSN())
-                    .endObject());
-        } else {
-            request.doc(jsonBuilder()
-                    .startObject()
-                    .field("is_isi", article.isISI() ? "1" : "0")
-                    .field("is_scopus", article.isScopus() ? "1" : "0")
-                    .endObject());
-        }
+        request.doc(jsonBuilder()
+            .startObject()
+                .field("is_isi", article.isISI())
+                .field("is_scopus", article.isScopus())
+                .field("issn", article.getISSN())
+            .endObject());
 
         DataUtl.getESClient().update(request);
     }
@@ -268,26 +286,43 @@ public class ImportDB {
         }
 
         pstmInsertAuthor.setString(1, author.getFullName());
-        int authorID = pstmInsertAuthor.executeUpdate();
+
+        pstmInsertAuthor.executeUpdate();
+
+        int authorID = DataUtl.getAutoIncrementID(pstmInsertAuthor);
 
         // Link authors and organizations
         if (pstmInsertAuthorOrganization == null) {
-            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors_organizes (author_id, organize) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors_organizes (author_id, organize_id) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
-        int organizationID = findOrCreateOrganization(author.getOrganization());
+        int[] organizationIDs = findOrCreateOrganizations(author.getOrganizations());
 
-        pstmInsertAuthorOrganization.setInt(1, authorID);
-        pstmInsertAuthorOrganization.setInt(2, organizationID);
+        for (int organizationID : organizationIDs) {
+            pstmInsertAuthorOrganization.setInt(1, authorID);
+            pstmInsertAuthorOrganization.setInt(2, organizationID);
 
-        pstmInsertAuthorOrganization.executeUpdate();
+            try {
+                pstmInsertAuthorOrganization.executeUpdate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         return authorID;
     }
 
-    private static PreparedStatement pstmInsertOrganization = null;
+    public static int[] findOrCreateOrganizations(String[] organizations) throws IOException, SQLException {
+        int[] organizationIDs = new int[organizations.length];
 
-    public static int findOrCreateOrganization(String organization) throws IOException, SQLException {
+        for (int i = 0; i < organizations.length; ++i) {
+            organizationIDs[i] = findOrCreateOrganization(organizations[i]);
+        }
+
+        return organizationIDs;
+    }
+
+    public static int findOrCreateOrganization(String organization) throws IOException {
         if (organization == null) {
             // AKA "Chưa phân loại"
             return 1;
@@ -296,31 +331,21 @@ public class ImportDB {
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
         SearchHits hits = DataUtl.queryES("available_organizations", builder);
 
-        if (hits.getTotalHits() != 0) {
+        for (SearchHit hit : hits) {
             // The condition is quite strict, as journal names are messy and need a separate deduplication
             // - Only the closest match is examined
             // - error_threshold is pretty low
 
-            Map map = hits.getAt(0).getSourceAsMap();
-            if (Lev.distanceNormStr(organization, (String) map.get("name")) < 0.1d) {
-                return Integer.valueOf((String) map.get("original_id"));
+            Map map = hit.getSourceAsMap();
+            if (Lev.distanceNormStr(organization, (String) map.get("name")) < 0.05d) {
+                System.out.println("Found in elas: organizationID " + hit.getSourceAsMap().get("original_id") + "    " + organization);
+                return (Integer) map.get("original_id");
             }
         }
 
         // No match, create a new one
-        if (pstmInsertOrganization == null) {
-            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name) VALUES(?)");
-        }
-
-        pstmInsertOrganization.setString(1, organization);
-
-            pstmInsertOrganization.executeUpdate();
-
-        ResultSet rs = pstmInsertOrganization.getGeneratedKeys();
-        int organizationID = -1;
-        if (rs.next()) {
-            organizationID = rs.getInt(1);
-        }
+        int organizationID = createOrganizationInServer(organization);
+        System.out.println("server created organizationID " + organizationID + "    " + organization);
 
         // Index it in ES
         DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
@@ -332,6 +357,51 @@ public class ImportDB {
         );
 
         return organizationID;
+    }
+
+    private static CloseableHttpClient httpClient = HttpClients.createDefault();
+    private static Gson gson = new Gson();
+
+    private static int createOrganizationInServer(String organization) throws IOException {
+        String json = gson.toJson(new Organization(organization));
+
+        HttpPost httpPOST = new HttpPost("http://localhost:8000/api/organizes/createByName");
+        httpPOST.setEntity(new StringEntity(json, "UTF-8"));
+        httpPOST.setHeader("Content-type", "application/json; charset=utf-8");    // hmmm
+
+        HttpResponse response = httpClient.execute(httpPOST);
+        Organization org = gson.fromJson(EntityUtils.toString(response.getEntity(), "UTF-8"), Organization.class);
+
+        return org.getId();
+    }
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+        String organization = "Centre de Physique Théorique, Case 907 Luminy, 13288 Marseille Cedex 9, France, Université de la Méditérannée, 13288 Marseille Cedex 9, France";
+        int organizationID = createOrganizationInServer(organization);
+        System.out.println("exact id " + organizationID);
+
+        DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
+            jsonBuilder()
+                .startObject()
+                    .field("original_id", organizationID)
+                    .field("name", organization)
+                .endObject()
+        );
+
+        QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
+        SearchHits hits = DataUtl.queryES("available_organizations", builder);
+
+        System.out.println("size " + hits.getTotalHits());
+
+        for (SearchHit hit : hits) {
+            Map map = hit.getSourceAsMap();
+            System.out.println("- " + map.get("name"));
+
+            if (Lev.distanceNormStr(organization, (String) map.get("name")) < 0.05d) {
+                System.out.println("    - " + map.get("name"));
+                System.out.println("    - " + map.get("original_id"));
+            }
+        }
     }
 
     /**
@@ -355,12 +425,12 @@ public class ImportDB {
         for (SearchHit hit : hits) {
             Article article = new Article();
 
-            article.setId(Integer.valueOf((String) hit.getSourceAsMap().get("original_id")));
+            article.setId((Integer) hit.getSourceAsMap().get("original_id"));
             article.setTitle((String) hit.getSourceAsMap().get("title"));
             article.setYear((String) hit.getSourceAsMap().get("year"));
             article.setJournal((String) hit.getSourceAsMap().get("journal"));
 
-            if (InterDeduplicator.isDuplicate(article, input)) {
+            if (Deduplicator.isDuplicate(article, input)) {
                 return false;
             }
         }

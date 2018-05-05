@@ -3,7 +3,8 @@ package data;
 import java.util.ArrayList;
 
 public class Author {
-    private String organize, first_name, last_name, fullName;
+    private String first_name, last_name, fullName;
+    private String[] organize;
     private ArrayList<String> listAbbrName;
 
     public Author() {
@@ -13,11 +14,11 @@ public class Author {
         this.fullName = fullName;
     }
 
-    public String getOrganization() {
+    public String[] getOrganizations() {
         return organize;
     }
 
-    public void setOrganize(String organize) {
+    public void setOrganizations(String[] organize) {
         this.organize = organize;
     }
 
@@ -47,7 +48,7 @@ public class Author {
 
     public String getFullName() {
         if (fullName == null) {
-            fullName = first_name + (first_name.charAt(first_name.length() - 1) == ' ' ? "" : " ") + last_name;
+            fullName = (first_name.trim() + " " + last_name.trim()).trim();
         }
 
         return fullName;
@@ -56,7 +57,7 @@ public class Author {
     public ArrayList<String> getListAbbrName() {
         if (listAbbrName == null) {
             if (fullName == null) {
-                fullName = first_name + (first_name.charAt(first_name.length() - 1) == ' ' ? "" : " ") + last_name;
+                fullName = (first_name.trim() + " " + last_name.trim()).trim();
             }
 
             this.listAbbrName = new ArrayList<>();

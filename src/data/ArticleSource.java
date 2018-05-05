@@ -1,8 +1,6 @@
 package data;
 
 import config.Config;
-import deduplicator.InterDeduplicator;
-import edu.binghamton.metasearch.deduplication.Deduplicator;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -20,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleSource {
-    public static List<Article> getArticles(String field, String value) throws UnknownHostException, SQLException {
+    public static List<Article> getArticles(String index, String field, String value) throws UnknownHostException, SQLException {
         switch (Config.getDataSource()) {
             case ES_TRANSPORT_6_2_3:
-                return getArticlesES_Transport(field, value);
+                return getArticlesES_Transport(index, field, value);
 
             case ES_REST:
                 return getArticlesES_REST(field, value);
@@ -36,8 +34,8 @@ public class ArticleSource {
         }
     }
 
-    public static List<Article> getArticles(String type, String field, String value) throws UnknownHostException, SQLException {
-        List<Article> articles = getArticles(field, value);
+    public static List<Article> getArticles(String index, String type, String field, String value) throws UnknownHostException, SQLException {
+        List<Article> articles = getArticles(index, field, value);
 
         boolean is_isi = type.equals("isi");
         for (int i = 0; i < articles.size(); ++i) {
@@ -49,8 +47,8 @@ public class ArticleSource {
         return articles;
     }
 
-    public static Article getArticleByID(String type, int ID) throws SQLException, UnknownHostException {
-        List<Article> articles = getArticles(Config.FIELD_ID, String.valueOf(ID));
+    public static Article getArticleByID(String index, String type, int ID) throws SQLException, UnknownHostException {
+        List<Article> articles = getArticles(index, Config.FIELD_ID, String.valueOf(ID));
 
         if (articles == null) {
             System.out.println("real null");
@@ -73,19 +71,13 @@ public class ArticleSource {
 
             return null;
         }
-
-//        if (articles.size() == 0) {
-//            System.out.println(type + "    " + ID);
-//        }
-//
-//        return articles.size() == 0 ? null : articles.get(0);
     }
 
-    private static List<Article> getArticlesES_Transport(String field, String value) throws UnknownHostException {
+    private static List<Article> getArticlesES_Transport(String index, String field, String value) throws UnknownHostException {
         List<Article> articles = new ArrayList<>();
 
         QueryBuilder filterByField = QueryBuilders.matchQuery(field, value);
-        SearchHits hits = DataUtl.queryES(Config.ES_INDEX, filterByField);
+        SearchHits hits = DataUtl.queryES(index, filterByField);
 
         if (hits == null || hits.getTotalHits() == 0) {
             return articles;
@@ -94,7 +86,7 @@ public class ArticleSource {
         for (SearchHit hit : hits) {
             Article article = new Article();
 
-            article.setId(Integer.valueOf((String) hit.getSourceAsMap().get("original_id")));
+            article.setId((Integer) hit.getSourceAsMap().get("original_id"));
             article.setTitle((String) hit.getSourceAsMap().get("title"));
             article.setYear((String) hit.getSourceAsMap().get("year"));
             article.setRawAuthorStr((String) hit.getSourceAsMap().get("author"));

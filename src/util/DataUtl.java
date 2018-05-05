@@ -20,10 +20,7 @@ import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 import java.io.UnsupportedEncodingException;
 import java.net.*;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -80,6 +77,13 @@ public class DataUtl {
 
     public static void indexES(String index, String type, String id, XContentBuilder builder) throws UnknownHostException {
         getESClient().prepareIndex(index, type, id).setSource(builder).get();
+        getESClient().admin().indices().prepareRefresh(index).get();
+
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static Connection connection = null;
@@ -130,5 +134,11 @@ public class DataUtl {
         }
 
         stm.executeBatch();
+    }
+
+    public static int getAutoIncrementID(PreparedStatement pstm) throws SQLException {
+        ResultSet rs = pstm.getGeneratedKeys();
+        rs.next();
+        return rs.getInt(1);
     }
 }

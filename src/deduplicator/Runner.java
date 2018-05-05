@@ -2,8 +2,11 @@ package deduplicator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import config.Config;
 import data.Article;
+import data.ArticleSource;
 import data.Match;
+import importer.ImportDB;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -18,32 +21,35 @@ import java.util.concurrent.*;
 import static data.ArticleSource.getArticleByID;
 
 public class Runner {
-    public static void main(String[] args) throws IOException {
-        List<Match> listMatches = new ArrayList<>();
+    public static void main(String[] args) throws IOException, SQLException {
+        importAllScopus();
 
-        for (int i = 0; i < 63000; ++i) {
-            try {
-                addToListMatches(listMatches, InterDeduplicator.deduplicate("isi", i));
-            } catch (Exception e) {
-                e.printStackTrace();
+//        List<Match> listMatches = new ArrayList<>();
+//
+//        for (int i = 0; i < 41000; ++i) {
+//            try {
+//                addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//
+//        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
+//
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+//        writer.write(gson.toJson(listMatches));
+//        writer.close();
+    }
+
+    public static void importAllScopus() throws SQLException, IOException {
+        for (int i = 0; i < 44000; ++i) {
+            Article scopus = ArticleSource.getArticleByID(Config.ES_INDEX, "scopus", i);
+            if (scopus != null) {
+                ImportDB.createArticle(scopus);
             }
         }
-
-        for (int i = 0; i < 51000; ++i) {
-            try {
-                addToListMatches(listMatches, InterDeduplicator.deduplicate("scopus", i));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-        writer.write(gson.toJson(listMatches));
-        writer.close();
     }
 
     public static void addToListMatches(List<Match> currentMatches, List<Match> newMatches) {
@@ -76,23 +82,6 @@ public class Runner {
         }
     }
 
-    public static void writeToFile(List<Match> listMatches) throws SQLException, IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File("D:\\VCI\\Deduplication\\src\\outfile_relaxed")));
-        StringBuilder builder = new StringBuilder();
-
-        for (Match match : listMatches) {
-            Article articleISI = getArticleByID("isi", match.getISI());
-            Article articleScopus = getArticleByID("scopus", match.getScopus());
-
-            builder.append(articleISI.toString()).append("\n\n");
-            builder.append(articleScopus.toString()).append("\n\n\n");
-        }
-        builder.append(listMatches.size());
-
-        writer.write(builder.toString());
-        writer.close();
-    }
-
     public static class Worker implements Callable<List<Match>> {
 
         private String type;
@@ -110,7 +99,7 @@ public class Runner {
 
             for (int i = start; i < end; ++i) {
                 try {
-                    listMatches.addAll(InterDeduplicator.deduplicate(type, i));
+                    listMatches.addAll(Deduplicator.deduplicate(type, i));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

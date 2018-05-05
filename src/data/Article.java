@@ -3,7 +3,6 @@ package data;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -225,15 +224,6 @@ public class Article {
         }
 
         return listAuthors;
-    }
-
-    public static void main(String[] args) {
-        String str = "[{\"organize\": \"Aristotle Univ Thessaloniki, Dept Phys, Lab Nonlinear Syst Circuits & Complex LANSCOM, GR-54124 Thessaloniki, Greece\", \"first_name\": \"Volos\", \"last_name\": \"CK\"}, {\"organize\": \"Aristotle Univ Thessaloniki, Dept Phys, Lab Nonlinear Syst Circuits & Complex LANSCOM, GR-54124 Thessaloniki, Greece\", \"first_name\": \"Volos\", \"last_name\": \"Christos K.\"}, {\"organize\": \"Sakarya Univ, Fac Technol, Dept Elect & Elect Engn, TR-54187 Serdivan, Sakarya, Turkey\", \"first_name\": \"Akgul\", \"last_name\": \"Akif\"}, {\"organize\": \"Sch Elect & Telecommun, 01 Dai Co Viet Rd, Hanoi, Vietnam\", \"first_name\": \"Viet-Thanh Pham\", \"last_name\": \"Hanoi Univ Sci & Technol\"}, {\"organize\": \"Univ Aberdeen, Inst Complex Syst & Math Biol, Aberdeen AB24 3UE, Scotland.\", \"first_name\": \"Baptista\", \"last_name\": \"Murilo S.\"}]";
-        List<Author> authors = gson.fromJson(str, new TypeToken<List<Author>>(){}.getType());
-
-        for (Author author : authors) {
-            System.out.println(author.getFirst_name() + " " + author.getLast_name() + " " + author.getFullName());
-        }
     }
 
     public boolean isISI() {

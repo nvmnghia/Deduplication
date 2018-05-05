@@ -6,6 +6,8 @@ import config.Config;
 import data.*;
 
 import importer.ImportDB;
+import org.elasticsearch.action.update.UpdateRequest;
+import util.DataUtl;
 import util.StringUtl;
 
 import java.io.IOException;
@@ -13,26 +15,26 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class InterDeduplicator {
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
-    private static Set<Integer> insertedScopusArticle = new HashSet<>();
+public class Deduplicator {
 
     public static List<Match> deduplicate(String type, Integer id) throws IOException, SQLException {
         // First get the article
-        Article article = ArticleSource.getArticleByID(type, id);
+        Article article = ArticleSource.getArticleByID(Config.ES_INDEX, type, id);
         if (article == null) {
             return new ArrayList<>();
         }
 
-        // Then search for its name
-        // In the OTHER DB
-        List<Article> candidates = ArticleSource.getArticles(type.equals("isi") ? "scopus" : "isi", Config.FIELD_TITLE, article.getTitle());
+        // Then search for its name, in the merged DB
+        List<Article> candidates = ArticleSource.getArticles("available_articles", type.equals("isi") ? "scopus" : "isi", Config.FIELD_TITLE, article.getTitle());
 
         // Filter by year
         filterByYear(candidates, article.getYear());
@@ -47,7 +49,7 @@ public class InterDeduplicator {
             }
 
             if (isDuplicate(article, candidate)) {
-                printDebug(article, candidate);
+                duplicated = true;
 
                 if (article.isISI()) {
                     listMatches.add(new Match(article.getId(), candidate.getId()));
@@ -55,45 +57,52 @@ public class InterDeduplicator {
                     listMatches.add(new Match(candidate.getId(), article.getId()));
                 }
 
-                if (! duplicated) {
-                    duplicated = true;
-
-                    Article theChosenOne = candidate.isScopus() ? candidate : article;
-                    theChosenOne.setDuplicate();
-
-                    if (ImportDB.isNeedInsert(theChosenOne)) {
-                        ImportDB.createArticle(theChosenOne);
-                    }
-
-                    insertedScopusArticle.add(theChosenOne.getId());
-
-                    System.out.print("Import scopus " + theChosenOne.getId() + " for");
-                    if (type.equals("isi")) {
-                        System.out.print(" isi " + id);
-                    }
-                } else {
-                    if (type.equals("isi")) {
-                        System.out.print(" scopus " + candidate.getId());
-                    } else {
-                        System.out.print(" isi " + candidate.getId());
-                    }
-                }
+                // Candidates are Scopus, which are already imported
+                // But they and their journals need to be updated: is_isi = true;
+                updateArticleAndJournal(candidate);
             }
         }
 
         if (! duplicated) {
-            if (article.isScopus()) {
-                if (! insertedScopusArticle.contains(article.getId())) {
-                    insertedScopusArticle.add(article.getId());
-                    ImportDB.createArticle(article);
-                }
-
-            } else {
-                ImportDB.createArticle(article);
-            }
+            ImportDB.createArticle(article);
         }
 
         return listMatches;
+    }
+
+    private static PreparedStatement pstmUpdateArticle = null;
+    private static PreparedStatement pstmUpdateJournal = null;
+    private static void updateArticleAndJournal(Article candidate) throws SQLException, IOException {
+        // Update articles
+        if (pstmUpdateArticle == null) {
+            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.articles SET is_isi = 1 WHERE id = ?");
+        }
+        pstmUpdateArticle.setInt(1, candidate.getId());
+        pstmUpdateArticle.executeUpdate();
+
+        UpdateRequest request = new UpdateRequest("available_articles", "articles", String.valueOf(candidate.getId()));
+        request.doc(jsonBuilder()
+                .startObject()
+                    .field("is_isi", true)
+                    .field("is_scopus", true)
+                .endObject());
+        DataUtl.getESClient().update(request);
+
+        // Update journals
+        if (pstmUpdateJournal == null) {
+            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.journals SET is_isi = 1 WHERE id = ?");
+        }
+        int journalID = ImportDB.findOrCreateJournal(candidate);
+        pstmUpdateJournal.setInt(1, journalID);
+        pstmUpdateJournal.executeUpdate();
+
+        request = new UpdateRequest("available_journals", "articles", String.valueOf(journalID));
+        request.doc(jsonBuilder()
+            .startObject()
+                .field("is_isi", true)
+                .field("is_vci", true)
+            .endObject());
+        DataUtl.getESClient().update(request);
     }
 
     private static void printDebug(Article article, Article candidate) {
@@ -159,11 +168,11 @@ public class InterDeduplicator {
             return article.getDOI().equals(candidate.getDOI());
         }
 
-        if (candidate.getISSN() != null && candidate.getISSN().length() != 0
-                && article.getISSN() != null && article.getISSN().length() != 0
-                && ! candidate.getISSN().replace("-", "").equals(article.getISSN().replace("-", ""))) {
-            return false;
-        }
+        // One Journal can have multiple ISSN ==
+//        if (candidate.getISSN() != null && article.getISSN() != null
+//                && ! candidate.equals(article.getISSN())) {
+//            return false;
+//        }
 
         // Approx Matching
         boolean isSameTitle = isSameTitle(article, candidate);

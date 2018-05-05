@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class ImportElastic {
-    public static void main(String[] args) throws IOException, SQLException, InterruptedException {
+    public static void main(String[] args) throws IOException, SQLException {
         TransportAddress address = new TransportAddress(InetAddress.getByName("localhost"), 9300);
         Settings settings = Settings.builder()
                 .put("cluster.name", Config.ES_CLUSTER_NAME)
@@ -38,17 +38,16 @@ public class ImportElastic {
         ResultSet articleSet = DataUtl.queryDB("isi", query);
 
         // Read the received ResultSet to Elastic
-        // Read both ISI and Scopus into one index, so later the code can be reused to deduplicate inside each DB
         int counter = 0;
         while (articleSet.next()) {
             bulkRequest.add(client.prepareIndex(Config.ES_INDEX, "articles", String.valueOf(counter++))
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("original_id", String.valueOf(articleSet.getInt(1)))
+                        .field("original_id", articleSet.getInt(1))
                         .field("affiliation", articleSet.getString(2))
                         .field("author", articleSet.getString(3))
                         .field("doi", articleSet.getString(4))
-                        .field("issn", articleSet.getString(7))
+                        .field("issn", normalizeISSN(articleSet.getString(7)))
                         .field("journal", articleSet.getString(8))
                         .field("journal_iso", articleSet.getString(9))
                         .field("language", articleSet.getString(10))
@@ -69,12 +68,6 @@ public class ImportElastic {
                     .endObject()
                 )
             );
-
-            if (counter % 100 == 0) {
-                System.out.println(articleSet.getString(3));
-            }
-
-            System.out.println(articleSet.getInt(1));
         }
 
 
@@ -90,13 +83,13 @@ public class ImportElastic {
             bulkRequest.add(client.prepareIndex(Config.ES_INDEX, "articles", String.valueOf(counter++))
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("original_id", String.valueOf(articleSet.getInt(1)))
+                        .field("original_id", articleSet.getInt(1))
                         .field("affiliation", articleSet.getString(10))
                         .field("author", articleSet.getString(2))
                         .field("doi", articleSet.getString(9))
                         .field("funding_text", articleSet.getString(11))
                         .field("isbn", articleSet.getString(14))
-                        .field("issn", articleSet.getString(13))
+                        .field("issn", normalizeISSN(articleSet.getString(13)))
                         .field("journal", articleSet.getString(5))
                         .field("journal_iso", articleSet.getString(16))
                         .field("language", articleSet.getString(15))
@@ -117,17 +110,10 @@ public class ImportElastic {
                     .endObject()
                 )
             );
-
-            if (++counter % 100 == 0) {
-                System.out.println(articleSet.getString(3));
-            }
-
-            System.out.println(articleSet.getInt(1));
         }
 
-
         // Import available articles
-        query = "SELECT ar.id, ar.title, ar.year, j.name FROM articles ar " +
+        query = "SELECT ar.id, ar.title, ar.year, j.name, ar.doi, ar.is_isi, ar.is_scopus FROM articles ar " +
                 "JOIN journals j ON ar.journal_id = j.id";
 
         articleSet = DataUtl.queryDB("vci_scholar", query);
@@ -136,10 +122,13 @@ public class ImportElastic {
             bulkRequest.add(client.prepareIndex("available_articles", "articles", String.valueOf(articleSet.getInt(1)))
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("original_id", String.valueOf(articleSet.getInt(1)))
+                        .field("original_id", articleSet.getInt(1))
                         .field("title", articleSet.getString(2))
                         .field("year", articleSet.getString(3))
                         .field("journal", articleSet.getString(4))
+                        .field("doi", articleSet.getString(5))
+                        .field("is_isi", articleSet.getString(6) != null && articleSet.getString(6).equals("1"))
+                        .field("is_scopus", articleSet.getString(7) != null && articleSet.getString(7).equals("1"))
                     .endObject()
                 )
             );
@@ -154,15 +143,17 @@ public class ImportElastic {
             bulkRequest.add(client.prepareIndex("available_journals", "articles", String.valueOf(articleSet.getInt(1)))
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("original_id", String.valueOf(articleSet.getInt(1)))
+                        .field("original_id", articleSet.getInt(1))
                         .field("name", articleSet.getString(2))
                         .field("issn", normalizeISSN(articleSet.getString(3)))
-                        .field("is_isi", articleSet.getString(4))
-                        .field("is_scopus", articleSet.getString(5))
-                        .field("is_vci", articleSet.getString(6))
+                        .field("is_isi", articleSet.getString(4) != null && articleSet.getString(4).equals("1"))
+                        .field("is_scopus", articleSet.getString(5) != null && articleSet.getString(5).equals("1"))
+                        .field("is_vci", articleSet.getString(6) != null && articleSet.getString(6).equals("1"))
                     .endObject()
                 )
             );
+
+            System.out.println(articleSet.getString(4));
         }
 
         // Import available organizations
@@ -171,10 +162,10 @@ public class ImportElastic {
         articleSet = DataUtl.queryDB("vci_scholar", query);
 
         while (articleSet.next()) {
-            bulkRequest.add(client.prepareIndex("available_organizations", "articles", String.valueOf(articleSet.getString(1)))
+            bulkRequest.add(client.prepareIndex("available_organizations", "articles", articleSet.getString(1))
                 .setSource(jsonBuilder()
                     .startObject()
-                        .field("original_id", String.valueOf(articleSet.getString(1)))
+                        .field("original_id", articleSet.getInt(1))
                         .field("name", articleSet.getString(2))
                     .endObject()
                 )
@@ -200,10 +191,14 @@ public class ImportElastic {
             return null;
         }
 
+        ISSN = ISSN.replace('x', 'X').trim();
+
         if (ISSN.length() == 8) {
             return ISSN.substring(0, 4) + "-" + ISSN.substring(4, 8);
+        } else if (ISSN.length() == 9) {
+            return ISSN;
         } else {
-            return ISSN.substring(0, 4) + "-" + ISSN.substring(5, 9);
+            return null;
         }
     }
 }
