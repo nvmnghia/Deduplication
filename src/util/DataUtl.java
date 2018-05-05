@@ -141,4 +141,15 @@ public class DataUtl {
         rs.next();
         return rs.getInt(1);
     }
+
+    public static List<Integer> getAutoIncrementIDs(PreparedStatement pstm) throws SQLException {
+        List<Integer> IDs = new ArrayList<>();
+        ResultSet rs = pstm.getGeneratedKeys();
+
+        while (rs.next()) {
+            IDs.add(rs.getInt(1));
+        }
+
+        return IDs;
+    }
 }

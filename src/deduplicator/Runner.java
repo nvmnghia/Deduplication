@@ -44,7 +44,7 @@ public class Runner {
     }
 
     public static void importAllScopus() throws SQLException, IOException {
-        for (int i = 0; i < 44000; ++i) {
+        for (int i = 11136; i < 44000; ++i) {
             Article scopus = ArticleSource.getArticleByID(Config.ES_INDEX, "scopus", i);
             if (scopus != null) {
                 ImportDB.createArticle(scopus);

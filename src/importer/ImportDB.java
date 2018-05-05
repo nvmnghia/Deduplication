@@ -13,7 +13,9 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -22,11 +24,8 @@ import util.DataUtl;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
@@ -41,6 +40,16 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
  */
 
 public class ImportDB {
+
+    private static int numOfOrganization;
+
+    static {
+        try {
+            numOfOrganization = getNumOfOrganizations();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Main insert function
@@ -87,13 +96,14 @@ public class ImportDB {
             pstmInsertArticleAuthors = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.articles_authors (author_id, article_id) VALUES(?, ?)");
         }
 
-        int[] authorIDs = createAuthors(article);
-        for (int authorID : authorIDs) {
+        List<Integer> authorIDs = createAuthors(article);
+
+        for (Integer authorID : authorIDs) {
             pstmInsertArticleAuthors.setInt(1, authorID);
             pstmInsertArticleAuthors.setInt(2, articleID);
+
             pstmInsertArticleAuthors.addBatch();
         }
-
         pstmInsertArticleAuthors.executeBatch();
 
         System.out.println("created " + (article.isScopus() ? "scopus " : "isi ") + articleID + "    " + article.getTitle());
@@ -239,11 +249,11 @@ public class ImportDB {
         UpdateRequest request = new UpdateRequest("available_journals", "articles", String.valueOf(journalID));
 
         request.doc(jsonBuilder()
-            .startObject()
+                .startObject()
                 .field("is_isi", article.isISI())
                 .field("is_scopus", article.isScopus())
                 .field("issn", article.getISSN())
-            .endObject());
+                .endObject());
 
         DataUtl.getESClient().update(request);
     }
@@ -257,14 +267,54 @@ public class ImportDB {
      * @throws IOException
      * @throws SQLException
      */
-    public static int[] createAuthors(Article article) throws IOException, SQLException {
+    public static List<Integer> createAuthors(Article article) throws IOException, SQLException {
+        HashSet<String> organizationSet = new HashSet<>();
         List<Author> authors = article.getListAuthors();
-        int[] authorIDs = new int[authors.size()];
 
-        for (int i = 0; i < authors.size(); ++i) {
-            authorIDs[i] = createAuthor(authors.get(i));
+        for (Author author : authors) {
+            for (String organization : author.getOrganizations()) {
+                organizationSet.add(organization);
+            }
         }
 
+        HashMap<String, Integer> idOfOrganizations = findOrCreateOrganizations(organizationSet);
+
+        if (pstmInsertAuthor == null) {
+            pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
+        }
+
+        for (Author author : authors) {
+            pstmInsertAuthor.setString(1, author.getFullName());
+            pstmInsertAuthor.addBatch();
+        }
+        pstmInsertAuthor.executeBatch();
+
+        List<Integer> authorIDs = DataUtl.getAutoIncrementIDs(pstmInsertAuthor);
+
+        if (pstmInsertAuthorOrganization == null) {
+            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors_organizes (author_id, organize_id) VALUES(?, ?)");
+        }
+
+        for (int i = 0; i < authorIDs.size(); ++i) {
+            Author author = authors.get(i);
+            int authorID = authorIDs.get(i);
+
+            for (String organization : author.getOrganizations()) {
+                pstmInsertAuthorOrganization.setInt(1, authorID);
+                pstmInsertAuthorOrganization.setInt(2, idOfOrganizations.get(organization));
+
+                pstmInsertAuthorOrganization.addBatch();
+            }
+
+            try {
+                pstmInsertAuthorOrganization.executeBatch();
+            } catch (SQLException e) {
+                if (e instanceof BatchUpdateException) {
+                    System.out.println("stupid org " + article.getId());
+                }
+            }
+        }
+        
         return authorIDs;
     }
 
@@ -322,12 +372,102 @@ public class ImportDB {
         return organizationIDs;
     }
 
+    private static PreparedStatement pstmInsertOrganization = null;
+    public static HashMap<String, Integer> findOrCreateOrganizations(HashSet<String> organizationSet) throws IOException, SQLException {
+        HashMap<String, Integer> mapping = new HashMap<>();
+
+        // This is bullshit
+//        for (String organization : organizationSet) {
+//            int organizationID = findOrganization(organization);
+//
+//            if (organizationID != -1) {
+//                mapping.put(organization, organizationID);
+//                organizationSet.remove(organization);
+//            }
+//        }
+
+        for (Iterator<String> it = organizationSet.iterator(); it.hasNext(); ) {
+            String organization = it.next();
+            int organizationID = findOrganization(organization);
+
+            if (organizationID != -1) {
+                mapping.put(organization, organizationID);
+                it.remove();
+            }
+        }
+
+        if (pstmInsertOrganization == null) {
+            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name, _lft, _rgt, slug) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+        }
+
+        for (String organization : organizationSet) {
+            int _rgt = numOfOrganization++ << 1;
+
+            pstmInsertOrganization.setString(1, organization);
+            pstmInsertOrganization.setInt(3, _rgt);
+            pstmInsertOrganization.setInt(2, --_rgt);
+            pstmInsertOrganization.setString(4, "add-slug-here");
+
+            pstmInsertOrganization.addBatch();
+        }
+
+        pstmInsertOrganization.executeBatch();
+
+        List<Integer> organizationIDs = DataUtl.getAutoIncrementIDs(pstmInsertOrganization);
+        int counter = 0;
+
+        for (String organization : organizationSet) {
+            mapping.put(organization, organizationIDs.get(counter++));
+        }
+
+        // Index into ES
+        Client client = DataUtl.getESClient();
+        BulkRequestBuilder bulkRequest = client.prepareBulk();
+
+        for (Map.Entry<String, Integer> entry : mapping.entrySet()) {
+            bulkRequest.add(client.prepareIndex("available_organizations", "articles", String.valueOf(entry.getValue()))
+                .setSource(jsonBuilder()
+                    .startObject()
+                        .field("original_id", entry.getValue())
+                        .field("name", entry.getKey())
+                    .endObject()
+                )
+            );
+        }
+
+        bulkRequest.get();
+
+        return mapping;
+    }
+
     public static int findOrCreateOrganization(String organization) throws IOException {
         if (organization == null) {
             // AKA "Chưa phân loại"
             return 1;
         }
 
+        int organizationID = findOrganization(organization);
+        if (organizationID != -1) {
+            return organizationID;
+        }
+
+        // No match, create a new one
+        organizationID = createOrganizationInServer(organization);
+        System.out.println("server created organizationID " + organizationID + "    " + organization);
+
+        // Index it in ES
+        DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
+                jsonBuilder()
+                    .startObject()
+                        .field("original_id", organizationID)
+                        .field("name", organization)
+                    .endObject()
+        );
+
+        return organizationID;
+    }
+
+    public static int findOrganization(String organization) throws UnknownHostException {
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
         SearchHits hits = DataUtl.queryES("available_organizations", builder);
 
@@ -343,20 +483,7 @@ public class ImportDB {
             }
         }
 
-        // No match, create a new one
-        int organizationID = createOrganizationInServer(organization);
-        System.out.println("server created organizationID " + organizationID + "    " + organization);
-
-        // Index it in ES
-        DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
-            jsonBuilder()
-                .startObject()
-                    .field("original_id", organizationID)
-                    .field("name", organization)
-                .endObject()
-        );
-
-        return organizationID;
+        return -1;
     }
 
     private static CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -381,11 +508,11 @@ public class ImportDB {
         System.out.println("exact id " + organizationID);
 
         DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
-            jsonBuilder()
-                .startObject()
-                    .field("original_id", organizationID)
-                    .field("name", organization)
-                .endObject()
+                jsonBuilder()
+                        .startObject()
+                        .field("original_id", organizationID)
+                        .field("name", organization)
+                        .endObject()
         );
 
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
@@ -436,5 +563,11 @@ public class ImportDB {
         }
 
         return true;
+    }
+
+    public static int getNumOfOrganizations() throws SQLException {
+        ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT COUNT(*) FROM organizes");
+        rs.next();
+        return rs.getInt(1);
     }
 }
