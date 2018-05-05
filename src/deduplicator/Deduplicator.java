@@ -11,20 +11,23 @@ import util.DataUtl;
 import util.StringUtl;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class Deduplicator {
+
+    private static final double DUPLICATE = 1d;
+    private static final double POSSIBLE_DUPLICATE = 0d;
+    private static final double NOT_DUPLICATE = -1d;
+
+    private static PreparedStatement pstmPossibleDuplicates = null;
 
     public static List<Match> deduplicate(String type, Integer id) throws IOException, SQLException {
         // First get the article
@@ -40,7 +43,11 @@ public class Deduplicator {
         filterByYear(candidates, article.getYear());
 
         List<Match> listMatches = new ArrayList<>();
-        boolean duplicated = false;
+        boolean duplicated = false, possibleDuplicates = false;
+
+        if (pstmPossibleDuplicates == null) {
+            pstmPossibleDuplicates = DataUtl.getDBConnection().prepareStatement("INSERT INTO possible_duplicates VALUES(?, ?, ?, ?)");
+        }
 
         for (Article candidate : candidates) {
             if (candidate.getId() == article.getId()) {
@@ -48,7 +55,8 @@ public class Deduplicator {
                 continue;
             }
 
-            if (isDuplicate(article, candidate)) {
+            double[] result = isDuplicate(article, candidate);
+            if (result[0] == DUPLICATE) {
                 duplicated = true;
 
                 if (article.isISI()) {
@@ -60,10 +68,24 @@ public class Deduplicator {
                 // Candidates are Scopus, which are already imported
                 // But they and their journals need to be updated: is_isi = true;
                 updateArticleAndJournal(candidate);
+
+            } else if (result[0] == POSSIBLE_DUPLICATE) {
+                possibleDuplicates = true;
+
+                pstmPossibleDuplicates.setInt(1, id);
+                pstmPossibleDuplicates.setInt(2, candidate.getId());
+                pstmPossibleDuplicates.setFloat(3, (float) result[2]);
+                pstmPossibleDuplicates.setFloat(4, (float) result[3]);
+
+                pstmPossibleDuplicates.addBatch();
             }
         }
 
         if (! duplicated) {
+            ImportDB.createArticle(article);
+        }
+
+        if (possibleDuplicates) {
             ImportDB.createArticle(article);
         }
 
@@ -160,43 +182,61 @@ public class Deduplicator {
         }
     }
 
-    public static boolean isDuplicate(Article article, Article candidate) {
+    public static double[] isDuplicate(Article article, Article candidate) {
         // Quick deny / accept
         if (candidate.getDOI() != null && StringUtl.isDOI(candidate.getDOI())
                 && article.getDOI() != null && StringUtl.isDOI(article.getDOI())) {
 
-            return article.getDOI().equals(candidate.getDOI());
+            return article.getDOI().equals(candidate.getDOI()) ? (new double[]{DUPLICATE, 1.0d, 1.0d}) : (new double[]{NOT_DUPLICATE, 0.0d, 0.0d});
         }
 
         // One Journal can have multiple ISSN ==
 //        if (candidate.getISSN() != null && article.getISSN() != null
 //                && ! candidate.equals(article.getISSN())) {
-//            return false;
+//            return (new double[]{NOT_DUPLICATE, 0.0d, 0.0d});
 //        }
 
         // Approx Matching
-        boolean isSameTitle = isSameTitle(article, candidate);
-        boolean isSameJournal = isSameJournal(article, candidate);
-//        boolean isSameAuthors = isSameAuthors(article, candidate);
+        double titleScore = titleScore(article, candidate);
+        double journalScore = journalScore(article, candidate);
 
-        // Look suspicious, need more investigation
-        if (isSameTitle && ! isSameJournal) {
-            try {
-                Files.write(Paths.get("D:\\VCI\\Deduplication\\src\\almost.txt"), (article.toString() + "\n\n" + candidate.toString() + "\n\n\n\n").getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (titleScore >= 0.8d) {
+            if (journalScore >= 0.8d) {
+                return new double[]{DUPLICATE, titleScore, journalScore};
+            } else {
+                return new double[]{POSSIBLE_DUPLICATE, titleScore, journalScore};
             }
+        } else if (titleScore >= 0.7d) {
+            return new double[]{POSSIBLE_DUPLICATE, titleScore, journalScore};
+        } else {
+            return new double[]{NOT_DUPLICATE, 0.0d, 0.0d};
         }
-
-        return isSameTitle && isSameJournal;
     }
 
     public static boolean isSameJournal(Article article, Article candidate) {
-        return LCS.isMatch(article.getJournal(), candidate.getJournal(), 0.2d) || LCS.isMatch(article.getJournal_abbr(), candidate.getJournal_abbr(), 0.2d);
+        return LCS.isMatch(article.getJournal(), candidate.getJournal(), 0.2d) || LCS.isMatch(article.getAbbrJourna(), candidate.getAbbrJourna(), 0.2d);
     }
 
     public static boolean isSameTitle(Article article, Article candidate) {
         return LCS.isMatch(article.getTitle(), candidate.getTitle(), 0.3d);
+    }
+
+    public static double titleScore(Article article, Article candidate) {
+        return 1.0d - LCS.approxDistance(article.getTitle(), candidate.getTitle());
+    }
+
+    public static double journalScore(Article article, Article candidate) {
+        double normalNameScore = 1.0d - LCS.approxDistance(article.getJournal(), candidate.getJournal());
+        if (normalNameScore >= 0.8d) {
+            return normalNameScore;
+        }
+
+        double abbrNameScore = 1.0d - LCS.approxDistance(article.getAbbrJourna(), candidate.getAbbrJourna());
+        if (abbrNameScore >= 0.8d) {
+            return abbrNameScore;
+        } else {
+            return normalNameScore > abbrNameScore ? normalNameScore : abbrNameScore;
+        }
     }
 
     public static boolean isSameAuthors(Article article, Article candidate) {
@@ -246,5 +286,13 @@ public class Deduplicator {
         // Should've deduplicate / (float)rawAuthorStr.split(", ").length
         // Instead, author.length relax the condition to allow more matches
         return match / (float)Math.min(articleListAuthor.size(), candidateListAuthor.size()) > 0.8f;
+    }
+
+    /**
+     * Everything related to batch update/insert goes here
+     * One final blow to import them all
+     */
+    public static void finishHim() throws SQLException {
+        pstmPossibleDuplicates.executeUpdate();
     }
 }

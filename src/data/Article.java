@@ -58,7 +58,7 @@ public class Article {
         this.journal = journal;
     }
 
-    public String getJournal_abbr() {
+    public String getAbbrJourna() {
         return journal_abbr;
     }
 

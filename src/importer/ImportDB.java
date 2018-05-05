@@ -314,7 +314,7 @@ public class ImportDB {
                 }
             }
         }
-        
+
         return authorIDs;
     }
 
@@ -529,40 +529,6 @@ public class ImportDB {
                 System.out.println("    - " + map.get("original_id"));
             }
         }
-    }
-
-    /**
-     * Check if the article exists in the current DB
-     * The whole DB was indexed in ES (see ImportElastic class),
-     * so ES will be searched, instead of the original DB
-     * If the ISI or Scopus version have existed in the DB, skip them
-     *
-     * @param input the input article
-     * @return the result of the check
-     * @throws UnknownHostException when ES fucked up
-     */
-    public static boolean isNeedInsert(Article input) throws UnknownHostException {
-        QueryBuilder filterByField = QueryBuilders.matchQuery("title", input.getTitle());
-        SearchHits hits = DataUtl.queryES(Config.ES_INDEX, filterByField);
-
-        if (hits == null || hits.getTotalHits() == 0) {
-            return true;
-        }
-
-        for (SearchHit hit : hits) {
-            Article article = new Article();
-
-            article.setId((Integer) hit.getSourceAsMap().get("original_id"));
-            article.setTitle((String) hit.getSourceAsMap().get("title"));
-            article.setYear((String) hit.getSourceAsMap().get("year"));
-            article.setJournal((String) hit.getSourceAsMap().get("journal"));
-
-            if (Deduplicator.isDuplicate(article, input)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     public static int getNumOfOrganizations() throws SQLException {

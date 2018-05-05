@@ -7,6 +7,7 @@ import data.Article;
 import data.ArticleSource;
 import data.Match;
 import importer.ImportDB;
+import util.Sluginator;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,25 +23,29 @@ import static data.ArticleSource.getArticleByID;
 
 public class Runner {
     public static void main(String[] args) throws IOException, SQLException {
-        importAllScopus();
+//        importAllScopus();
 
-//        List<Match> listMatches = new ArrayList<>();
-//
-//        for (int i = 0; i < 41000; ++i) {
-//            try {
-//                addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//
-//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//
-//        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
-//
-//        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-//        writer.write(gson.toJson(listMatches));
-//        writer.close();
+        List<Match> listMatches = new ArrayList<>();
+
+        for (int i = 500; i < 41000; ++i) {
+            try {
+                addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        Deduplicator.finishHim();
+
+        Sluginator.slugifyAll();
+
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+        writer.write(gson.toJson(listMatches));
+        writer.close();
     }
 
     public static void importAllScopus() throws SQLException, IOException {
