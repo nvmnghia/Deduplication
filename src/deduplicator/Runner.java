@@ -7,6 +7,7 @@ import data.Article;
 import data.ArticleSource;
 import data.Match;
 import importer.ImportDB;
+import importer.ImportElastic;
 import util.Sluginator;
 
 import java.io.BufferedWriter;
@@ -22,12 +23,20 @@ import java.util.concurrent.*;
 import static data.ArticleSource.getArticleByID;
 
 public class Runner {
-    public static void main(String[] args) throws IOException, SQLException {
-//        importAllScopus();
+    public static void main(String[] args) throws IOException, SQLException, InterruptedException {
+        long start = System.nanoTime();
+
+        ImportElastic.importISIAndScopus();
+
+        importAllScopus();
+
+        ImportElastic.importAvailableArticles();
+        ImportElastic.importAvailableJournals();
+        ImportElastic.importAvailableOrganizations();
 
         List<Match> listMatches = new ArrayList<>();
 
-        for (int i = 500; i < 41000; ++i) {
+        for (int i = 0; i < 41000; ++i) {
             try {
                 addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
             } catch (Exception e) {
@@ -46,10 +55,14 @@ public class Runner {
         BufferedWriter writer = new BufferedWriter(new FileWriter(output));
         writer.write(gson.toJson(listMatches));
         writer.close();
+
+        long elapsed = System.nanoTime() - start;
+
+        System.out.println("All took " + elapsed + " nanoseconds");
     }
 
-    public static void importAllScopus() throws SQLException, IOException {
-        for (int i = 11136; i < 44000; ++i) {
+    public static void importAllScopus() throws SQLException, IOException, InterruptedException {
+        for (int i = 0; i < 44000; ++i) {
             Article scopus = ArticleSource.getArticleByID(Config.ES_INDEX, "scopus", i);
             if (scopus != null) {
                 ImportDB.createArticle(scopus);

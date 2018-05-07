@@ -133,4 +133,11 @@ public class LCS {
     public static boolean isMatch(String A, String B, double error_threshold) {
         return approxDistance(A, B) <= error_threshold;
     }
+
+    public static void main(String[] args) {
+        String A = "european physical journal a";
+        String B = "European Physical Journal B";
+
+        System.out.println(approxDistance(A, B));
+    }
 }

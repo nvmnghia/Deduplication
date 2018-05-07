@@ -6,6 +6,7 @@ import config.Config;
 import data.*;
 
 import importer.ImportDB;
+import importer.ImportElastic;
 import org.elasticsearch.action.update.UpdateRequest;
 import util.DataUtl;
 import util.StringUtl;
@@ -23,11 +24,9 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class Deduplicator {
 
-    private static final double DUPLICATE = 1d;
-    private static final double POSSIBLE_DUPLICATE = 0d;
-    private static final double NOT_DUPLICATE = -1d;
-
-    private static PreparedStatement pstmPossibleDuplicates = null;
+    private static final double DUPLICATED = 1d;
+    private static final double POSSIBLY_DUPLICATED = 0d;
+    private static final double NOT_DUPLICATED = -1d;
 
     public static List<Match> deduplicate(String type, Integer id) throws IOException, SQLException {
         // First get the article
@@ -36,60 +35,77 @@ public class Deduplicator {
             return new ArrayList<>();
         }
 
-        // Then search for its name, in the merged DB
+        // Then search for its name, in the merged Elas
         List<Article> candidates = ArticleSource.getArticles("available_articles", type.equals("isi") ? "scopus" : "isi", Config.FIELD_TITLE, article.getTitle());
 
         // Filter by year
         filterByYear(candidates, article.getYear());
 
         List<Match> listMatches = new ArrayList<>();
-        boolean duplicated = false, possibleDuplicates = false;
+        boolean duplicated = false, possiblyDuplicated = false;
 
-        if (pstmPossibleDuplicates == null) {
-            pstmPossibleDuplicates = DataUtl.getDBConnection().prepareStatement("INSERT INTO possible_duplicates VALUES(?, ?, ?, ?)");
-        }
+        List<Article> listPossibleCandidates = new ArrayList<>();
+        List<Double> listPossibleCandidateTitleScore = new ArrayList<>();
+        List<Double> listPossibleCandidateJournalScore = new ArrayList<>();
 
         for (Article candidate : candidates) {
-            if (candidate.getId() == article.getId()) {
+            if (candidate.getID() == article.getID()) {
                 // Search result will include the original article
                 continue;
             }
 
-            double[] result = isDuplicate(article, candidate);
-            if (result[0] == DUPLICATE) {
+            double[] result = areSameArticles(article, candidate);
+            if (result[0] == DUPLICATED) {
                 duplicated = true;
 
                 if (article.isISI()) {
-                    listMatches.add(new Match(article.getId(), candidate.getId()));
+                    listMatches.add(new Match(article.getID(), candidate.getID()));
                 } else {
-                    listMatches.add(new Match(candidate.getId(), article.getId()));
+                    listMatches.add(new Match(candidate.getID(), article.getID()));
                 }
 
                 // Candidates are Scopus, which are already imported
                 // But they and their journals need to be updated: is_isi = true;
                 updateArticleAndJournal(candidate);
 
-            } else if (result[0] == POSSIBLE_DUPLICATE) {
-                possibleDuplicates = true;
+                System.out.println("Duplicated: ISI: " + article.getTitle() + "    Scopus: " + candidate.getTitle());
 
-                pstmPossibleDuplicates.setInt(1, id);
-                pstmPossibleDuplicates.setInt(2, candidate.getId());
-                pstmPossibleDuplicates.setFloat(3, (float) result[2]);
-                pstmPossibleDuplicates.setFloat(4, (float) result[3]);
+            } else if (result[0] == POSSIBLY_DUPLICATED) {
+                possiblyDuplicated = true;
 
-                pstmPossibleDuplicates.addBatch();
+                listPossibleCandidates.add(candidate);
+                listPossibleCandidateTitleScore.add(result[1]);
+                listPossibleCandidateJournalScore.add(result[2]);
             }
         }
 
-        if (! duplicated) {
+        if (possiblyDuplicated || ! duplicated) {
             ImportDB.createArticle(article);
         }
 
-        if (possibleDuplicates) {
-            ImportDB.createArticle(article);
+        if (possiblyDuplicated) {
+            for (int i = 0; i < listPossibleCandidates.size(); ++i) {
+                addPossiblyDuplicatedArticles(article, listPossibleCandidates.get(i),
+                        listPossibleCandidateTitleScore.get(i), listPossibleCandidateJournalScore.get(i));
+            }
         }
 
         return listMatches;
+    }
+
+    private static PreparedStatement pstmInsertPossiblyDuplicatedArticles = null;
+    public static void addPossiblyDuplicatedArticles(Article article, Article candidate, double titleScore, double journalScore) throws SQLException {
+        if (pstmInsertPossiblyDuplicatedArticles == null) {
+            pstmInsertPossiblyDuplicatedArticles = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_articles (isi_id, scopus_id, title_score, journal_score) VALUES(?, ?, ?, ?)");
+        }
+
+        pstmInsertPossiblyDuplicatedArticles.setInt(1, article.getID());
+        pstmInsertPossiblyDuplicatedArticles.setInt(2, candidate.getID());
+        pstmInsertPossiblyDuplicatedArticles.setFloat(3, (float) titleScore);
+        pstmInsertPossiblyDuplicatedArticles.setFloat(4, (float) journalScore);
+
+        pstmInsertPossiblyDuplicatedArticles.addBatch();
+
     }
 
     private static PreparedStatement pstmUpdateArticle = null;
@@ -99,10 +115,10 @@ public class Deduplicator {
         if (pstmUpdateArticle == null) {
             pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.articles SET is_isi = 1 WHERE id = ?");
         }
-        pstmUpdateArticle.setInt(1, candidate.getId());
+        pstmUpdateArticle.setInt(1, candidate.getID());
         pstmUpdateArticle.executeUpdate();
 
-        UpdateRequest request = new UpdateRequest("available_articles", "articles", String.valueOf(candidate.getId()));
+        UpdateRequest request = new UpdateRequest("available_articles", "articles", String.valueOf(candidate.getID()));
         request.doc(jsonBuilder()
                 .startObject()
                     .field("is_isi", true)
@@ -114,7 +130,8 @@ public class Deduplicator {
         if (pstmUpdateJournal == null) {
             pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.journals SET is_isi = 1 WHERE id = ?");
         }
-        int journalID = ImportDB.findOrCreateJournal(candidate);
+
+        int journalID = candidate.getJournalID();
         pstmUpdateJournal.setInt(1, journalID);
         pstmUpdateJournal.executeUpdate();
 
@@ -182,18 +199,29 @@ public class Deduplicator {
         }
     }
 
-    public static double[] isDuplicate(Article article, Article candidate) {
+    /**
+     * Check if the 2 articles are the same
+     * The result is of the following format
+     * [IS_DUPLICATED, titleScore, journalScore]
+     * IS_DUPLICATED: can be DUPLICATED (1.0d), POSSIBLY_DUPLICATED (0.0d), or NOT_DUPLICATED (-1.0d)
+     * titleScore, journalScore: similarity scores, ranging from 0.0d to to 1.0d
+     *
+     * @param article an Article of either ISI or Scopus type
+     * @param candidate an Article of the other type
+     * @return the result of the check
+     */
+    public static double[] areSameArticles(Article article, Article candidate) {
         // Quick deny / accept
         if (candidate.getDOI() != null && StringUtl.isDOI(candidate.getDOI())
                 && article.getDOI() != null && StringUtl.isDOI(article.getDOI())) {
 
-            return article.getDOI().equals(candidate.getDOI()) ? (new double[]{DUPLICATE, 1.0d, 1.0d}) : (new double[]{NOT_DUPLICATE, 0.0d, 0.0d});
+            return article.getDOI().equals(candidate.getDOI()) ? (new double[]{DUPLICATED, 1.0d, 1.0d}) : (new double[]{NOT_DUPLICATED, 0.0d, 0.0d});
         }
 
         // One Journal can have multiple ISSN ==
 //        if (candidate.getISSN() != null && article.getISSN() != null
 //                && ! candidate.equals(article.getISSN())) {
-//            return (new double[]{NOT_DUPLICATE, 0.0d, 0.0d});
+//            return (new double[]{NOT_DUPLICATED, 0.0d, 0.0d});
 //        }
 
         // Approx Matching
@@ -202,22 +230,22 @@ public class Deduplicator {
 
         if (titleScore >= 0.8d) {
             if (journalScore >= 0.8d) {
-                return new double[]{DUPLICATE, titleScore, journalScore};
+                return new double[]{DUPLICATED, titleScore, journalScore};
             } else {
-                return new double[]{POSSIBLE_DUPLICATE, titleScore, journalScore};
+                return new double[]{POSSIBLY_DUPLICATED, titleScore, journalScore};
             }
         } else if (titleScore >= 0.7d) {
-            return new double[]{POSSIBLE_DUPLICATE, titleScore, journalScore};
+            return new double[]{POSSIBLY_DUPLICATED, titleScore, journalScore};
         } else {
-            return new double[]{NOT_DUPLICATE, 0.0d, 0.0d};
+            return new double[]{NOT_DUPLICATED, 0.0d, 0.0d};
         }
     }
 
-    public static boolean isSameJournal(Article article, Article candidate) {
+    public static boolean areSameJournals(Article article, Article candidate) {
         return LCS.isMatch(article.getJournal(), candidate.getJournal(), 0.2d) || LCS.isMatch(article.getAbbrJourna(), candidate.getAbbrJourna(), 0.2d);
     }
 
-    public static boolean isSameTitle(Article article, Article candidate) {
+    public static boolean areSameTitles(Article article, Article candidate) {
         return LCS.isMatch(article.getTitle(), candidate.getTitle(), 0.3d);
     }
 
@@ -239,7 +267,7 @@ public class Deduplicator {
         }
     }
 
-    public static boolean isSameAuthors(Article article, Article candidate) {
+    public static boolean areSameAuthors(Article article, Article candidate) {
 
         List<Author> articleListAuthor = article.getListAuthors();
         List<Author> candidateListAuthor = candidate.getListAuthors();
@@ -293,6 +321,10 @@ public class Deduplicator {
      * One final blow to import them all
      */
     public static void finishHim() throws SQLException {
-        pstmPossibleDuplicates.executeUpdate();
+        if (pstmInsertPossiblyDuplicatedArticles != null) {
+            pstmInsertPossiblyDuplicatedArticles.executeUpdate();
+        }
+
+        ImportDB.finishHim();
     }
 }

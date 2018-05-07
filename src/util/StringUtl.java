@@ -173,5 +173,29 @@ public class StringUtl {
     public static boolean isDOI(String block) {
         return block.startsWith("10.");
     }
+
+    public static String getPages(String start, String finish) {
+        if (start != null && finish != null) {
+            return start + "-" + finish;
+        }
+
+        return null;
+    }
+
+    public static String normalizeISSN(String ISSN) {
+        if (ISSN == null || ISSN.length() < 8) {
+            return null;
+        }
+
+        ISSN = ISSN.replace('x', 'X').trim();
+
+        if (ISSN.length() == 8) {
+            return ISSN.substring(0, 4) + "-" + ISSN.substring(4, 8);
+        } else if (ISSN.length() == 9) {
+            return ISSN;
+        } else {
+            return null;
+        }
+    }
 }
 

@@ -86,7 +86,7 @@ public class ArticleSource {
         for (SearchHit hit : hits) {
             Article article = new Article();
 
-            article.setId((Integer) hit.getSourceAsMap().get("original_id"));
+            article.setID((Integer) hit.getSourceAsMap().get("original_id"));
             article.setTitle((String) hit.getSourceAsMap().get("title"));
             article.setYear((String) hit.getSourceAsMap().get("year"));
             article.setRawAuthorStr((String) hit.getSourceAsMap().get("author"));
@@ -101,6 +101,11 @@ public class ArticleSource {
             article.setAbstracts((String) hit.getSourceAsMap().get("abstract"));
             article.setReference((String) hit.getSourceAsMap().get("reference"));
             article.setKeywords((String) hit.getSourceAsMap().get("keyword"));
+
+            if (! index.equals(Config.ES_INDEX)) {
+                article.setJournalID((Integer) hit.getSourceAsMap().get("journal_id"));
+                article.setMergedID(article.getID());
+            }
 
             articles.add(article);
         }
@@ -137,7 +142,7 @@ public class ArticleSource {
         while (resultSet.next()) {
             Article article = new Article();
 
-            article.setId(resultSet.getInt(1));
+            article.setID(resultSet.getInt(1));
             article.setTitle(resultSet.getString(2));
             article.setDOI(resultSet.getString(3));
             article.setYear(resultSet.getString(4));

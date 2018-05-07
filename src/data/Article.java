@@ -9,7 +9,7 @@ import java.util.List;
 public class Article {
     private static Gson gson = new Gson();
 
-    private int id;
+    private int ID, journalID = -1, mergedID;
     private String rawAuthorStr, doi, issn, journal, journal_abbr, language, publisher, title, type, volume, authors_json, uri, reference, keywords, abstracts, number;
     private List<Author> listAuthors;
     private boolean is_isi, is_scopus, is_vci;
@@ -18,12 +18,34 @@ public class Article {
     public Article() {
     }
 
-    public int getId() {
-        return id;
+    public int getID() {
+        return ID;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    /**
+     * mergedID is the ID in the final (merged) DB
+     * Remember, there're 3 DBs: final/merged and the original (storing crawled data of ISI and Scopus)
+     *
+     * @return
+     */
+    public int getMergedID() {
+        return mergedID;
+    }
+
+    public void setMergedID(int mergedID) {
+        this.mergedID = mergedID;
+    }
+
+    public int getJournalID() {
+        return journalID;
+    }
+
+    public void setJournalID(int journalID) {
+        this.journalID = journalID;
     }
 
     public String getRawAuthorStr() {
@@ -271,7 +293,7 @@ public class Article {
     public String toString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append(id).append(": ").append(title).append('\n');
+        builder.append(ID).append(": ").append(title).append('\n');
         builder.append(rawAuthorStr).append('\n');
         builder.append(doi).append(' ').append(year).append(' ').append(journal).append(is_isi ? " ISI" : " Scopus");
 

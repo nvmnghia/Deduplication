@@ -1,12 +1,13 @@
 package importer;
 
 import com.google.gson.Gson;
+import comparator.LCS;
 import comparator.Lev;
-import config.Config;
 import data.Article;
 import data.Author;
 import data.Organization;
 import deduplicator.Deduplicator;
+import javafx.util.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -90,6 +91,7 @@ public class ImportDB {
         pstmInsertArticle.executeUpdate();
 
         int articleID = DataUtl.getAutoIncrementID(pstmInsertArticle);
+        article.setMergedID(articleID);
 
         // Link articles and authors
         if (pstmInsertArticleAuthors == null) {
@@ -106,23 +108,26 @@ public class ImportDB {
         }
         pstmInsertArticleAuthors.executeBatch();
 
-        System.out.println("created " + (article.isScopus() ? "scopus " : "isi ") + articleID + "    " + article.getTitle());
+        System.out.println("Created " + (article.isScopus() ? "Scopus " : "ISI ") + articleID + "    " + article.getTitle());
     }
 
     /**
      * Equivalent to createOrFindJournal
      * Get the id of the journal given its article
-     * If the journal is found, returns its id
-     * If not, create a new journal, insert it into DB, index it into ES, and then returns the id
+     * If the journal is found, return its ID
+     * If not, create a new journal, insert it into DB, index it into ES, insert its look-alike into DB and then returns its ID
+     * The tricky part is that each journal will be compared to the others to find look-alike once - when it is first inserted
      *
      * @param article
      * @return the id of the found or newly created journal
      * @throws UnknownHostException
      */
     private static PreparedStatement pstmInsertJournal = null;
+    private static PreparedStatement pstmInsertPossiblyDuplicatedJournals = null;
     public static int findOrCreateJournal(Article article) throws IOException, SQLException {
-        if (article.getJournal() == null) {
+        if (article.getJournal() == null || article.getJournal().trim().equals("")) {
             // AKA "Chưa phân loại"
+            article.setJournalID(1);
             return 1;
         }
 
@@ -134,52 +139,40 @@ public class ImportDB {
                 Map map = hit.getSourceAsMap();
                 String hitISSN = (String) map.get("issn");
 
-                // God almighty
-                if (hitISSN != null && hitISSN.equals(article.getISSN())) {
-                    boolean is_isi = map.get("is_isi").equals(Boolean.TRUE);
-                    boolean is_scopus = map.get("is_scopus").equals(Boolean.TRUE);
+                // Found by ISSN
+                if (hitISSN != null && hitISSN.equalsIgnoreCase(article.getISSN())) {
+                    // Remember to set additional variables
+                    article.setJournalID((Integer) map.get("original_id"));
+                    article.setVCI((Boolean) map.get("is_vci"));
 
-                    if (is_isi != article.isISI() || is_scopus != article.isScopus()) {
-                        // Need to update
-                        updateJournal(article, (Integer) map.get("original_id"));
-                    }
-
-                    article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
-
-                    return (Integer) map.get("original_id");
+                    return article.getJournalID();
                 }
             }
         }
+
+        // List of look-alike
+        List<Pair<Integer, Float>> listPossibleCandidates = new ArrayList<>();
 
         QueryBuilder builder = QueryBuilders.matchQuery("name", article.getJournal());
         SearchHits hits = DataUtl.queryES("available_journals", builder);
 
         for (SearchHit hit : hits) {
+            Map map = hit.getSourceAsMap();
+            String name = (String) map.get("name");
+
+            double normalNameScore = 1.0d - LCS.approxDistance(article.getJournal(), name);
+
+            // Found by name
             // The condition is quite strict, as journal names are messy and need a separate deduplication
             // - Only the closest match is examined
             // - error_threshold is pretty low
-
-            Map map = hit.getSourceAsMap();
-
-            String issn = (String) map.get("issn");    // Ha ha ha java in a nutshell: Foo bar = (Foo) null;
-            String name = (String) map.get("name");
-
-            if (Lev.distanceNormStr(article.getJournal(), name) < 0.1d) {
-                boolean is_isi = map.get("is_isi").equals(Boolean.TRUE);
-                boolean is_scopus = map.get("is_scopus").equals(Boolean.TRUE);
-
-                if (issn != null && article.getISSN() == null) {
-                    article.setISSN(issn);
-                }
-
-                if (is_isi != article.isISI() || is_scopus != article.isScopus() || issn == null) {
-                    // Need update
-                    updateJournal(article, (Integer) map.get("original_id"));
-                }
-
+            if (normalNameScore > 0.9d) {
+                article.setJournalID((Integer) map.get("original_id"));
                 article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
 
-                return (Integer) map.get("original_id");
+                return article.getJournalID();
+            } else if (normalNameScore >= 0.8d) {
+                listPossibleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) normalNameScore));
             }
         }
 
@@ -203,6 +196,7 @@ public class ImportDB {
         pstmInsertJournal.executeUpdate();
 
         int journalID = DataUtl.getAutoIncrementID(pstmInsertJournal);
+        article.setJournalID(journalID);
 
         // Index it in ES
         DataUtl.indexES("available_journals", "articles", String.valueOf(journalID),
@@ -217,45 +211,30 @@ public class ImportDB {
                 .endObject()
         );
 
-        return journalID;
-    }
-
-    /**
-     * Update journal information
-     * If an article is duplicated in both ISI and Scopus data, its journal must also be marked is_isi and is_scopus
-     * If an article has a text issn
-     *
-     * @param article
-     * @param journalID
-     * @param isNeedUpdateISSN
-     * @throws SQLException
-     * @throws IOException
-     */
-    private static PreparedStatement pstmUpdateJournal = null;
-    public static void updateJournal(Article article, int journalID) throws SQLException, IOException {
-        // Update in DB
-        if (pstmUpdateJournal == null) {
-            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE vci_scholar.journals SET is_isi = ?, is_scopus = ?, issn = ? WHERE id = ?");
+        // Insert its look-alike into DB
+        if (pstmInsertPossiblyDuplicatedJournals == null) {
+            pstmInsertPossiblyDuplicatedJournals = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_journals (journal_a, journal_b, journal_score) VALUES(?, ?, ?)");
         }
 
-        pstmUpdateJournal.setInt(1, article.isISI() ? 1 : 0);
-        pstmUpdateJournal.setInt(2, article.isScopus() ? 1 : 0);
-        pstmUpdateJournal.setString(3, article.getISSN());
-        pstmUpdateJournal.setInt(4, journalID);
+        for (Pair<Integer, Float> candidate : listPossibleCandidates) {
+            pstmInsertPossiblyDuplicatedJournals.setInt(1, journalID);
+            pstmInsertPossiblyDuplicatedJournals.setInt(2, candidate.getKey());
+            pstmInsertPossiblyDuplicatedJournals.setFloat(3, candidate.getValue());
 
-        pstmUpdateJournal.executeUpdate();
+            pstmInsertPossiblyDuplicatedJournals.addBatch();
+        }
 
-        // Update in ES
-        UpdateRequest request = new UpdateRequest("available_journals", "articles", String.valueOf(journalID));
+        if (journalID % 100 == 0) {
+            if (pstmInsertPossiblyDuplicatedJournals != null) {
+                pstmInsertPossiblyDuplicatedJournals.executeBatch();
+            }
 
-        request.doc(jsonBuilder()
-                .startObject()
-                .field("is_isi", article.isISI())
-                .field("is_scopus", article.isScopus())
-                .field("issn", article.getISSN())
-                .endObject());
+            if (pstmInsertPossiblyDuplicatedOrganizations != null) {
+                pstmInsertPossiblyDuplicatedOrganizations.executeBatch();
+            }
+        }
 
-        DataUtl.getESClient().update(request);
+        return journalID;
     }
 
     /**
@@ -267,6 +246,8 @@ public class ImportDB {
      * @throws IOException
      * @throws SQLException
      */
+    private static PreparedStatement pstmInsertAuthor = null;
+    private static PreparedStatement pstmInsertAuthorOrganization = null;
     public static List<Integer> createAuthors(Article article) throws IOException, SQLException {
         HashSet<String> organizationSet = new HashSet<>();
         List<Author> authors = article.getListAuthors();
@@ -310,7 +291,7 @@ public class ImportDB {
                 pstmInsertAuthorOrganization.executeBatch();
             } catch (SQLException e) {
                 if (e instanceof BatchUpdateException) {
-                    System.out.println("stupid org " + article.getId());
+                    System.out.println("stupid org " + article.getID());
                 }
             }
         }
@@ -319,60 +300,15 @@ public class ImportDB {
     }
 
     /**
-     * Insert a single author to DB
-     * First insert the authors, then insert organization if needed and link them
+     * Given a set of organizations, find or create theirs corresponding IDs
      *
-     * @param author
-     * @return ID of the new article
-     * @throws SQLException
+     * @param organizationSet
+     * @return
      * @throws IOException
+     * @throws SQLException
      */
-    private static PreparedStatement pstmInsertAuthor = null;
-    private static PreparedStatement pstmInsertAuthorOrganization = null;
-    public static int createAuthor(Author author) throws SQLException, IOException {
-        // Insert author to DB
-        if (pstmInsertAuthor == null) {
-            pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
-        }
-
-        pstmInsertAuthor.setString(1, author.getFullName());
-
-        pstmInsertAuthor.executeUpdate();
-
-        int authorID = DataUtl.getAutoIncrementID(pstmInsertAuthor);
-
-        // Link authors and organizations
-        if (pstmInsertAuthorOrganization == null) {
-            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors_organizes (author_id, organize_id) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS);
-        }
-
-        int[] organizationIDs = findOrCreateOrganizations(author.getOrganizations());
-
-        for (int organizationID : organizationIDs) {
-            pstmInsertAuthorOrganization.setInt(1, authorID);
-            pstmInsertAuthorOrganization.setInt(2, organizationID);
-
-            try {
-                pstmInsertAuthorOrganization.executeUpdate();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return authorID;
-    }
-
-    public static int[] findOrCreateOrganizations(String[] organizations) throws IOException, SQLException {
-        int[] organizationIDs = new int[organizations.length];
-
-        for (int i = 0; i < organizations.length; ++i) {
-            organizationIDs[i] = findOrCreateOrganization(organizations[i]);
-        }
-
-        return organizationIDs;
-    }
-
     private static PreparedStatement pstmInsertOrganization = null;
+    private static PreparedStatement pstmInsertPossiblyDuplicatedOrganizations = null;
     public static HashMap<String, Integer> findOrCreateOrganizations(HashSet<String> organizationSet) throws IOException, SQLException {
         HashMap<String, Integer> mapping = new HashMap<>();
 
@@ -386,20 +322,31 @@ public class ImportDB {
 //            }
 //        }
 
+        // List of organization, along with their look-alike, along with their scores
+        List<Pair<String, List<Pair<Integer, Float>>>> wowLookAtME = new ArrayList<>();
+
+        // Remove created organizations
         for (Iterator<String> it = organizationSet.iterator(); it.hasNext(); ) {
             String organization = it.next();
-            int organizationID = findOrganization(organization);
+            List<Pair<Integer, Float>> possibleOrganizationIDs = findOrganization(organization);
 
-            if (organizationID != -1) {
-                mapping.put(organization, organizationID);
+            if (possibleOrganizationIDs.size() != 0 && possibleOrganizationIDs.get(0).getValue() >= 0.95) {
+                mapping.put(organization, possibleOrganizationIDs.get(0).getKey());
                 it.remove();
+            } else {
+                wowLookAtME.add(new Pair<>(organization, possibleOrganizationIDs));
             }
         }
+
 
         if (pstmInsertOrganization == null) {
             pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name, _lft, _rgt, slug) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
+        // NestedSet logic:
+        // New node, without parent information, will be inserted into the root node as the last node
+        // So, the _rgt value will be the largest _rgt, exactly doubling numOfOrganization
+        // and the _lft equals _rgt - 1
         for (String organization : organizationSet) {
             int _rgt = numOfOrganization++ << 1;
 
@@ -416,6 +363,7 @@ public class ImportDB {
         List<Integer> organizationIDs = DataUtl.getAutoIncrementIDs(pstmInsertOrganization);
         int counter = 0;
 
+        // A good example of de-facto standard: although not guaranteed, the iteration order of a set will stay the same, as long as it isn't modified
         for (String organization : organizationSet) {
             mapping.put(organization, organizationIDs.get(counter++));
         }
@@ -437,37 +385,33 @@ public class ImportDB {
 
         bulkRequest.get();
 
+        if (pstmInsertPossiblyDuplicatedOrganizations == null) {
+            pstmInsertPossiblyDuplicatedOrganizations = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_organizations (organization_a, organization_b, organization_score) VALUES(?, ?, ?)");
+        }
+
+        for (Pair<String, List<Pair<Integer, Float>>> pair : wowLookAtME) {
+            int organization_a = mapping.get(pair.getKey());
+
+            for (Pair<Integer, Float> candidate : pair.getValue()) {
+                pstmInsertPossiblyDuplicatedOrganizations.setInt(1, organization_a);
+                pstmInsertPossiblyDuplicatedOrganizations.setInt(2, candidate.getKey());
+                pstmInsertPossiblyDuplicatedOrganizations.setFloat(3, candidate.getValue());
+
+                pstmInsertPossiblyDuplicatedOrganizations.addBatch();
+            }
+        }
+
         return mapping;
     }
 
-    public static int findOrCreateOrganization(String organization) throws IOException {
-        if (organization == null) {
-            // AKA "Chưa phân loại"
-            return 1;
+    public static List<Pair<Integer, Float>> findOrganization(String organization) throws UnknownHostException {
+        List<Pair<Integer, Float>> listPossbleCandidates = new ArrayList<>();
+
+        if (organization == null || organization.trim().equals("")) {
+            listPossbleCandidates.add(new Pair<>(1, 1.0f));
+            return listPossbleCandidates;
         }
 
-        int organizationID = findOrganization(organization);
-        if (organizationID != -1) {
-            return organizationID;
-        }
-
-        // No match, create a new one
-        organizationID = createOrganizationInServer(organization);
-        System.out.println("server created organizationID " + organizationID + "    " + organization);
-
-        // Index it in ES
-        DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
-                jsonBuilder()
-                    .startObject()
-                        .field("original_id", organizationID)
-                        .field("name", organization)
-                    .endObject()
-        );
-
-        return organizationID;
-    }
-
-    public static int findOrganization(String organization) throws UnknownHostException {
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
         SearchHits hits = DataUtl.queryES("available_organizations", builder);
 
@@ -475,65 +419,37 @@ public class ImportDB {
             // The condition is quite strict, as journal names are messy and need a separate deduplication
             // - Only the closest match is examined
             // - error_threshold is pretty low
-
             Map map = hit.getSourceAsMap();
-            if (Lev.distanceNormStr(organization, (String) map.get("name")) < 0.05d) {
+            double nameScore = 1.0d - LCS.approxDistance(organization, (String) map.get("name"));
+
+            if (nameScore >= 0.95d) {
                 System.out.println("Found in elas: organizationID " + hit.getSourceAsMap().get("original_id") + "    " + organization);
-                return (Integer) map.get("original_id");
+
+                listPossbleCandidates.clear();
+                listPossbleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) nameScore));
+
+                return listPossbleCandidates;
+            } else if (nameScore >= 0.8d) {
+                listPossbleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) nameScore));
             }
         }
 
-        return -1;
-    }
-
-    private static CloseableHttpClient httpClient = HttpClients.createDefault();
-    private static Gson gson = new Gson();
-
-    private static int createOrganizationInServer(String organization) throws IOException {
-        String json = gson.toJson(new Organization(organization));
-
-        HttpPost httpPOST = new HttpPost("http://localhost:8000/api/organizes/createByName");
-        httpPOST.setEntity(new StringEntity(json, "UTF-8"));
-        httpPOST.setHeader("Content-type", "application/json; charset=utf-8");    // hmmm
-
-        HttpResponse response = httpClient.execute(httpPOST);
-        Organization org = gson.fromJson(EntityUtils.toString(response.getEntity(), "UTF-8"), Organization.class);
-
-        return org.getId();
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-        String organization = "Centre de Physique Théorique, Case 907 Luminy, 13288 Marseille Cedex 9, France, Université de la Méditérannée, 13288 Marseille Cedex 9, France";
-        int organizationID = createOrganizationInServer(organization);
-        System.out.println("exact id " + organizationID);
-
-        DataUtl.indexES("available_organizations", "articles", String.valueOf(organizationID),
-                jsonBuilder()
-                        .startObject()
-                        .field("original_id", organizationID)
-                        .field("name", organization)
-                        .endObject()
-        );
-
-        QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
-        SearchHits hits = DataUtl.queryES("available_organizations", builder);
-
-        System.out.println("size " + hits.getTotalHits());
-
-        for (SearchHit hit : hits) {
-            Map map = hit.getSourceAsMap();
-            System.out.println("- " + map.get("name"));
-
-            if (Lev.distanceNormStr(organization, (String) map.get("name")) < 0.05d) {
-                System.out.println("    - " + map.get("name"));
-                System.out.println("    - " + map.get("original_id"));
-            }
-        }
+        return listPossbleCandidates;
     }
 
     public static int getNumOfOrganizations() throws SQLException {
         ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT COUNT(*) FROM organizes");
         rs.next();
         return rs.getInt(1);
+    }
+
+    public static void finishHim() throws SQLException {
+        if (pstmInsertPossiblyDuplicatedJournals != null) {
+            pstmInsertPossiblyDuplicatedJournals.executeBatch();
+        }
+
+        if (pstmInsertPossiblyDuplicatedOrganizations != null) {
+            pstmInsertPossiblyDuplicatedOrganizations.executeBatch();
+        }
     }
 }

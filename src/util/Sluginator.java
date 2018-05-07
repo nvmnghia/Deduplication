@@ -26,6 +26,8 @@ public class Sluginator {
         ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, title, slug FROM articles");
         PreparedStatement pstmSlugifyArticles = DataUtl.getDBConnection().prepareStatement("UPDATE articles SET slug = ? WHERE id = ?");
 
+        int counter = 0;
+
         while (rs.next()) {
             String currentSlug = rs.getString(3);
 
@@ -35,7 +37,12 @@ public class Sluginator {
 
                 pstmSlugifyArticles.addBatch();
             } else {
+                System.out.println("no modification " + currentSlug);
                 articleSlugs.add(currentSlug);
+            }
+
+            if (++counter % 100 == 0) {
+                pstmSlugifyArticles.executeBatch();
             }
         }
 
@@ -48,6 +55,8 @@ public class Sluginator {
         ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, name, slug FROM journals");
         PreparedStatement pstmSlugifyJournals = DataUtl.getDBConnection().prepareStatement("UPDATE journals SET slug = ? WHERE id = ?");
 
+        int counter = 0;
+
         while (rs.next()) {
             String currentSlug = rs.getString(3);
 
@@ -57,7 +66,12 @@ public class Sluginator {
 
                 pstmSlugifyJournals.addBatch();
             } else {
+                System.out.println("no modification " + currentSlug);
                 journalSlugs.add(currentSlug);
+            }
+
+            if (++counter % 100 == 0) {
+                pstmSlugifyJournals.executeBatch();
             }
         }
 
@@ -70,38 +84,63 @@ public class Sluginator {
         ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, name, slug FROM organizes");
         PreparedStatement pstmSlugifyOrganizes = DataUtl.getDBConnection().prepareStatement("UPDATE organizes SET slug = ? WHERE id = ?");
 
+        int counter = 0;
+
         while (rs.next()) {
             String currentSlug = rs.getString(3);
 
             if (currentSlug == null || currentSlug.length() == 0 || currentSlug.equals("add-slug-here")) {
-                pstmSlugifyOrganizes.setString(1, slugify(organizationSlugs, rs.getString(3)));
+                pstmSlugifyOrganizes.setString(1, slugify(organizationSlugs, rs.getString(2)));
                 pstmSlugifyOrganizes.setInt(2, rs.getInt(1));
 
                 pstmSlugifyOrganizes.addBatch();
             } else {
+                System.out.println("No modification " + currentSlug);
                 organizationSlugs.add(currentSlug);
+            }
+
+            if (++counter % 100 == 0) {
+                pstmSlugifyOrganizes.executeBatch();
             }
         }
 
         pstmSlugifyOrganizes.executeBatch();
     }
 
+    /**
+     * Generate ASCII, lower case slug.
+     * THe maximum length of the slug is 255 chars, as MariaDB cannot index anything larger than 767 bytes
+     *
+     * @param slugSet
+     * @param str
+     * @return
+     */
+    private static final int MAX_SLUG_LENGTH = 255;
     public static String slugify(HashSet<String> slugSet, String str) {
         String slug = sluginator.slugify(str);
+        slug = slug.substring(0, slug.length() > MAX_SLUG_LENGTH ? MAX_SLUG_LENGTH : slug.length());
 
         if (slugSet.contains(slug)) {
-            slug += '-';
-            String newSlug;
+            String temp = slug;
             int counter = 1;
 
             do {
-                newSlug = slug + String.valueOf(counter++);
-            } while (! slugSet.contains(newSlug));
+                String count = String.valueOf(counter++);
 
-            slugSet.add(newSlug);
-            return newSlug;
+                if (temp.length() + 1 + count.length() > MAX_SLUG_LENGTH) {
+                    slug = temp.substring(0, MAX_SLUG_LENGTH - count.length() - 1) + "-" + count;
+                } else {
+                    slug = temp + "-" + count;
+                }
+            } while (slugSet.contains(slug));
+
+            slugSet.add(slug);
+            System.out.println("Slug with suffix " + slug);
+            return slug;
+
         } else {
             slugSet.add(slug);
+            System.out.println("Slug without suffix " + slug);
             return slug;
         }
     }
