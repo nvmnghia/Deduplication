@@ -37,10 +37,17 @@ public class ArticleSource {
     public static List<Article> getArticles(String index, String type, String field, String value) throws UnknownHostException, SQLException {
         List<Article> articles = getArticles(index, field, value);
 
-        boolean is_isi = type.equals("isi");
-        for (int i = 0; i < articles.size(); ++i) {
-            if (articles.get(i).isISI() != is_isi) {
-                articles.remove(i--);
+        if (type.equals("scopus")) {
+            for (int i = 0; i < articles.size(); ++i) {
+                if (! articles.get(i).isScopus()) {
+                    articles.remove(i--);
+                }
+            }
+        } else {
+            for (int i = 0; i < articles.size(); ++i) {
+                if (! articles.get(i).isISI()) {
+                    articles.remove(i--);
+                }
             }
         }
 
@@ -51,22 +58,34 @@ public class ArticleSource {
         List<Article> articles = getArticles(index, Config.FIELD_ID, String.valueOf(ID));
 
         if (articles == null) {
-            System.out.println("real null");
-
             return null;
         } else {
             boolean is_isi = type.equals("isi");
 
             for (Article article : articles) {
-                if (article.isISI() == is_isi) {
+                if (article.isISI() == is_isi && article.getID() == ID) {
                     return article;
                 }
             }
 
-            try {
-                Files.write(Paths.get("D:\\VCI\\Deduplication\\src\\almost.txt"), (type + "    " + ID + "\n\n\n\n").getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Article getArticleByIDStrict(String index, String type, int ID) throws SQLException, UnknownHostException {
+        List<Article> articles = getArticles(index, Config.FIELD_ID, String.valueOf(ID));
+
+        if (articles == null) {
+            System.out.println("real null");
+            return null;
+
+        } else {
+            boolean is_isi = type.equals("isi");
+
+            for (Article article : articles) {
+                if (article.isISI() == is_isi && article.getID() == ID) {
+                    return article;
+                }
             }
 
             return null;

@@ -139,8 +139,8 @@ public class ImportElastic {
                             .field("doi", articleSet.getString(5))
                             .field("is_isi", articleSet.getString(6) != null && articleSet.getString(6).equals("1"))
                             .field("is_scopus", articleSet.getString(7) != null && articleSet.getString(7).equals("1"))
-                            .field("uri", articleSet.getString(7))
-                            .field("journal_id", articleSet.getInt(8))
+                            .field("uri", articleSet.getString(8))
+                            .field("journal_id", articleSet.getInt(9))
                             .endObject()
                     )
             );
@@ -169,8 +169,6 @@ public class ImportElastic {
                             .endObject()
                     )
             );
-
-            System.out.println(articleSet.getString(4));
         }
 
         bulkRequest.get();

@@ -108,7 +108,7 @@ public class ImportDB {
         }
         pstmInsertArticleAuthors.executeBatch();
 
-        System.out.println("Created " + (article.isScopus() ? "Scopus " : "ISI ") + articleID + "    " + article.getTitle());
+        System.out.println("Created " + (article.isScopus() ? "Scopus-" : "ISI-") + article.getID() + " as " + articleID + " in DB:    " + article.getTitle());
     }
 
     /**
@@ -178,7 +178,7 @@ public class ImportDB {
 
         // No match, create a new one
         if (pstmInsertJournal == null) {
-            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertJournal.setString(1, article.getJournal());
@@ -192,6 +192,7 @@ public class ImportDB {
         pstmInsertJournal.setString(9, "");
         pstmInsertJournal.setString(10, "");
         pstmInsertJournal.setInt(11, 0);
+        pstmInsertJournal.setString(12, article.getJournal());
 
         pstmInsertJournal.executeUpdate();
 
@@ -213,7 +214,7 @@ public class ImportDB {
 
         // Insert its look-alike into DB
         if (pstmInsertPossiblyDuplicatedJournals == null) {
-            pstmInsertPossiblyDuplicatedJournals = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_journals (journal_a, journal_b, journal_score) VALUES(?, ?, ?)");
+            pstmInsertPossiblyDuplicatedJournals = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.possibly_duplicated_journals (journal_a, journal_b, journal_score) VALUES(?, ?, ?)");
         }
 
         for (Pair<Integer, Float> candidate : listPossibleCandidates) {
@@ -338,9 +339,8 @@ public class ImportDB {
             }
         }
 
-
         if (pstmInsertOrganization == null) {
-            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name, _lft, _rgt, slug) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         // NestedSet logic:
@@ -354,6 +354,7 @@ public class ImportDB {
             pstmInsertOrganization.setInt(3, _rgt);
             pstmInsertOrganization.setInt(2, --_rgt);
             pstmInsertOrganization.setString(4, "add-slug-here");
+            pstmInsertOrganization.setString(5, organization);
 
             pstmInsertOrganization.addBatch();
         }
@@ -386,7 +387,7 @@ public class ImportDB {
         bulkRequest.get();
 
         if (pstmInsertPossiblyDuplicatedOrganizations == null) {
-            pstmInsertPossiblyDuplicatedOrganizations = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_organizations (organization_a, organization_b, organization_score) VALUES(?, ?, ?)");
+            pstmInsertPossiblyDuplicatedOrganizations = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.possibly_duplicated_organizations (organization_a, organization_b, organization_score) VALUES(?, ?, ?)");
         }
 
         for (Pair<String, List<Pair<Integer, Float>>> pair : wowLookAtME) {

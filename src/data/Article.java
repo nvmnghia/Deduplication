@@ -133,12 +133,12 @@ public class Article {
     }
 
     public void setYear(int year) {
-        this.year = year;
+        this.year = year < 1600 ? -1 : year;
     }
 
     public void setYear(String year) {
         try {
-            this.year = Integer.valueOf(year);
+            setYear(Integer.valueOf(year));
         } catch (Exception e) {
             this.year = -1;
         }

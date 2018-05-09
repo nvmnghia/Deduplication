@@ -6,7 +6,6 @@ import config.Config;
 import data.*;
 
 import importer.ImportDB;
-import importer.ImportElastic;
 import org.elasticsearch.action.update.UpdateRequest;
 import util.DataUtl;
 import util.StringUtl;
@@ -27,6 +26,8 @@ public class Deduplicator {
     private static final double DUPLICATED = 1d;
     private static final double POSSIBLY_DUPLICATED = 0d;
     private static final double NOT_DUPLICATED = -1d;
+
+    private static int counterISI = 0;
 
     public static List<Match> deduplicate(String type, Integer id) throws IOException, SQLException {
         // First get the article
@@ -49,10 +50,10 @@ public class Deduplicator {
         List<Double> listPossibleCandidateJournalScore = new ArrayList<>();
 
         for (Article candidate : candidates) {
-            if (candidate.getID() == article.getID()) {
-                // Search result will include the original article
-                continue;
-            }
+            // This can't be the case: candidates are from available_article which are articles in the merged DB, and the article is an article in the crawled DB
+//            if (candidate.getID() == article.getID()) {
+//                continue;
+//            }
 
             double[] result = areSameArticles(article, candidate);
             if (result[0] == DUPLICATED) {
@@ -65,10 +66,15 @@ public class Deduplicator {
                 }
 
                 // Candidates are Scopus, which are already imported
-                // But they and their journals need to be updated: is_isi = true;
+                // But they and their journals need to be updated: is_isi = true
                 updateArticleAndJournal(candidate);
 
                 System.out.println("Duplicated: ISI: " + article.getTitle() + "    Scopus: " + candidate.getTitle());
+
+                // Normally, the quest for duplicated articles ends here, as the duplicated one was found
+                // But the quest should continue to find POSSIBLY_DUPLICATED articles
+                // This has some surprise side effect:
+                // There may be multiple matches, therefore the number of is_isi in the merged DB could be larger than the number of row in the crawled DB
 
             } else if (result[0] == POSSIBLY_DUPLICATED) {
                 possiblyDuplicated = true;
@@ -81,6 +87,7 @@ public class Deduplicator {
 
         if (possiblyDuplicated || ! duplicated) {
             ImportDB.createArticle(article);
+            System.out.println("Inserted " + ++counterISI + " ISI articles");
         }
 
         if (possiblyDuplicated) {
@@ -96,7 +103,7 @@ public class Deduplicator {
     private static PreparedStatement pstmInsertPossiblyDuplicatedArticles = null;
     public static void addPossiblyDuplicatedArticles(Article article, Article candidate, double titleScore, double journalScore) throws SQLException {
         if (pstmInsertPossiblyDuplicatedArticles == null) {
-            pstmInsertPossiblyDuplicatedArticles = DataUtl.getDBConnection().prepareStatement("INSERT INTO possibly_duplicated_articles (isi_id, scopus_id, title_score, journal_score) VALUES(?, ?, ?, ?)");
+            pstmInsertPossiblyDuplicatedArticles = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.possibly_duplicated_articles (isi_id, scopus_id, title_score, journal_score) VALUES(?, ?, ?, ?)");
         }
 
         pstmInsertPossiblyDuplicatedArticles.setInt(1, article.getID());
@@ -105,7 +112,6 @@ public class Deduplicator {
         pstmInsertPossiblyDuplicatedArticles.setFloat(4, (float) journalScore);
 
         pstmInsertPossiblyDuplicatedArticles.addBatch();
-
     }
 
     private static PreparedStatement pstmUpdateArticle = null;
@@ -132,6 +138,7 @@ public class Deduplicator {
         }
 
         int journalID = candidate.getJournalID();
+
         pstmUpdateJournal.setInt(1, journalID);
         pstmUpdateJournal.executeUpdate();
 
@@ -187,14 +194,9 @@ public class Deduplicator {
         }
 
         for (int i = 0; i < articles.size(); ++i) {
-            if (articles.get(i).getYear() != year) {
-                if (articles.get(i).getYear() != -1) {
-                    // Definitely not
-                    articles.remove(i);
-                    --i;
-                } else {
-                    // Give it a chance! Give it a chance! LMAO
-                }
+            if (articles.get(i).getYear() != year && articles.get(i).getYear() != -1) {
+                // Definitely not
+                articles.remove(i--);
             }
         }
     }

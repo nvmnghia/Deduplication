@@ -8,22 +8,20 @@ import data.ArticleSource;
 import data.Match;
 import importer.ImportDB;
 import importer.ImportElastic;
+import util.DataUtl;
 import util.Sluginator;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.*;
-
-import static data.ArticleSource.getArticleByID;
 
 public class Runner {
     public static void main(String[] args) throws IOException, SQLException, InterruptedException {
+
+        System.setOut(new PrintStream(new FileOutputStream(new File("D:\\VCI\\Deduplication\\src\\log.txt"))));
+
         long start = System.nanoTime();
 
         ImportElastic.importISIAndScopus();
@@ -36,7 +34,8 @@ public class Runner {
 
         List<Match> listMatches = new ArrayList<>();
 
-        for (int i = 0; i < 41000; ++i) {
+        int maxIDOfISI = getMaxIDOfDB("isi", "isi_documents");
+        for (int i = 0; i <= maxIDOfISI; ++i) {
             try {
                 addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
             } catch (Exception e) {
@@ -62,12 +61,23 @@ public class Runner {
     }
 
     public static void importAllScopus() throws SQLException, IOException, InterruptedException {
-        for (int i = 0; i < 44000; ++i) {
+        int maxIDOfScopus = getMaxIDOfDB("scopus", "scopus_documents");
+        for (int i = 0; i <= maxIDOfScopus; ++i) {
             Article scopus = ArticleSource.getArticleByID(Config.ES_INDEX, "scopus", i);
             if (scopus != null) {
                 ImportDB.createArticle(scopus);
             }
         }
+    }
+
+    public static int getMaxIDOfDB(String dbName, String tableName) throws SQLException {
+        ResultSet rs = DataUtl.queryDB(dbName, "SELECT id FROM " + tableName + " ORDER BY id DESC LIMIT 1");
+        rs.next();
+
+        int maxIDOfMergedDB = rs.getInt(1);
+        System.out.println("Max ID of " + dbName + "." + tableName + ": " + maxIDOfMergedDB);
+
+        return maxIDOfMergedDB;
     }
 
     public static void addToListMatches(List<Match> currentMatches, List<Match> newMatches) {
@@ -83,47 +93,5 @@ public class Runner {
         }
 
         currentMatches.addAll(newMatches);
-    }
-
-    public static void removeDuplicateMatch(List<Match> listMatches) {
-        HashSet<String> setMatchStr = new HashSet<>();
-
-        for (int i = 0; i < listMatches.size(); ++i) {
-            Match match = listMatches.get(i);
-            String matchStr = match.getISI() + "-" + match.getScopus();
-
-            if (setMatchStr.contains(matchStr)) {
-                listMatches.remove(i--);
-            } else {
-                setMatchStr.add(matchStr);
-            }
-        }
-    }
-
-    public static class Worker implements Callable<List<Match>> {
-
-        private String type;
-        private int start, end;
-
-        public Worker(String type, int start, int end) {
-            this.type = type;
-            this.start = start;
-            this.end = end;
-        }
-
-        @Override
-        public List<Match> call() throws Exception {
-            List<Match> listMatches = new ArrayList<>();
-
-            for (int i = start; i < end; ++i) {
-                try {
-                    listMatches.addAll(Deduplicator.deduplicate(type, i));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-
-            return listMatches;
-        }
     }
 }

@@ -26,36 +26,6 @@ import java.util.List;
 import java.util.Random;
 
 public class DataUtl {
-
-    private static JsonParser parser = new JsonParser();
-    private static Random random = new Random();
-
-    public static JsonArray queryES(String field, String value) throws URISyntaxException, UnsupportedEncodingException {
-        field = URLEncoder.encode(field, "UTF-8");
-        value = URLEncoder.encode(value, "UTF-8");
-
-        HttpPost query = new HttpPost();
-        query.setURI(new URI( Config.ES_SEARCH_URI + field + ":" + value));
-        System.out.println(Config.ES_SEARCH_URI + field + ":" + value);
-
-        try (
-                CloseableHttpClient client = HttpClientBuilder.create().build();
-                CloseableHttpResponse response = client.execute(query);
-        ) {
-
-            String result = EntityUtils.toString(response.getEntity(), "UTF-8");
-            JsonObject rootObject = parser.parse(result).getAsJsonObject();
-
-            // Make sure the poor server won't be banged to death
-            Thread.sleep(random.nextInt(55));
-
-            return rootObject.getAsJsonObject("hits").getAsJsonArray("hits");
-
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private static Client client = null;
 
     public static Client getESClient() throws UnknownHostException {
@@ -78,12 +48,6 @@ public class DataUtl {
     public static void indexES(String index, String type, String id, XContentBuilder builder) throws UnknownHostException {
         getESClient().prepareIndex(index, type, id).setSource(builder).get();
         getESClient().admin().indices().prepareRefresh(index).get();
-
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private static Connection connection = null;
