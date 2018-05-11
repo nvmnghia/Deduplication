@@ -88,7 +88,11 @@ public class ImportDB {
         pstmInsertArticle.setInt(19, 1);
         pstmInsertArticle.setString(20, "add-slug-here");
 
-        pstmInsertArticle.executeUpdate();
+        try {
+            pstmInsertArticle.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
         int articleID = DataUtl.getAutoIncrementID(pstmInsertArticle);
         article.setMergedID(articleID);
@@ -143,7 +147,7 @@ public class ImportDB {
                 if (hitISSN != null && hitISSN.equalsIgnoreCase(article.getISSN())) {
                     // Remember to set additional variables
                     article.setJournalID((Integer) map.get("original_id"));
-                    article.setVCI((Boolean) map.get("is_vci"));
+//                    article.setVCI((Boolean) map.get("is_vci"));
 
                     return article.getJournalID();
                 }
@@ -168,7 +172,7 @@ public class ImportDB {
             // - error_threshold is pretty low
             if (normalNameScore > 0.9d) {
                 article.setJournalID((Integer) map.get("original_id"));
-                article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
+//                article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
 
                 return article.getJournalID();
             } else if (normalNameScore >= 0.8d) {

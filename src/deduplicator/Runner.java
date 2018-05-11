@@ -26,38 +26,41 @@ public class Runner {
 
         ImportElastic.importISIAndScopus();
 
-        importAllScopus();
+//        importAllScopus();
 
-        ImportElastic.importAvailableArticles();
+//        ImportElastic.importAvailableArticles();
         ImportElastic.importAvailableJournals();
-        ImportElastic.importAvailableOrganizations();
-
-        List<Match> listMatches = new ArrayList<>();
-
-        int maxIDOfISI = getMaxIDOfDB("isi", "isi_documents");
-        for (int i = 0; i <= maxIDOfISI; ++i) {
-            try {
-                addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        Deduplicator.finishHim();
-
-        Sluginator.slugifyAll();
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
-        writer.write(gson.toJson(listMatches));
-        writer.close();
-
-        long elapsed = System.nanoTime() - start;
-
-        System.out.println("All took " + elapsed + " nanoseconds");
+//        ImportElastic.importAvailableOrganizations();
+//
+//        Thread.sleep(1000);
+//
+//        List<Match> listMatches = new ArrayList<>();
+//
+//        int maxIDOfISI = getMaxIDOfDB("isi", "isi_documents");
+//        for (int i = 0; i <= maxIDOfISI; ++i) {
+//
+//            try {
+//                addToListMatches(listMatches, Deduplicator.deduplicate("isi", i));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        Deduplicator.finishHim();
+//
+//        Sluginator.slugifyAll();
+//
+//        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//
+//        File output = new File("D:\\VCI\\Deduplication\\src\\output.txt");
+//
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(output));
+//        writer.write(gson.toJson(listMatches));
+//        writer.close();
+//
+//        long elapsed = System.nanoTime() - start;
+//
+//        System.out.println("All took " + elapsed + " nanoseconds");
     }
 
     public static void importAllScopus() throws SQLException, IOException, InterruptedException {

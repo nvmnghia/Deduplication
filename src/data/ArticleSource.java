@@ -60,31 +60,17 @@ public class ArticleSource {
         if (articles == null) {
             return null;
         } else {
-            boolean is_isi = type.equals("isi");
-
-            for (Article article : articles) {
-                if (article.isISI() == is_isi && article.getID() == ID) {
-                    return article;
+            if (type.equals("scopus")) {
+                for (Article article : articles) {
+                    if (article.isScopus() && article.getID() == ID) {
+                        return article;
+                    }
                 }
-            }
-
-            return null;
-        }
-    }
-
-    public static Article getArticleByIDStrict(String index, String type, int ID) throws SQLException, UnknownHostException {
-        List<Article> articles = getArticles(index, Config.FIELD_ID, String.valueOf(ID));
-
-        if (articles == null) {
-            System.out.println("real null");
-            return null;
-
-        } else {
-            boolean is_isi = type.equals("isi");
-
-            for (Article article : articles) {
-                if (article.isISI() == is_isi && article.getID() == ID) {
-                    return article;
+            } else {
+                for (Article article : articles) {
+                    if (article.isISI() && article.getID() == ID) {
+                        return article;
+                    }
                 }
             }
 
