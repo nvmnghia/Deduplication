@@ -10,7 +10,6 @@
     <orderEntry type="library" name="mysql:mysql-connector-java:5.1.46" level="project" />
     <orderEntry type="library" name="org.elasticsearch.client:transport:6.2.3" level="project" />
     <orderEntry type="library" name="info.debatty:java-string-similarity:1.1.0" level="project" />
-    <orderEntry type="library" name="metta" level="project" />
     <orderEntry type="library" name="com.google.code.gson:gson:2.8.2" level="project" />
     <orderEntry type="library" name="com.github.slugify:slugify:2.2" level="project" />
   </component>

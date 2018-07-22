@@ -78,6 +78,7 @@ public class Name {
 //
 //        return false;
 
+        // Name error threshold is a lil higher to compensate abbreviation
         return LCS.isMatch(author1.getFullName(), author2.getFullName(), 0.4d);
     }
 }

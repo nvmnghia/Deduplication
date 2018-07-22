@@ -1,6 +1,7 @@
 package util;
 
 import com.github.slugify.Slugify;
+import config.Config;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,8 +24,8 @@ public class Sluginator {
     public static void slugifyArticles() throws SQLException {
         HashSet<String> articleSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, title, slug FROM articles");
-        PreparedStatement pstmSlugifyArticles = DataUtl.getDBConnection().prepareStatement("UPDATE articles SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT id, title, slug FROM articles");
+        PreparedStatement pstmSlugifyArticles = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".articles SET slug = ? WHERE id = ?");
 
         int counter = 0;
 
@@ -37,7 +38,6 @@ public class Sluginator {
 
                 pstmSlugifyArticles.addBatch();
             } else {
-                System.out.println("no modification " + currentSlug);
                 articleSlugs.add(currentSlug);
             }
 
@@ -52,8 +52,8 @@ public class Sluginator {
     public static void slugifyJournals() throws SQLException {
         HashSet<String> journalSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, name, slug FROM journals");
-        PreparedStatement pstmSlugifyJournals = DataUtl.getDBConnection().prepareStatement("UPDATE journals SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT id, name, slug FROM journals");
+        PreparedStatement pstmSlugifyJournals = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".journals SET slug = ? WHERE id = ?");
 
         int counter = 0;
 
@@ -66,7 +66,6 @@ public class Sluginator {
 
                 pstmSlugifyJournals.addBatch();
             } else {
-                System.out.println("no modification " + currentSlug);
                 journalSlugs.add(currentSlug);
             }
 
@@ -81,8 +80,8 @@ public class Sluginator {
     public static void slugifyOrganizations() throws SQLException {
         HashSet<String> organizationSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT id, name, slug FROM organizes");
-        PreparedStatement pstmSlugifyOrganizes = DataUtl.getDBConnection().prepareStatement("UPDATE organizes SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT id, name, slug FROM organizes");
+        PreparedStatement pstmSlugifyOrganizes = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".organizes SET slug = ? WHERE id = ?");
 
         int counter = 0;
 
@@ -95,7 +94,6 @@ public class Sluginator {
 
                 pstmSlugifyOrganizes.addBatch();
             } else {
-                System.out.println("No modification " + currentSlug);
                 organizationSlugs.add(currentSlug);
             }
 
@@ -140,7 +138,6 @@ public class Sluginator {
 
         } else {
             slugSet.add(slug);
-            System.out.println("Slug without suffix " + slug);
             return slug;
         }
     }

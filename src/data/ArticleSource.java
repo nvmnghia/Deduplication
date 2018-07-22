@@ -7,37 +7,27 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import util.DataUtl;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleSource {
-    public static List<Article> getArticles(String index, String field, String value) throws UnknownHostException, SQLException {
-        switch (Config.getDataSource()) {
-            case ES_TRANSPORT_6_2_3:
-                return getArticlesES_Transport(index, field, value);
-
-            case ES_REST:
-                return getArticlesES_REST(field, value);
-
-            case DB:
-                return getArticlesDB(field, value);
-
-            default:
-                return new ArrayList<>();
-        }
-    }
-
-    public static List<Article> getArticles(String index, String type, String field, String value) throws UnknownHostException, SQLException {
+    /**
+     * Do the same things as the above function, but filter out the type
+     * @param index
+     * @param type
+     * @param field
+     * @param value
+     * @return
+     * @throws UnknownHostException
+     * @throws SQLException
+     */
+    public static List<Article> getArticles(String index, int type, String field, String value) throws UnknownHostException {
         List<Article> articles = getArticles(index, field, value);
 
-        if (type.equals("scopus")) {
+        if (type == Article.SCOPUS) {
             for (int i = 0; i < articles.size(); ++i) {
                 if (! articles.get(i).isScopus()) {
                     articles.remove(i--);
@@ -54,13 +44,13 @@ public class ArticleSource {
         return articles;
     }
 
-    public static Article getArticleByID(String index, String type, int ID) throws SQLException, UnknownHostException {
-        List<Article> articles = getArticles(index, Config.FIELD_ID, String.valueOf(ID));
+    public static Article getArticleByID(String index, int type, int ID) throws UnknownHostException {
+        List<Article> articles = getArticles(index, "original_id", String.valueOf(ID));
 
         if (articles == null) {
             return null;
         } else {
-            if (type.equals("scopus")) {
+            if (type == Article.SCOPUS) {
                 for (Article article : articles) {
                     if (article.isScopus() && article.getID() == ID) {
                         return article;
@@ -78,7 +68,7 @@ public class ArticleSource {
         }
     }
 
-    private static List<Article> getArticlesES_Transport(String index, String field, String value) throws UnknownHostException {
+    private static List<Article> getArticles(String index, String field, String value) throws UnknownHostException {
         List<Article> articles = new ArrayList<>();
 
         QueryBuilder filterByField = QueryBuilders.matchQuery(field, value);
@@ -107,7 +97,7 @@ public class ArticleSource {
             article.setReference((String) hit.getSourceAsMap().get("reference"));
             article.setKeywords((String) hit.getSourceAsMap().get("keyword"));
 
-            if (! index.equals(Config.ES_INDEX)) {
+            if (! index.equals(Config.ES.INDEX)) {
                 article.setJournalID((Integer) hit.getSourceAsMap().get("journal_id"));
                 article.setMergedID(article.getID());
             }
@@ -120,46 +110,5 @@ public class ArticleSource {
 
     private static List<Article> getArticlesES_REST(String field, String value) {
         return null;
-    }
-
-    private static List<Article> getArticlesDB(String field, String value) throws SQLException {
-        List<Article> articles = new ArrayList<>();
-
-        String query;
-        if (field.equalsIgnoreCase("id")) {
-            query = "SELECT ar.id, ar.title, ar.doi, ar.year, ar.is_isi, ar.is_scopus, GROUP_CONCAT(au.name SEPARATOR ', '), j.issn, j.name FROM articles ar " +
-                    "JOIN articles_authors aa ON aa.article_id = ar.id " +
-                    "JOIN authors au ON aa.author_id = au.id " +
-                    "JOIN journals j ON j.id = ar.journal_id " +
-                    "WHERE ar.reference IS NOT NULL AND length(ar.reference) >= 1 AND ar.id = " + value + " " +
-                    "GROUP BY ar.id";
-        } else {
-            query = "SELECT ar.id, ar.title, ar.doi, ar.year, ar.is_isi, ar.is_scopus, GROUP_CONCAT(au.name SEPARATOR ', '), j.issn, j.name FROM articles ar " +
-                    "JOIN articles_authors aa ON aa.article_id = ar.id " +
-                    "JOIN authors au ON aa.author_id = au.id " +
-                    "JOIN journals j ON j.id = ar.journal_id " +
-                    "WHERE ar.reference IS NOT NULL AND length(ar.reference) >= 1 AND MATCH (title) AGAINST ('" + value + "' IN NATURAL LANGUAGE MODE) " +
-                    "GROUP BY ar.id";
-        }
-
-        ResultSet resultSet = DataUtl.queryDB(Config.DB_NAME, query);
-
-        while (resultSet.next()) {
-            Article article = new Article();
-
-            article.setID(resultSet.getInt(1));
-            article.setTitle(resultSet.getString(2));
-            article.setDOI(resultSet.getString(3));
-            article.setYear(resultSet.getString(4));
-            article.setISI(resultSet.getString(5) != null && resultSet.getString(5).length() != 0 && resultSet.getInt(5) == 1);
-            article.setScopus(resultSet.getString(6) != null && resultSet.getString(6).length() != 0 && resultSet.getInt(6) == 1);
-            article.setRawAuthorStr(resultSet.getString(7));
-            article.setISSN(resultSet.getString(8));
-            article.setJournal(resultSet.getString(9));
-
-            articles.add(article);
-        }
-
-        return articles;
     }
 }

@@ -1,15 +1,13 @@
 package util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import config.Config;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import io.netty.channel.ChannelPromiseNotifier;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
+import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.TransportAddress;
@@ -18,27 +16,39 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
-import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class DataUtl {
+
+    /**
+     * ES
+     */
+
     private static Client client = null;
 
     public static Client getESClient() throws UnknownHostException {
         if (client == null) {
-            TransportAddress address = new TransportAddress(InetAddress.getByName("localhost"), 9300);
+            TransportAddress address = new TransportAddress(InetAddress.getByName(Config.ES.URL), 9300);
             Settings settings = Settings.builder()
-                    .put("cluster.name", Config.ES_CLUSTER_NAME)
                     .build();
 
             client = new PreBuiltTransportClient(settings).addTransportAddress(address);
         }
 
         return client;
+    }
+
+    public static boolean createIndex(String index) throws UnknownHostException {
+        CreateIndexRequestBuilder createIndexRequestBuilder = getESClient().admin().indices().prepareCreate(index);
+        return createIndexRequestBuilder.execute().actionGet().isAcknowledged();
+    }
+
+    public static boolean deleteIndex(String index) throws UnknownHostException {
+        DeleteIndexRequestBuilder deleteIndexRequestBuilder = getESClient().admin().indices().prepareDelete(index);
+        return deleteIndexRequestBuilder.execute().actionGet().isAcknowledged();
     }
 
     public static SearchHits queryES(String index, QueryBuilder builder) throws UnknownHostException {
@@ -50,13 +60,22 @@ public class DataUtl {
         getESClient().admin().indices().prepareRefresh(index).get();
     }
 
+    public static void flushES(String index) throws UnknownHostException {
+        FlushRequest flushRequest = getESClient().admin().indices().prepareFlush(index).request();
+        client.admin().indices().flush(flushRequest).actionGet();
+    }
+
+    /**
+     * DB
+     */
+
     private static Connection connection = null;
 
     public static Connection getDBConnection() throws SQLException {
         if (connection == null) {
             MysqlDataSource dataSource = new MysqlDataSource();
-            dataSource.setUser("root");
-            dataSource.setPassword("nvmnghia");
+            dataSource.setUser(Config.DB.USERNAME);
+            dataSource.setPassword(Config.DB.PASSWORD);
 
             connection = dataSource.getConnection();
         }
@@ -81,11 +100,11 @@ public class DataUtl {
         return stm.executeQuery(query);
     }
 
-    public static int insertAndGetID(String dbName, String query) throws SQLException {
+    public static int insertAndGetID(String dbName, String insertQuery) throws SQLException {
         Statement stm = getDBStatement();
 
         stm.executeQuery("USE " + dbName);
-        return stm.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+        return stm.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
     }
 
     public static void batchInsert(String dbName, List<String> insertQueries) throws SQLException {
@@ -115,5 +134,15 @@ public class DataUtl {
         }
 
         return IDs;
+    }
+
+    public static int getMaxIDOfTable(String dbName, String tableName) throws SQLException {
+        ResultSet rs = DataUtl.queryDB(dbName, "SELECT id FROM " + tableName + " ORDER BY id DESC LIMIT 1");
+        rs.next();
+
+        int maxIDOfMergedDB = rs.getInt(1);
+        System.out.println("Max ID of " + dbName + "." + tableName + ": " + maxIDOfMergedDB);
+
+        return maxIDOfMergedDB;
     }
 }

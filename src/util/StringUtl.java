@@ -1,19 +1,19 @@
 package util;
 
-import info.debatty.java.stringsimilarity.LongestCommonSubsequence;
-import javafx.util.Pair;
+import comparator.LCS;
 
+import java.text.Normalizer;
 import java.util.*;
 
 public class StringUtl {
     /**
-     * Clean the input string
+     * Clean the input subsequence
      * - Trim
      * - Convert to lower case
      * - Strip diacritics
      *
-     * @param str input string
-     * @return cleaned string
+     * @param str input subsequence
+     * @return cleaned subsequence
      */
     public static String clean(String str) {
         return str.trim().replaceAll("\\s+", " ").toLowerCase();
@@ -61,7 +61,7 @@ public class StringUtl {
     }
 
     /**
-     * Count the number of occurrences of a single letter in a string
+     * Count the number of occurrences of a single letter in a subsequence
      * Used in comparator
      *
      * @param haystack
@@ -160,7 +160,7 @@ public class StringUtl {
                                     "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some",
                                     "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis",
                                     "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where",
-                                    "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your"};
+                                    "which", "while", "whom", "why", "will", "with", "would", "yet", "you", "your"};
         for (String stopword : stopwordList) {
             stopwords.add(stopword);
         }
@@ -195,6 +195,173 @@ public class StringUtl {
             return ISSN;
         } else {
             return null;
+        }
+    }
+
+    private static Map<String, String> corrector = new HashMap<>();
+    static {
+        corrector.put("Viet nam", "Vietnam");
+        corrector.put("Việt nam", "Vietnam");
+        corrector.put("Viet Nam", "Vietnam");
+        corrector.put("Việt Nam", "Vietnam");
+    }
+
+    public static String correct(String str) {
+        for (String key : corrector.keySet()) {
+            str = str.replace(key, corrector.get(key));
+        }
+
+        return str;
+    }
+
+    public static String[] generateTokenizedString(String A, String B) {
+        // Segment strings
+        // Non alphanumeric stuffs are used as delimiters
+        ArrayList<String> segmentedA = new ArrayList<>(Arrays.asList(flattenToASCII(A).toLowerCase().split("[^\\w']+")));
+        for (int i = 0; i < segmentedA.size(); ++i) {
+            String segment = segmentedA.get(i);
+            if (segment.length() == 0 || StringUtl.isStopWord(segment)) {
+                segmentedA.remove(i--);
+            }
+        }
+
+        ArrayList<String> segmentedB = new ArrayList<>(Arrays.asList(flattenToASCII(B).toLowerCase().split("[^\\w']+")));
+        for (int i = 0; i < segmentedB.size(); ++i) {
+            String segment = segmentedB.get(i);
+            if (segment.length() == 0 || StringUtl.isStopWord(segment)) {
+                segmentedB.remove(i--);
+            }
+        }
+
+        // Tokenization
+        // Words are converted into unique characters (tokens)
+        // Word that is a prefix of a word of the other subsequence are treated as the same word as the its extending word
+        // Example: J for Journal, Res for research,...
+        // However, in some case there could be >= 2 words in a sentence that have the same prefix
+        // Then do a tie-break: choose the word that is the most similar in length with the prefix
+
+        // This character is to
+        char representChar = 'a';
+        HashMap<String, Character> representCharMap = new HashMap<>();
+
+        // Match segment and build token corrector
+        for (String a : segmentedA) {
+            if (representCharMap.containsKey(a)) {
+                continue;
+            }
+
+            float score = 0.0f;
+            int posB = -1;
+
+            for (int j = 0; j < segmentedB.size(); ++j) {
+                String b = segmentedB.get(j);
+
+                if (possiblySameWord(a, b)) {
+                    // Found possible deduplicate
+                    float tempScore = ((float) Math.min(a.length(), b.length()) ) / Math.max(a.length(), b.length());
+                    if (score < tempScore) {
+                        score = tempScore;
+                        posB = j;
+                    }
+                }
+            }
+
+            representCharMap.put(a, ++representChar);
+
+            if (posB != -1) {
+                // a and segmentedB[posB], one is the prefix of the other
+                representCharMap.put(segmentedB.get(posB), representChar);
+            }
+        }
+
+        // Tokenize using built token corrector
+        StringBuilder builder = new StringBuilder();
+        for (String segment : segmentedA) {
+            builder.append(representCharMap.get(segment));
+        }
+        String tokenizedA = builder.toString();
+
+        builder = new StringBuilder();
+        for (String segment : segmentedB) {
+            // After the loop, all segments in segmentedA are in the representCharMap
+            // But there're segments in segmentedB which is not contained in representCharMap
+            if (representCharMap.containsKey(segment)) {
+                builder.append(representCharMap.get(segment));
+
+            } else {
+                representCharMap.put(segment, ++representChar);
+                builder.append(representChar);
+            }
+        }
+        String tokenizedB = builder.toString();
+
+//        System.out.println(tokenizedA + "\n" + tokenizedB);
+
+        return new String[]{tokenizedA, tokenizedB};
+    }
+
+    /**
+     * This function is strongly biased to some common patterns of abbreviation in ISI DB
+     * For example: Natl for Naturelles,...
+     *
+     * @param A
+     * @param B
+     * @return
+     */
+    public static Map<String, String> abbr = new HashMap<>();
+    private static boolean possiblySameWord(String A, String B) {
+        String shorter, longer;
+
+        if (A.length() < B.length()) {
+            shorter = A;
+            longer = B;
+        } else {
+            shorter = B;
+            longer = A;
+        }
+
+        if (longer.startsWith(shorter)) {
+            abbr.put(shorter, longer);
+            return true;
+        }
+
+        int lengthLCS = LCS.length(longer, shorter);
+        boolean isAbbr = shorter.charAt(0) == longer.charAt(0) && lengthLCS > shorter.length() * 0.9f;
+        if (isAbbr) {
+            abbr.put(shorter, longer);
+        }
+
+        return isAbbr;
+    }
+
+    /**
+     * @author David Conrad
+     * https://stackoverflow.com/questions/3322152/is-there-a-way-to-get-rid-of-accents-and-convert-a-whole-string-to-regular-lette
+     *
+     * @param str
+     * @return
+     */
+    public static String flattenToASCII(String str) {
+        char[] out = new char[str.length()];
+        str = Normalizer.normalize(str, Normalizer.Form.NFD);
+
+        int j = 0;
+        for (int i = 0; i < str.length(); ++i) {
+            char c = str.charAt(i);
+            if (c <= '\u007F') {
+                out[j++] = c;
+            }
+        }
+
+        return new String(out);
+    }
+
+    public static boolean isNumber(String str) {
+        try {
+            Double.valueOf(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

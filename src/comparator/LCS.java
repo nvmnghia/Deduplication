@@ -4,22 +4,26 @@ import info.debatty.java.stringsimilarity.LongestCommonSubsequence;
 import info.debatty.java.stringsimilarity.MetricLCS;
 import util.StringUtl;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
+
+import static util.StringUtl.generateTokenizedString;
+import static util.StringUtl.removeDiacritics;
 
 public class LCS {
 
 
-    private static MetricLCS lcs = new MetricLCS();
+    private static MetricLCS metricLCS = new MetricLCS();
+    private static LongestCommonSubsequence LCS = new LongestCommonSubsequence();
 
     public static double preciseDistance(String A, String B) {
-        return lcs.distance(A, B);
+        return metricLCS.distance(A, B);
+    }
+
+    public static int length(String A, String B) {
+        return LCS.length(A, B);
     }
 
     /**
@@ -35,109 +39,109 @@ public class LCS {
      */
     public static double approxDistance(String A, String B) {
         if (A == null || B == null) {
-            return 0.0d;
+            return 1.0d;
         }
 
         if (A.equals(B)) {
             return 0.0d;
         }
 
-        // Segment strings
-        // Non alphanumeric stuffs are used as delimiters
-//        List<String> segmentedA = Arrays.asList(A.toLowerCase().split("[^\\\\w']+"));
-        ArrayList<String> segmentedA = new ArrayList<>(Arrays.asList(A.toLowerCase().split("[^\\w']+")));
-        for (int i = 0; i < segmentedA.size(); ++i) {
-            String segment = segmentedA.get(i);
-            if (segment.length() == 0 || StringUtl.isStopWord(segment)) {
-                segmentedA.remove(i);
-            }
-        }
-
-        ArrayList<String> segmentedB = new ArrayList<>(Arrays.asList(B.toLowerCase().split("[^\\w']+")));
-        for (int i = 0; i < segmentedB.size(); ++i) {
-            String segment = segmentedB.get(i);
-            if (segment.length() == 0 || StringUtl.isStopWord(segment)) {
-                segmentedB.remove(i);
-            }
-        }
-
-        // Tokenization
-        // Words are converted into unique characters (token)
-        // Word that is a prefix of a word of the other string are treated as the same word as the its extending word
-        // Example: J for Journal, Res for research,...
-        // However, in some case there could be >= 2 words in a string that has the same prefix, and that prefix appears in the other string
-        // Then tie-break: choose the word that is the most similar in length with the prefix
-
-        // This character is to
-        char representChar = 'a';
-        HashMap<String, Character> representCharMap = new HashMap<>();
-
-        // Match segment and build token map
-        for (int i = 0; i < segmentedA.size(); ++i) {
-            String a = segmentedA.get(i);
-
-            if (representCharMap.containsKey(a)) {
-                continue;
-            }
-
-            float score = 0.0f;
-            int posB = -1;
-
-            for (int j = 0; j < segmentedB.size(); ++j) {
-                String b = segmentedB.get(j);
-
-                if (a.startsWith(b) || b.startsWith(a)) {
-                    // Found possible deduplicate
-                    float tempScore = Math.min(a.length(), b.length()) / Math.max(a.length(), b.length());
-                    if (score < tempScore) {
-                        score = tempScore;
-                        posB = j;
-                    }
-                }
-            }
-
-            representCharMap.put(a, ++representChar);
-
-            if (posB != -1) {
-                // a and segmentedB[posB], one is the prefix of the other
-                representCharMap.put(segmentedB.get(posB), representChar);
-            }
-        }
-
-        // Tokenize using built token map
-        StringBuilder builder = new StringBuilder();
-        for (String segment : segmentedA) {
-            builder.append(representCharMap.get(segment));
-        }
-        String tokenizedA = builder.toString();
-
-        builder = new StringBuilder();
-        for (String segment : segmentedB) {
-            // After the loop, all segments in segmentedA are in the representCharMap
-            // But there're segments in segmentedB which is not contained in representCharMap
-            if (representCharMap.containsKey(segment)) {
-                builder.append(representCharMap.get(segment));
-
-            } else {
-                representCharMap.put(segment, ++representChar);
-                builder.append(representChar);
-            }
-        }
-        String tokenizedB = builder.toString();
+        String[] tokenized = generateTokenizedString(A, B);
+        String tokenizedA = tokenized[0];
+        String tokenizedB = tokenized[1];
 
         // Calculate LCS
-        return lcs.distance(tokenizedA, tokenizedB);
+        return metricLCS.distance(tokenizedA, tokenizedB);
     }
 
+    public static double approxSimilarityRelaxed(String A, String B) {
+        if (A == null || B == null) {
+            return 0.0d;
+        }
+
+        if (A.equals(B)) {
+            return 1.0d;
+        }
+
+        String[] tokenized = generateTokenizedString(A, B);
+        String tokenizedA = tokenized[0];
+        String tokenizedB = tokenized[1];
+
+        // Calculate LCS
+        return ((double) LCS.length(tokenizedA, tokenizedB)) / Math.min(tokenizedA.length(), tokenizedB.length());
+    }
+
+    public static double approxSimilarity(String A, String B) {
+        if (A == null || B == null) {
+            return 0.0d;
+        }
+
+        if (A.equals(B)) {
+            return 1.0d;
+        }
+
+        String[] tokenized = generateTokenizedString(A, B);
+        String tokenizedA = tokenized[0];
+        String tokenizedB = tokenized[1];
+
+        // Calculate LCS
+        return ((double) LCS.length(tokenizedA, tokenizedB)) / Math.max(tokenizedA.length(), tokenizedB.length());
+    }
 
     public static boolean isMatch(String A, String B, double error_threshold) {
         return approxDistance(A, B) <= error_threshold;
     }
 
-    public static void main(String[] args) {
-        String A = "european physical journal a";
-        String B = "European Physical Journal B";
+    public static String subsequence(String A, String B)
+    {
+        int len_A = A.length(), len_B = B.length();
+        int[][] L = new int[len_A+1][len_B+1];
 
-        System.out.println(approxDistance(A, B));
+        // Build L[len_A+1][len_B+1] in bottom up fashion.
+        // Note that L[i][j] contains length of LCS of A[0..i-1] and B[0..j-1]
+        for (int i = 0; i <= len_A; ++i)
+        {
+            for (int j = 0; j <= len_B; ++j)
+            {
+                if (i == 0 || j == 0)
+                    L[i][j] = 0;
+                else if (A.charAt(i-1) == B.charAt(j - 1))
+                    L[i][j] = L[i-1][j-1] + 1;
+                else
+                    L[i][j] = Math.max(L[i - 1][j], L[i][j - 1]);
+            }
+        }
+
+        //  Build LCS
+        int index = L[len_A][len_B];
+
+        // Create a character array to store the subsequence
+        char[] lcs = new char[index];
+
+        // Start from the bottom right corner and
+        int i = len_A, j = len_B;
+        while (i > 0 && j > 0)
+        {
+            // If current character in A[] and B are same, then
+            // current character is part of LCS
+            if (A.charAt(i - 1) == B.charAt(j - 1))
+            {
+                // Put the current character in result
+                lcs[index - 1] = A.charAt(i - 1);
+
+                // Reduce values of i, j and index
+                --i;
+                --j;
+                --index;
+            }
+
+            // If they aren't the same, find the larger of two and go in its direction
+            else if (L[i - 1][j] > L[i][j - 1])
+                --i;
+            else
+                --j;
+        }
+
+        return new String(lcs);
     }
 }

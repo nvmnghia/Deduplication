@@ -1,12 +1,16 @@
 package data;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Article {
+    public static final int SCOPUS = 1;
+    public static final int ISI = 2;
+
     private static Gson gson = new Gson();
 
     private int ID, journalID = -1, mergedID;
@@ -28,7 +32,7 @@ public class Article {
 
     /**
      * mergedID is the ID in the final (merged) DB
-     * Remember, there're 3 DBs: final/merged and the original (storing crawled data of ISI and Scopus)
+     * Remember, there're 3 DBs: final/merged and 2 original DBs
      *
      * @return
      */
@@ -137,10 +141,14 @@ public class Article {
     }
 
     public void setYear(String year) {
-        try {
-            setYear(Integer.valueOf(year));
-        } catch (Exception e) {
+        if (year == null || year.length() == 0) {
             this.year = -1;
+        } else {
+            try {
+                setYear(Integer.valueOf(year));
+            } catch (Exception e) {
+                this.year = -1;
+            }
         }
     }
 
@@ -212,11 +220,11 @@ public class Article {
         }
     }
 
-    public boolean isDuplicate() {
+    public boolean isDuplicated() {
         return is_isi && is_scopus;
     }
 
-    public void setDuplicate() {
+    public void setDuplicated() {
         is_isi = true;
         is_scopus = true;
     }
@@ -295,7 +303,7 @@ public class Article {
 
         builder.append(ID).append(": ").append(title).append('\n');
         builder.append(rawAuthorStr).append('\n');
-        builder.append(doi).append(' ').append(year).append(' ').append(journal).append(is_isi ? " ISI" : " Scopus");
+        builder.append(doi).append(' ').append(year).append(' ').append(journal).append(is_scopus ? " Scopus" : " ISI");
 
         return builder.toString();
     }

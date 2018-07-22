@@ -51,7 +51,7 @@ public class Bitap {
             }
 
             // Hardcore matcher, finally
-            // For the more potential string
+            // For the more potential subsequence
             return match_bitap_extended(text, pattern, error_threshold);
         }
     }

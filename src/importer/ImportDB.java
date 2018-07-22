@@ -1,21 +1,11 @@
 package importer;
 
-import com.google.gson.Gson;
 import comparator.LCS;
-import comparator.Lev;
+import config.Config;
 import data.Article;
 import data.Author;
 import data.Organization;
-import deduplicator.Deduplicator;
-import javafx.util.Pair;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -42,11 +32,51 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class ImportDB {
 
+    // Used to set initial NestedSet _rgt and _lft of organizes table
     private static int numOfOrganization;
+
+    private static int UNCATEGORIZED_JOURNAL_ID = -1;
+    private static int UNCATEGORIZED_ORGANIZATION_ID = -1;
 
     static {
         try {
             numOfOrganization = getNumOfOrganizations();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Prepare uncategorized values for journals and organizes table
+        try {
+            ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
+            while (rs.next()) {
+                UNCATEGORIZED_JOURNAL_ID = rs.getInt("id");
+                System.out.println("this is it " + UNCATEGORIZED_JOURNAL_ID);
+            }
+
+            if (UNCATEGORIZED_JOURNAL_ID == -1) {
+                UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.DBNAME,
+                        "INSERT INTO journals (name, name_en, slug) VALUES('Chưa phân loại', 'Uncategorized', '')");
+            }
+
+            System.out.println("UNCATEGORIZED_JOURNAL_ID: " + UNCATEGORIZED_JOURNAL_ID);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME,
+                    "SELECT id FROM organizes WHERE name_en LIKE 'Uncategorized'");
+            while (rs.next()) {
+                UNCATEGORIZED_ORGANIZATION_ID = rs.getInt(1);
+            }
+
+            if (UNCATEGORIZED_ORGANIZATION_ID == -1) {
+                int _rgt = ++numOfOrganization << 1;    // Look at the comments in findOrCreateOrganizations
+                UNCATEGORIZED_ORGANIZATION_ID = DataUtl.insertAndGetID(Config.DB.DBNAME,
+                        "INSERT INTO organizes (name, _rgt, _lft, slug, name_en) VALUES('Chưa phân loại', " + _rgt + ", " + --_rgt + ", '', 'Uncategorized')");
+            }
+
+            System.out.println("UNCATEGORIZED_ORGANIZATION_ID: " + UNCATEGORIZED_ORGANIZATION_ID);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -64,7 +94,8 @@ public class ImportDB {
     public static void createArticle(Article article) throws IOException, SQLException {
         // Insert the article
         if (pstmInsertArticle == null) {
-            pstmInsertArticle = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertArticle = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertArticle.setString(1, article.getTitle());
@@ -86,20 +117,21 @@ public class ImportDB {
         pstmInsertArticle.setInt(17, article.isISI() ? 1 : 0);
         pstmInsertArticle.setInt(18, article.isVCI() ? 1 : 0);
         pstmInsertArticle.setInt(19, 1);
-        pstmInsertArticle.setString(20, "add-slug-here");
+        pstmInsertArticle.setString(20, "");
 
         try {
             pstmInsertArticle.executeUpdate();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         int articleID = DataUtl.getAutoIncrementID(pstmInsertArticle);
-        article.setMergedID(articleID);
+        article.setMergedID(articleID);    // No, don't set ID!
 
         // Link articles and authors
         if (pstmInsertArticleAuthors == null) {
-            pstmInsertArticleAuthors = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.articles_authors (author_id, article_id) VALUES(?, ?)");
+            pstmInsertArticleAuthors = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".articles_authors (author_id, article_id) VALUES(?, ?)");
         }
 
         List<Integer> authorIDs = createAuthors(article);
@@ -112,27 +144,26 @@ public class ImportDB {
         }
         pstmInsertArticleAuthors.executeBatch();
 
-        System.out.println("Created " + (article.isScopus() ? "Scopus-" : "ISI-") + article.getID() + " as " + articleID + " in DB:    " + article.getTitle());
+        System.out.println("Created " + (article.isScopus() ? "Scopus-" : "ISI-") +
+                article.getID() + " as " + article.getMergedID() + " in DB:    " + article.getTitle());
     }
 
     /**
      * Equivalent to createOrFindJournal
-     * Get the id of the journal given its article
+     * Given an article, get the id of the journal
      * If the journal is found, return its ID
-     * If not, create a new journal, insert it into DB, index it into ES, insert its look-alike into DB and then returns its ID
-     * The tricky part is that each journal will be compared to the others to find look-alike once - when it is first inserted
+     * If not, create a new journal, insert it into DB, index it into ES, and then returns its ID
      *
      * @param article
      * @return the id of the found or newly created journal
      * @throws UnknownHostException
      */
     private static PreparedStatement pstmInsertJournal = null;
-    private static PreparedStatement pstmInsertPossiblyDuplicatedJournals = null;
-    public static int findOrCreateJournal(Article article) throws IOException, SQLException {
+    public static Integer findOrCreateJournal(Article article) throws IOException, SQLException {
         if (article.getJournal() == null || article.getJournal().trim().equals("")) {
             // AKA "Chưa phân loại"
-            article.setJournalID(1);
-            return 1;
+            article.setJournalID(UNCATEGORIZED_JOURNAL_ID);
+            return UNCATEGORIZED_JOURNAL_ID;
         }
 
         if (article.getISSN() != null) {
@@ -145,8 +176,8 @@ public class ImportDB {
 
                 // Found by ISSN
                 if (hitISSN != null && hitISSN.equalsIgnoreCase(article.getISSN())) {
-                    // Remember to set additional variables
                     article.setJournalID((Integer) map.get("original_id"));
+                    // If the journal is a VCI, set the article's is_vci to true
 //                    article.setVCI((Boolean) map.get("is_vci"));
 
                     return article.getJournalID();
@@ -154,35 +185,37 @@ public class ImportDB {
             }
         }
 
-        // List of look-alike
-        List<Pair<Integer, Float>> listPossibleCandidates = new ArrayList<>();
-
         QueryBuilder builder = QueryBuilders.matchQuery("name", article.getJournal());
         SearchHits hits = DataUtl.queryES("available_journals", builder);
+
+        Integer ID = null;
+        double highestScore = -1d;
 
         for (SearchHit hit : hits) {
             Map map = hit.getSourceAsMap();
             String name = (String) map.get("name");
 
-            double normalNameScore = 1.0d - LCS.approxDistance(article.getJournal(), name);
+            double nameScore = 1.0d - LCS.approxDistance(article.getJournal(), name);
 
-            // Found by name
-            // The condition is quite strict, as journal names are messy and need a separate deduplication
-            // - Only the closest match is examined
-            // - error_threshold is pretty low
-            if (normalNameScore > 0.9d) {
-                article.setJournalID((Integer) map.get("original_id"));
-//                article.setVCI(map.get("is_vci").equals(Boolean.TRUE));
+            if (nameScore > 0.9d && nameScore > highestScore) {
+//                article.setJournalID((Integer) map.get("original_id"));
+//
+//                return article.getJournalID();
 
-                return article.getJournalID();
-            } else if (normalNameScore >= 0.8d) {
-                listPossibleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) normalNameScore));
+                highestScore = nameScore;
+                ID = (Integer) map.get("original_id");
             }
+        }
+
+        if (ID != null) {
+            article.setJournalID(ID);
+            return ID;
         }
 
         // No match, create a new one
         if (pstmInsertJournal == null) {
-            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertJournal = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertJournal.setString(1, article.getJournal());
@@ -192,7 +225,7 @@ public class ImportDB {
         pstmInsertJournal.setInt(5, 0);
         pstmInsertJournal.setInt(6, 1);
         pstmInsertJournal.setString(7, article.getType());
-        pstmInsertJournal.setString(8, "add-slug-here");
+        pstmInsertJournal.setString(8, "");
         pstmInsertJournal.setString(9, "");
         pstmInsertJournal.setString(10, "");
         pstmInsertJournal.setInt(11, 0);
@@ -200,14 +233,14 @@ public class ImportDB {
 
         pstmInsertJournal.executeUpdate();
 
-        int journalID = DataUtl.getAutoIncrementID(pstmInsertJournal);
-        article.setJournalID(journalID);
+        ID = DataUtl.getAutoIncrementID(pstmInsertJournal);
+        article.setJournalID(ID);
 
         // Index it in ES
-        DataUtl.indexES("available_journals", "articles", String.valueOf(journalID),
+        DataUtl.indexES("available_journals", "articles", String.valueOf(ID),
             jsonBuilder()
                 .startObject()
-                    .field("original_id", journalID)
+                    .field("original_id", ID)
                     .field("name", article.getJournal())
                     .field("issn", article.getISSN())
                     .field("is_isi", article.isISI())
@@ -216,30 +249,7 @@ public class ImportDB {
                 .endObject()
         );
 
-        // Insert its look-alike into DB
-        if (pstmInsertPossiblyDuplicatedJournals == null) {
-            pstmInsertPossiblyDuplicatedJournals = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.possibly_duplicated_journals (journal_a, journal_b, journal_score) VALUES(?, ?, ?)");
-        }
-
-        for (Pair<Integer, Float> candidate : listPossibleCandidates) {
-            pstmInsertPossiblyDuplicatedJournals.setInt(1, journalID);
-            pstmInsertPossiblyDuplicatedJournals.setInt(2, candidate.getKey());
-            pstmInsertPossiblyDuplicatedJournals.setFloat(3, candidate.getValue());
-
-            pstmInsertPossiblyDuplicatedJournals.addBatch();
-        }
-
-        if (journalID % 100 == 0) {
-            if (pstmInsertPossiblyDuplicatedJournals != null) {
-                pstmInsertPossiblyDuplicatedJournals.executeBatch();
-            }
-
-            if (pstmInsertPossiblyDuplicatedOrganizations != null) {
-                pstmInsertPossiblyDuplicatedOrganizations.executeBatch();
-            }
-        }
-
-        return journalID;
+        return ID;
     }
 
     /**
@@ -254,19 +264,13 @@ public class ImportDB {
     private static PreparedStatement pstmInsertAuthor = null;
     private static PreparedStatement pstmInsertAuthorOrganization = null;
     public static List<Integer> createAuthors(Article article) throws IOException, SQLException {
-        HashSet<String> organizationSet = new HashSet<>();
         List<Author> authors = article.getListAuthors();
 
-        for (Author author : authors) {
-            for (String organization : author.getOrganizations()) {
-                organizationSet.add(organization);
-            }
-        }
-
-        HashMap<String, Integer> idOfOrganizations = findOrCreateOrganizations(organizationSet);
+        HashMap<String, Integer> idOfOrganizations = findOrCreateOrganizations(article);
 
         if (pstmInsertAuthor == null) {
-            pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         for (Author author : authors) {
@@ -278,7 +282,8 @@ public class ImportDB {
         List<Integer> authorIDs = DataUtl.getAutoIncrementIDs(pstmInsertAuthor);
 
         if (pstmInsertAuthorOrganization == null) {
-            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.authors_organizes (author_id, organize_id) VALUES(?, ?)");
+            pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".authors_organizes (author_id, organize_id) VALUES(?, ?)");
         }
 
         for (int i = 0; i < authorIDs.size(); ++i) {
@@ -295,9 +300,7 @@ public class ImportDB {
             try {
                 pstmInsertAuthorOrganization.executeBatch();
             } catch (SQLException e) {
-                if (e instanceof BatchUpdateException) {
-                    System.out.println("stupid org " + article.getID());
-                }
+                e.printStackTrace();
             }
         }
 
@@ -308,18 +311,29 @@ public class ImportDB {
      * Given a set of organizations, find or create theirs corresponding IDs
      *
      * @param organizationSet
-     * @return
+     * @return input organizations along with theirs IDs
      * @throws IOException
      * @throws SQLException
      */
     private static PreparedStatement pstmInsertOrganization = null;
-    private static PreparedStatement pstmInsertPossiblyDuplicatedOrganizations = null;
-    public static HashMap<String, Integer> findOrCreateOrganizations(HashSet<String> organizationSet) throws IOException, SQLException {
+    public static HashMap<String, Integer> findOrCreateOrganizations(Article article) throws IOException, SQLException {
+        List<Author> authors = article.getListAuthors();
+        Set<String> organizationSet = new HashSet<>();
+
+        for (Author author : authors) {
+            try {
+                organizationSet.addAll(Arrays.asList(author.getOrganizations()));
+            } catch (Exception e) {
+                System.out.println(article.getID());
+                e.printStackTrace();
+            }
+        }
+
         HashMap<String, Integer> mapping = new HashMap<>();
 
         // This is bullshit
 //        for (String organization : organizationSet) {
-//            int organizationID = findOrganization(organization);
+//            int organizationID = isOrganizationCreated(organization);
 //
 //            if (organizationID != -1) {
 //                mapping.put(organization, organizationID);
@@ -327,37 +341,33 @@ public class ImportDB {
 //            }
 //        }
 
-        // List of organization, along with their look-alike, along with their scores
-        List<Pair<String, List<Pair<Integer, Float>>>> wowLookAtME = new ArrayList<>();
-
-        // Remove created organizations
+        // Remove organizations which are already stored in the output DB
         for (Iterator<String> it = organizationSet.iterator(); it.hasNext(); ) {
             String organization = it.next();
-            List<Pair<Integer, Float>> possibleOrganizationIDs = findOrganization(organization);
+            Integer ID = isOrganizationCreated(organization);
 
-            if (possibleOrganizationIDs.size() != 0 && possibleOrganizationIDs.get(0).getValue() >= 0.95) {
-                mapping.put(organization, possibleOrganizationIDs.get(0).getKey());
+            if (ID != null) {
+                mapping.put(organization, ID);
                 it.remove();
-            } else {
-                wowLookAtME.add(new Pair<>(organization, possibleOrganizationIDs));
             }
         }
 
         if (pstmInsertOrganization == null) {
-            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+            pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement(
+                    "INSERT INTO " + Config.DB.DBNAME + ".organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         // NestedSet logic:
         // New node, without parent information, will be inserted into the root node as the last node
-        // So, the _rgt value will be the largest _rgt, exactly doubling numOfOrganization
+        // So, the _rgt value will be the largest _rgt, exactly doubling the number of element (including the new one)
         // and the _lft equals _rgt - 1
         for (String organization : organizationSet) {
-            int _rgt = numOfOrganization++ << 1;
+            int _rgt = ++numOfOrganization << 1;    // Feel like an ACM fellow
 
             pstmInsertOrganization.setString(1, organization);
             pstmInsertOrganization.setInt(3, _rgt);
             pstmInsertOrganization.setInt(2, --_rgt);
-            pstmInsertOrganization.setString(4, "add-slug-here");
+            pstmInsertOrganization.setString(4, "");
             pstmInsertOrganization.setString(5, organization);
 
             pstmInsertOrganization.addBatch();
@@ -368,7 +378,8 @@ public class ImportDB {
         List<Integer> organizationIDs = DataUtl.getAutoIncrementIDs(pstmInsertOrganization);
         int counter = 0;
 
-        // A good example of de-facto standard: although not guaranteed, the iteration order of a set will stay the same, as long as it isn't modified
+        // A good example of de-facto standard: although not guaranteed,
+        // the iteration order of a set will remain the same, as long as it isn't modified
         for (String organization : organizationSet) {
             mapping.put(organization, organizationIDs.get(counter++));
         }
@@ -390,71 +401,46 @@ public class ImportDB {
 
         bulkRequest.get();
 
-        if (pstmInsertPossiblyDuplicatedOrganizations == null) {
-            pstmInsertPossiblyDuplicatedOrganizations = DataUtl.getDBConnection().prepareStatement("INSERT INTO vci_scholar.possibly_duplicated_organizations (organization_a, organization_b, organization_score) VALUES(?, ?, ?)");
-        }
-
-        for (Pair<String, List<Pair<Integer, Float>>> pair : wowLookAtME) {
-            int organization_a = mapping.get(pair.getKey());
-
-            for (Pair<Integer, Float> candidate : pair.getValue()) {
-                pstmInsertPossiblyDuplicatedOrganizations.setInt(1, organization_a);
-                pstmInsertPossiblyDuplicatedOrganizations.setInt(2, candidate.getKey());
-                pstmInsertPossiblyDuplicatedOrganizations.setFloat(3, candidate.getValue());
-
-                pstmInsertPossiblyDuplicatedOrganizations.addBatch();
-            }
-        }
-
         return mapping;
     }
 
-    public static List<Pair<Integer, Float>> findOrganization(String organization) throws UnknownHostException {
-        List<Pair<Integer, Float>> listPossbleCandidates = new ArrayList<>();
+    /**
+     * Given an organization's name, returns its ID if it is created in the output DB
+     * Return null otherwise
+     * @param organization
+     * @return
+     * @throws UnknownHostException
+     */
+    public static Integer isOrganizationCreated(String organization) throws UnknownHostException {
 
         if (organization == null || organization.trim().equals("")) {
-            listPossbleCandidates.add(new Pair<>(1, 1.0f));
-            return listPossbleCandidates;
+            return UNCATEGORIZED_ORGANIZATION_ID;
         }
 
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
         SearchHits hits = DataUtl.queryES("available_organizations", builder);
 
+        Integer ID = null;
+        double highestScore = -1d;
+
         for (SearchHit hit : hits) {
-            // The condition is quite strict, as journal names are messy and need a separate deduplication
-            // - Only the closest match is examined
-            // - error_threshold is pretty low
+            // The condition is quite strict, as organization names are messy and need a separate deduplication
+            // So only the closest match is examined
             Map map = hit.getSourceAsMap();
-            double nameScore = 1.0d - LCS.approxDistance(organization, (String) map.get("name"));
+            double nameScore = Organization.nameSimilarity(organization, (String) map.get("name"));
 
-            if (nameScore >= 0.95d) {
-                System.out.println("Found in elas: organizationID " + hit.getSourceAsMap().get("original_id") + "    " + organization);
-
-                listPossbleCandidates.clear();
-                listPossbleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) nameScore));
-
-                return listPossbleCandidates;
-            } else if (nameScore >= 0.8d) {
-                listPossbleCandidates.add(new Pair<>((Integer) map.get("original_id"), (float) nameScore));
+            if (nameScore >= 0.9d && nameScore >= highestScore) {
+                highestScore = nameScore;
+                ID = (Integer) map.get("original_id");
             }
         }
 
-        return listPossbleCandidates;
+        return ID;
     }
 
-    public static int getNumOfOrganizations() throws SQLException {
-        ResultSet rs = DataUtl.queryDB("vci_scholar", "SELECT COUNT(*) FROM organizes");
+    private static int getNumOfOrganizations() throws SQLException {
+        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT COUNT(*) FROM organizes");
         rs.next();
         return rs.getInt(1);
-    }
-
-    public static void finishHim() throws SQLException {
-        if (pstmInsertPossiblyDuplicatedJournals != null) {
-            pstmInsertPossiblyDuplicatedJournals.executeBatch();
-        }
-
-        if (pstmInsertPossiblyDuplicatedOrganizations != null) {
-            pstmInsertPossiblyDuplicatedOrganizations.executeBatch();
-        }
     }
 }
