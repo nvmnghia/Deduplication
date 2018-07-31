@@ -1,0 +1,15 @@
+1. Select articles with organization properties
+
+SELECT DISTINCT ar.id, ar.title FROM articles ar
+	JOIN articles_authors aa ON aa.article_id = ar.id
+    JOIN authors_organizes ao ON ao.author_id = aa.author_id
+    JOIN organizes o ON o.id = ao.organize_id
+    WHERE o.name LIKE '%ton duc thang%'
+
+2.
+
+SELECT ml.duplication_of FROM merge_logs ml
+	WHERE CONCAT(ml.duplication_of, '') NOT IN (
+        SELECT isi.raw_scopus_id FROM isi_documents isi
+        	WHERE isi.raw_scopus_id != ''
+    )

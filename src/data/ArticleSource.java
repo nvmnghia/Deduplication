@@ -8,7 +8,6 @@ import org.elasticsearch.search.SearchHits;
 import util.DataUtl;
 
 import java.net.UnknownHostException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +88,7 @@ public class ArticleSource {
             article.setISI(hit.getSourceAsMap().get("is_isi").equals(Boolean.TRUE));
             article.setScopus(hit.getSourceAsMap().get("is_scopus").equals(Boolean.TRUE));
             article.setJournal((String) hit.getSourceAsMap().get("journal"));
-            article.setAuthors_json((String) hit.getSourceAsMap().get("authors_json"));
+            article.setAuthorsJSON((String) hit.getSourceAsMap().get("authors_json"));
             article.setDOI((String) hit.getSourceAsMap().get("doi"));
             article.setVolume((String) hit.getSourceAsMap().get("volume"));
             article.setNumber((String) hit.getSourceAsMap().get("number"));
@@ -106,9 +105,5 @@ public class ArticleSource {
         }
 
         return articles;
-    }
-
-    private static List<Article> getArticlesES_REST(String field, String value) {
-        return null;
     }
 }

@@ -13,12 +13,13 @@ import java.util.Map;
  * @Author GerHobbelt
  * https://github.com/GerHobbelt/google-diff-match-patch
  *
- * The algorithm generates a deduplicate if there exist a substring in the text
- * which differs less than a given error threshold from the pattern
+ * The algorithm returns true if there exist a substring in the text
+ * which differs less than a given error threshold compared the pattern
+ * For example: ABCDEF is the text; BED is the pattern
+ * With enough threshold, the algorithm will found the BCD subsequence that is very close to BED
  *
- * The algorithm is modified to work with arbitrary long patterns
- * by storing the mask in a BitSet
- * Patterns having less than 64 chars still benefit from the fast bitwise version
+ * The algorithm is modified to work with arbitrary long patterns by storing the mask in a BitSet
+ * Patterns having less than 64 chars still benefit from the original, fast, native bitwise version
  */
 
 public class Bitap {
@@ -45,8 +46,11 @@ public class Bitap {
         } else {
             float[] initial_result = match_bitap(text, pattern.substring(0, 63), error_threshold);
             if (initial_result[1] == 0f) {
-                // If normal comparator can't deduplicate the first 63 chars, the chance for extended deduplicate is low too
-                // Acceptable heuristic, since 64 is already quite long.
+                // If original comparator can't find a duplication of the first 63 chars of the pattern,
+                // the chance for an extended deduplication is also very low
+                // For example: text is ABCDEF, pattern is BGD, pattern length limit is 2,
+                // then it cannot find BCD because it cannot find BG inside the text
+                // An acceptable heuristic, since 63 is already quite long
                 return initial_result;
             }
 
@@ -57,7 +61,7 @@ public class Bitap {
     }
 
     /**
-     * Same description as the above one, but return bool instead
+     * Same description as the above one, but returns bool instead
      *
      * @param text The text to search.
      * @param pattern The pattern to search for.
@@ -73,6 +77,7 @@ public class Bitap {
     }
 
     /**
+     * Original implementation
      * Locate the best instance of 'pattern' in 'text' near 'loc' using the Bitap algorithm.
      * Only support pattern less than 64 chars
      *
@@ -138,10 +143,10 @@ public class Bitap {
                 }
 
                 if (d == 0) {
-                    // First pass: exact deduplicate.
+                    // First pass: exact string match.
                     rd[j] = ((rd[j + 1] << 1) | 1) & charMatch;
                 } else {
-                    // Subsequent passes: fuzzy deduplicate.
+                    // Subsequent passes: fuzzy string match.
                     rd[j] = (((rd[j + 1] << 1) | 1) & charMatch)
                             | (((last_rd[j + 1] | last_rd[j]) << 1) | 1) | last_rd[j + 1];
                 }
@@ -177,11 +182,11 @@ public class Bitap {
     }
 
     /**
-     * Extended version of the above block of code
-     * Support patterns longer than 64 chars
+     * Extended version of the above function
+     * Support patterns longer than 63 chars
      * Of course it is slower
      * PAINFULLY slower
-     * Original, native bitwise code is commented out for reference
+     * Original, fast, native bitwise code is commented out for reference
      *
      * @param text The text to search.
      * @param pattern The pattern to search for.
@@ -343,7 +348,7 @@ public class Bitap {
 
     /**
      * The same as the above function, but uses BitSet instead of Long
-     * Original code is commented out for reference
+     * Original, fast, native code is commented out for reference
      *
      * @param pattern The text to encode.
      * @return Hash of character locations.

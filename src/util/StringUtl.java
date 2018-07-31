@@ -364,5 +364,9 @@ public class StringUtl {
             return false;
         }
     }
+
+    public static String normalize(String str) {
+        return str.trim().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+    }
 }
 

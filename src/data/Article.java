@@ -212,11 +212,16 @@ public class Article {
         return authors_json;
     }
 
-    public void setAuthors_json(String authors_json) {
+    public void setAuthorsJSON(String authors_json) {
         this.authors_json = authors_json;
 
         if (authors_json != null) {
-            this.listAuthors = gson.fromJson(authors_json, new TypeToken<List<Author>>(){}.getType());
+            try {
+                this.listAuthors = gson.fromJson(authors_json, new TypeToken<List<Author>>(){}.getType());
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Parsing error: " + authors_json);
+            }
         }
     }
 
@@ -306,5 +311,24 @@ public class Article {
         builder.append(doi).append(' ').append(year).append(' ').append(journal).append(is_scopus ? " Scopus" : " ISI");
 
         return builder.toString();
+    }
+
+    public String toShortString() {
+        String strID = "";
+
+        if (is_scopus && is_isi) {
+            strID = "Scopus&ISI";
+        } else if (is_scopus) {
+            strID = "Scopus";
+        } else {
+            strID = "ISI";
+        }
+
+        strID += "-" + ID;
+        for (int i = strID.length(); i <= 17; ++i) {
+            strID += " ";
+        }
+
+        return strID + ":  " + title.substring(0, title.length() < 50 ? title.length() : 50);
     }
 }

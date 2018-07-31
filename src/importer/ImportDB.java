@@ -95,7 +95,8 @@ public class ImportDB {
         // Insert the article
         if (pstmInsertArticle == null) {
             pstmInsertArticle = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.DBNAME + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug, raw_scopus_id, raw_isi_id) " +
+                            "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertArticle.setString(1, article.getTitle());
@@ -118,6 +119,14 @@ public class ImportDB {
         pstmInsertArticle.setInt(18, article.isVCI() ? 1 : 0);
         pstmInsertArticle.setInt(19, 1);
         pstmInsertArticle.setString(20, "");
+
+        if (article.isScopus()) {
+            pstmInsertArticle.setInt(21, article.getID());
+            pstmInsertArticle.setNull(22, Types.INTEGER);
+        } else {
+            pstmInsertArticle.setInt(22, article.getID());
+            pstmInsertArticle.setNull(21, Types.INTEGER);
+        }
 
         try {
             pstmInsertArticle.executeUpdate();
@@ -143,9 +152,6 @@ public class ImportDB {
             pstmInsertArticleAuthors.addBatch();
         }
         pstmInsertArticleAuthors.executeBatch();
-
-        System.out.println("Created " + (article.isScopus() ? "Scopus-" : "ISI-") +
-                article.getID() + " as " + article.getMergedID() + " in DB:    " + article.getTitle());
     }
 
     /**

@@ -92,8 +92,7 @@ public class LCS {
         return approxDistance(A, B) <= error_threshold;
     }
 
-    public static String subsequence(String A, String B)
-    {
+    public static String subsequence(String A, String B) {
         int len_A = A.length(), len_B = B.length();
         int[][] L = new int[len_A+1][len_B+1];
 

@@ -21,6 +21,7 @@ public class IndexElastic {
     static {
         try {
             DataUtl.deleteIndex("vci");
+            System.out.println("Deleted ES index vci");
         } catch (Exception e) {
             if (! (e instanceof IndexNotFoundException)) {
                 e.printStackTrace();
@@ -34,6 +35,7 @@ public class IndexElastic {
 
         try {
             DataUtl.deleteIndex("available_articles");
+            System.out.println("Deleted ES index available_articles");
         } catch (Exception e) {
             if (! (e instanceof IndexNotFoundException)) {
                 e.printStackTrace();
@@ -47,6 +49,7 @@ public class IndexElastic {
 
         try {
             DataUtl.deleteIndex("available_journals");
+            System.out.println("Deleted ES index available_journals");
         } catch (Exception e) {
             if (! (e instanceof IndexNotFoundException)) {
                 e.printStackTrace();
@@ -60,6 +63,7 @@ public class IndexElastic {
 
         try {
             DataUtl.deleteIndex("available_organizations");
+            System.out.println("Deleted ES index available_organizations");
         } catch (Exception e) {
             if (! (e instanceof IndexNotFoundException)) {
                 e.printStackTrace();
@@ -269,5 +273,43 @@ public class IndexElastic {
 
         bulkRequest.get();
         DataUtl.flushES("available_organizations");
+    }
+
+    public static void cleanTemporaryIndices() {
+        try {
+            DataUtl.deleteIndex("vci");
+            System.out.println("Deleted ES index vci");
+        } catch (Exception e) {
+            if (!(e instanceof IndexNotFoundException)) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            DataUtl.deleteIndex("available_articles");
+            System.out.println("Deleted ES index available_articles");
+        } catch (Exception e) {
+            if (! (e instanceof IndexNotFoundException)) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            DataUtl.deleteIndex("available_journals");
+            System.out.println("Deleted ES index available_journals");
+        } catch (Exception e) {
+            if (! (e instanceof IndexNotFoundException)) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            DataUtl.deleteIndex("available_organizations");
+            System.out.println("Deleted ES index available_organizations");
+        } catch (Exception e) {
+            if (! (e instanceof IndexNotFoundException)) {
+                e.printStackTrace();
+            }
+        }
     }
 }

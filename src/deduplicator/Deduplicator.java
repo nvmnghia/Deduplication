@@ -23,8 +23,6 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class Deduplicator {
 
-    private static int counterISI = 0;
-
     /**
      * Main deduplication function
      * Given the document type (either ISI or Scopus) and its id in the original DB, return a list of Match
@@ -72,22 +70,24 @@ public class Deduplicator {
             listMatches.add(match);
             if (match.getMatchType() == Match.DUPLICATED) {
                 duplicated = true;
-//                printDebug(article, candidate, match.titleScore, match.journalScore);
 
                 // Candidates are Scopus, which are already imported
                 // Now they and their journals need to be updated: is_isi = true
-                updateArticleAndJournal(candidate);
+                updateArticleAndJournal(candidate, article.getID());
 
-                System.out.println("Duplicated: ISI: " + article.getTitle() + "    Scopus: " + candidate.getTitle());
+                System.out.println("Duplicated:  " + article.toShortString() + "    " + candidate.toShortString());
+
+                // Break here, ignore the below shitpost
+                break;
 
                 // The quest for duplicated articles ends here, as the duplicated one was found
                 // But the program should continue to find POSSIBLY_DUPLICATED articles
                 // This has a surprise side effect:
                 // More DUPLICATED matched can be found,
-                // therefore the number of is_isi in the merged DB could be larger than the number records in isi_documents
+                // therefore the number of is_isi in the merged DB could be larger than the number of records in isi_documents
                 // However, the mergedID only stores one value: the last duplicated candidate's ID
 
-                article.setMergedID(candidate.getID());
+//                article.setMergedID(candidate.getID());
             }
         }
 
@@ -95,7 +95,7 @@ public class Deduplicator {
 //            insertOrganizationsOfDuplicatedArticle(article);
         } else {
             ImportDB.createArticle(article);
-            System.out.println("Inserted " + ++counterISI + " ISI articles");
+            System.out.println("   Created:  " + article.toShortString() + "  as  DB-" + article.getMergedID());
         }
 
         return listMatches;
@@ -123,12 +123,13 @@ public class Deduplicator {
 
     private static PreparedStatement pstmUpdateArticle = null;
     private static PreparedStatement pstmUpdateJournal = null;
-    private static void updateArticleAndJournal(Article candidate) throws SQLException, IOException {
+    private static void updateArticleAndJournal(Article candidate, int raw_isi_id) throws SQLException, IOException {
         // Update articles
         if (pstmUpdateArticle == null) {
-            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".articles SET is_isi = 1 WHERE id = ?");
+            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".articles SET is_isi = 1, raw_isi_id = ? WHERE id = ?");
         }
-        pstmUpdateArticle.setInt(1, candidate.getID());
+        pstmUpdateArticle.setInt(1, raw_isi_id);
+        pstmUpdateArticle.setInt(2, candidate.getID());
         pstmUpdateArticle.executeUpdate();
 
         UpdateRequest request = new UpdateRequest("available_articles", "articles", String.valueOf(candidate.getID()));
@@ -213,17 +214,19 @@ public class Deduplicator {
      * @return the result of the check
      */
     public static Match areSameArticles(Article article, Article candidate) {
+        // One article, multiple DOI...
+        // My god
         // Quick deny / accept
-        if (candidate.getDOI() != null && StringUtl.isDOI(candidate.getDOI())
-                && article.getDOI() != null && StringUtl.isDOI(article.getDOI())) {
-
-            return article.getDOI().equals(candidate.getDOI()) ?
-                    new Match(Match.DUPLICATED,
-                            article.isISI() ? article.getID() : candidate.getID(),
-                            article.isISI() ? candidate.getID() : article.getID(),
-                            1.0d, 1.0d)
-                    : null;
-        }
+//        if (candidate.getDOI() != null && StringUtl.isDOI(candidate.getDOI())
+//                && article.getDOI() != null && StringUtl.isDOI(article.getDOI())) {
+//
+//            return article.getDOI().equals(candidate.getDOI()) ?
+//                    new Match(Match.DUPLICATED,
+//                            article.isISI() ? article.getID() : candidate.getID(),
+//                            article.isISI() ? candidate.getID() : article.getID(),
+//                            1.0d, 1.0d)
+//                    : null;
+//        }
 
         // One Journal can have multiple ISSN ==
 //        if (candidate.getISSN() != null && article.getISSN() != null
@@ -238,7 +241,7 @@ public class Deduplicator {
         // Title score is more important as different articles will sure have different name,
         // and the journal may be abbreviated (which lowers journalScore)
         // This case is considered a POSSIBLY_DUPLICATED: titleScore = 0.7d, journalScore = 0.0d
-        if (titleScore == 1.0d) {
+        if (titleScore == 1.0d && article.getTitle().length() > 20) {
             return new Match(Match.DUPLICATED,
                     article.isISI() ? article.getID() : candidate.getID(),
                     article.isISI() ? candidate.getID() : article.getID(),

@@ -5,11 +5,11 @@ public class Config {
 
     // ES - Transport mode
     public static class ES {
-        public static int PORT = 9300;
         public static String INDEX = "vci";
         public static String TYPE = "isi";
 
         public static String URL = "localhost";
+        public static int PORT = 9300;
         public static String SEARCH_URI = Config.ES.URL + ":" + Config.ES.PORT + "/" + Config.ES.INDEX + "/" + Config.ES.TYPE + "/_search?q=";
     }
 

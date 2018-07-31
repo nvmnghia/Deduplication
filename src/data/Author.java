@@ -1,9 +1,12 @@
 package data;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 
 public class Author {
     private String first_name, last_name, fullName;
+    @SerializedName(value = "organize", alternate = {"organizes", "organization", "organizations"})
     private String[] organize;
     private ArrayList<String> listAbbrName;
 
