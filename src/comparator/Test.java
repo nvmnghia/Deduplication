@@ -1,24 +1,19 @@
 package comparator;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 import config.Config;
 import data.Article;
 import data.ArticleSource;
-import data.Author;
 import importer.ImportDB;
-import importer.IndexElastic;
-import javafx.util.Pair;
 import util.DataUtl;
 import util.StringUtl;
 
-import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+
+import static util.DataUtl.getMaxIDOfTable;
 
 public class Test {
     public static void main(String[] args) throws UnknownHostException, SQLException {
@@ -30,7 +25,7 @@ public class Test {
         Set<String> duplicatedISITitlesNghia = new HashSet<>();
 
         String query = "SELECT title FROM isi_documents WHERE raw_scopus_id != ''";
-        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         while (rs.next()) {
 //            if (rs.getString(1).contains("Surveillance of")) {
@@ -41,7 +36,7 @@ public class Test {
         }
 
         query = "SELECT title FROM articles WHERE is_scopus = 1 AND is_isi = 1";
-        rs = DataUtl.queryDB(Config.DB.DBNAME, query);
+        rs = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         int counter = 0;
         while (rs.next()) {
@@ -63,7 +58,7 @@ public class Test {
         Map<Integer, Integer> nghia = new HashMap<>();
 
         String query = "SELECT raw_isi_id, raw_scopus_id FROM articles WHERE raw_scopus_id IS NOT NULL AND raw_isi_id IS NOT NULL";
-        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         while (rs.next()) {
             nghia.put(rs.getInt(1), rs.getInt(2));
@@ -72,7 +67,7 @@ public class Test {
         Map<Integer, Integer> hieu = new HashMap<>();
 
         query = "SELECT id, raw_scopus_id FROM isi_documents WHERE raw_scopus_id != ''";
-        rs = DataUtl.queryDB(Config.DB.DBNAME, query);
+        rs = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         while (rs.next()) {
             hieu.put(rs.getInt(1), rs.getInt(2));
@@ -117,5 +112,12 @@ public class Test {
             }
         }
         System.out.println("\n" + counter);
+    }
+
+    public static void importSensei() throws SQLException, IOException {
+        // Import all Scopus
+
+
+        // Import ISI which has raw_scopus_id is '' (i.e. no duplication)
     }
 }

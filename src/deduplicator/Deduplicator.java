@@ -8,7 +8,6 @@ import data.*;
 import importer.ImportDB;
 import org.elasticsearch.action.update.UpdateRequest;
 import util.DataUtl;
-import util.StringUtl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -121,12 +120,12 @@ public class Deduplicator {
         pstmInsertDuplicatedISIArticleAuthor.executeBatch();
     }
 
-    private static PreparedStatement pstmUpdateArticle = null;
-    private static PreparedStatement pstmUpdateJournal = null;
-    private static void updateArticleAndJournal(Article candidate, int raw_isi_id) throws SQLException, IOException {
+    public static PreparedStatement pstmUpdateArticle = null;
+    public static PreparedStatement pstmUpdateJournal = null;
+    public static void updateArticleAndJournal(Article candidate, int raw_isi_id) throws SQLException, IOException {
         // Update articles
         if (pstmUpdateArticle == null) {
-            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".articles SET is_isi = 1, raw_isi_id = ? WHERE id = ?");
+            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".articles SET is_isi = 1, raw_isi_id = ? WHERE id = ?");
         }
         pstmUpdateArticle.setInt(1, raw_isi_id);
         pstmUpdateArticle.setInt(2, candidate.getID());
@@ -142,7 +141,7 @@ public class Deduplicator {
 
         // Update journals
         if (pstmUpdateJournal == null) {
-            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.DBNAME + ".journals SET is_isi = 1 WHERE id = ?");
+            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".journals SET is_isi = 1 WHERE id = ?");
         }
 
         int journalID = candidate.getJournalID();

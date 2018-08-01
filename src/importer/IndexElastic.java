@@ -1,7 +1,6 @@
 package importer;
 
 import config.Config;
-import org.elasticsearch.action.admin.indices.flush.FlushRequest;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.IndexNotFoundException;
@@ -91,7 +90,7 @@ public class IndexElastic {
         String query = "SELECT id, affiliation, author, doi, funding_text, isbn, issn, " +
                 "journal, journal_iso, `language`, pages, publisher, title, " +
                 "type, volume, year, authors_json, unique_id, abstract, cited_references, number, keyword FROM isi_documents";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.INPUT, query);
 
         // Read the received ResultSet to Elastic
         int counter = 0;
@@ -138,7 +137,7 @@ public class IndexElastic {
                 "publisher, issn, isbn, language_of_original_document, " +
                 "abbreviated_source_title, document_type, authors_json, abstract, `references`, index_keywords, link, issue FROM scopus_documents";
 
-        articleSet = DataUtl.queryDB(Config.DB.DBNAME, query);
+        articleSet = DataUtl.queryDB(Config.DB.INPUT, query);
 
         while (articleSet.next()) {
             bulkRequest.add(client.prepareIndex(Config.ES.INDEX, "articles", String.valueOf(counter++))
@@ -188,7 +187,7 @@ public class IndexElastic {
     public static void indexAvailableArticles() throws IOException, SQLException {
         String query = "SELECT ar.id, ar.title, ar.year, j.name, ar.doi, ar.is_isi, ar.is_scopus, ar.uri, ar.journal_id FROM articles ar " +
                 "JOIN journals j ON ar.journal_id = j.id";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -223,7 +222,7 @@ public class IndexElastic {
      */
     public static void indexAvailableJournals() throws IOException, SQLException {
         String query = "SELECT id, name, issn, is_isi, is_scopus, is_vci from journals";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -255,7 +254,7 @@ public class IndexElastic {
      */
     public static void indexAvailableOrganizations() throws IOException, SQLException {
         String query = "SELECT id, name FROM organizes";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.DBNAME, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();

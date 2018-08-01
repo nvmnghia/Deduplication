@@ -11,6 +11,7 @@ import util.Sluginator;
 import java.io.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +54,7 @@ public class Runner {
         IndexElastic.indexAvailableJournals();
         IndexElastic.indexAvailableOrganizations();
 
-        int maxIDOfISI = DataUtl.getMaxIDOfTable(Config.DB.DBNAME, "isi_documents");
+        int maxIDOfISI = DataUtl.getMaxIDOfTable(Config.DB.INPUT, "isi_documents");
         if (Config.START_IMPORT_ISI_FROM > maxIDOfISI) {
             throw new RuntimeException("Config.START_IMPORT_ISI_FROM is larger than the current max ID of isi_documents.");
         }
@@ -90,18 +91,26 @@ public class Runner {
     }
 
     private static PreparedStatement pstmLogMergedArticle = null;
-    private static void writeLogToDB(List<Deduplicator.Match> matches) throws SQLException {
+    public static void writeLogToDB(List<Deduplicator.Match> matches) throws SQLException {
         if (pstmLogMergedArticle == null) {
             pstmLogMergedArticle = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".merge_logs (isi_id, duplication_of, possible_duplication_of, title_score, journal_score, is_merged) VALUES(?, ?, ?, ?, ?, ?)");
+                    "INSERT INTO " + Config.DB.OUPUT + ".merge_logs (isi_id, duplication_of, possible_duplication_of, title_score, journal_score, is_merged) VALUES(?, ?, ?, ?, ?, ?)");
         }
 
         for (Deduplicator.Match match : matches) {
             pstmLogMergedArticle.setInt(1, match.getISI());
             pstmLogMergedArticle.setInt(match.getMatchType() == Deduplicator.Match.DUPLICATED ? 2 : 3, match.getScopus());
             pstmLogMergedArticle.setNull(match.getMatchType() == Deduplicator.Match.DUPLICATED ? 3 : 2, java.sql.Types.INTEGER);
-            pstmLogMergedArticle.setFloat(4, (float) match.getTitleScore());
-            pstmLogMergedArticle.setFloat(5, (float) match.getJournalScore());
+            if (match.getTitleScore() == -1d) {
+                pstmLogMergedArticle.setNull(4, Types.FLOAT);
+            } else {
+                pstmLogMergedArticle.setFloat(4, (float) match.getTitleScore());
+            }
+            if (match.getJournalScore() == -1d) {
+                pstmLogMergedArticle.setNull(5, Types.FLOAT);
+            } else {
+                pstmLogMergedArticle.setFloat(5, (float) match.getJournalScore());
+            }
             pstmLogMergedArticle.setBoolean(6, match.getMatchType() == Deduplicator.Match.DUPLICATED);
 
             pstmLogMergedArticle.addBatch();
@@ -117,17 +126,23 @@ public class Runner {
      * @throws IOException
      */
     private static void importAllScopus() throws SQLException, IOException {
-        int maxIDOfScopus = getMaxIDOfTable(Config.DB.DBNAME, "scopus_documents");
+        int maxIDOfScopus = getMaxIDOfTable(Config.DB.INPUT, "scopus_documents");
 
         if (Config.START_IMPORT_SCOPUS_FROM > maxIDOfScopus) {
             throw new RuntimeException("Config.START_IMPORT_SCOPUS_FROM is larger than the current max ID of scopus_documents.");
         }
 
         for (int i = Config.START_IMPORT_SCOPUS_FROM; i <= maxIDOfScopus; ++i) {
-            Article scopus = ArticleSource.getArticleByID(Config.ES.INDEX, Article.SCOPUS, i);
-            if (scopus != null) {
-                ImportDB.createArticle(scopus);
-                System.out.println("   Created:  " + scopus.toShortString() + "  as  DB-" + scopus.getMergedID());
+            Article Scopus = ArticleSource.getArticleByID(Config.ES.INDEX, Article.SCOPUS, i);
+
+            if (Scopus != null) {
+                if (Scopus.getID() != i) {
+                    System.out.println("WRONG ISI ID, ES PROBLEM");
+                    continue;
+                }
+
+                ImportDB.createArticle(Scopus);
+                System.out.println("   Created:  " + Scopus.toShortString() + "  as  DB-" + Scopus.getMergedID());
             }
         }
     }

@@ -47,14 +47,14 @@ public class ImportDB {
 
         // Prepare uncategorized values for journals and organizes table
         try {
-            ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
             while (rs.next()) {
                 UNCATEGORIZED_JOURNAL_ID = rs.getInt("id");
                 System.out.println("this is it " + UNCATEGORIZED_JOURNAL_ID);
             }
 
             if (UNCATEGORIZED_JOURNAL_ID == -1) {
-                UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.DBNAME,
+                UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.OUPUT,
                         "INSERT INTO journals (name, name_en, slug) VALUES('Chưa phân loại', 'Uncategorized', '')");
             }
 
@@ -64,7 +64,7 @@ public class ImportDB {
         }
 
         try {
-            ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME,
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT,
                     "SELECT id FROM organizes WHERE name_en LIKE 'Uncategorized'");
             while (rs.next()) {
                 UNCATEGORIZED_ORGANIZATION_ID = rs.getInt(1);
@@ -72,7 +72,7 @@ public class ImportDB {
 
             if (UNCATEGORIZED_ORGANIZATION_ID == -1) {
                 int _rgt = ++numOfOrganization << 1;    // Look at the comments in findOrCreateOrganizations
-                UNCATEGORIZED_ORGANIZATION_ID = DataUtl.insertAndGetID(Config.DB.DBNAME,
+                UNCATEGORIZED_ORGANIZATION_ID = DataUtl.insertAndGetID(Config.DB.OUPUT,
                         "INSERT INTO organizes (name, _rgt, _lft, slug, name_en) VALUES('Chưa phân loại', " + _rgt + ", " + --_rgt + ", '', 'Uncategorized')");
             }
 
@@ -95,7 +95,7 @@ public class ImportDB {
         // Insert the article
         if (pstmInsertArticle == null) {
             pstmInsertArticle = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug, raw_scopus_id, raw_isi_id) " +
+                    "INSERT INTO " + Config.DB.OUPUT + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug, raw_scopus_id, raw_isi_id) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
@@ -140,7 +140,7 @@ public class ImportDB {
         // Link articles and authors
         if (pstmInsertArticleAuthors == null) {
             pstmInsertArticleAuthors = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".articles_authors (author_id, article_id) VALUES(?, ?)");
+                    "INSERT INTO " + Config.DB.OUPUT + ".articles_authors (author_id, article_id) VALUES(?, ?)");
         }
 
         List<Integer> authorIDs = createAuthors(article);
@@ -221,7 +221,7 @@ public class ImportDB {
         // No match, create a new one
         if (pstmInsertJournal == null) {
             pstmInsertJournal = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUPUT + ".journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertJournal.setString(1, article.getJournal());
@@ -276,7 +276,7 @@ public class ImportDB {
 
         if (pstmInsertAuthor == null) {
             pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUPUT + ".authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         for (Author author : authors) {
@@ -289,7 +289,7 @@ public class ImportDB {
 
         if (pstmInsertAuthorOrganization == null) {
             pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".authors_organizes (author_id, organize_id) VALUES(?, ?)");
+                    "INSERT INTO " + Config.DB.OUPUT + ".authors_organizes (author_id, organize_id) VALUES(?, ?)");
         }
 
         for (int i = 0; i < authorIDs.size(); ++i) {
@@ -360,7 +360,7 @@ public class ImportDB {
 
         if (pstmInsertOrganization == null) {
             pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.DBNAME + ".organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUPUT + ".organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         // NestedSet logic:
@@ -445,7 +445,7 @@ public class ImportDB {
     }
 
     private static int getNumOfOrganizations() throws SQLException {
-        ResultSet rs = DataUtl.queryDB(Config.DB.DBNAME, "SELECT COUNT(*) FROM organizes");
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT COUNT(*) FROM organizes");
         rs.next();
         return rs.getInt(1);
     }

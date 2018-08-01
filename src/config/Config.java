@@ -14,7 +14,8 @@ public class Config {
     }
 
     public static class DB {
-        public static String DBNAME = "vci_scholar";
+        public static String INPUT = "isi_documents";
+        public static String OUPUT = "vci_scholar";
 
         public static String USERNAME = "root";
         public static String PASSWORD = "";
