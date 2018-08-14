@@ -42,6 +42,33 @@ public class ImportDB {
 
     static {
         try {
+            if (Config.DB.NUCLEAR_OPTION) {
+                String[] truncateTables = {"articles", "articles_authors", "authors", "authors_organizes", "journals", "merge_logs", "organizes", "organize_representative"};
+                Statement stm = getDBStatement();
+
+                for (String table : truncateTables) {
+                    String query = "TRUNCATE " + table;
+                    System.out.println(query);
+
+                    try {
+                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
+
+                        stm.executeQuery("USE " + Config.DB.OUTPUT);
+                        stm.executeUpdate(query);
+
+                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static {
+        try {
             numOfOrganization = getNumOfOrganizations();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -79,33 +106,6 @@ public class ImportDB {
             }
 
             System.out.println("UNCATEGORIZED_ORGANIZATION_ID: " + UNCATEGORIZED_ORGANIZATION_ID);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static {
-        try {
-            if (Config.DB.NUCLEAR_OPTION) {
-                String[] truncateTables = {"articles", "articles_authors", "authors", "authors_organizes", "journals", "merge_logs", "organizes", "organize_representative"};
-                Statement stm = getDBStatement();
-
-                for (String table : truncateTables) {
-                    String query = "TRUNCATE " + table;
-                    System.out.println(query);
-
-                    try {
-                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
-
-                        stm.executeQuery("USE " + Config.DB.OUTPUT);
-                        stm.executeUpdate(query);
-
-                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
