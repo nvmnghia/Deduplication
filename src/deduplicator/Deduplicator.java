@@ -6,6 +6,7 @@ import config.Config;
 import data.*;
 
 import importer.ImportDB;
+import importer.IndexElastic;
 import org.elasticsearch.action.update.UpdateRequest;
 import util.DataUtl;
 
@@ -76,9 +77,12 @@ public class Deduplicator {
 
                 System.out.println("Duplicated:  " + article.toShortString() + "    " + candidate.toShortString());
 
-                // Break here, ignore the below shitpost
-                break;
+                if (! Config.CONTINUOUS_MATCHING) {
+                    break;
+                    // Ignore the below shitpost
+                }
 
+                // CONTINUOUS_MATCHING = true
                 // The quest for duplicated articles ends here, as the duplicated one was found
                 // But the program should continue to find POSSIBLY_DUPLICATED articles
                 // This has a surprise side effect:
@@ -125,7 +129,7 @@ public class Deduplicator {
     public static void updateArticleAndJournal(Article candidate, int raw_isi_id) throws SQLException, IOException {
         // Update articles
         if (pstmUpdateArticle == null) {
-            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".articles SET is_isi = 1, raw_isi_id = ? WHERE id = ?");
+            pstmUpdateArticle = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUTPUT + ".articles SET is_isi = 1, raw_isi_id = ? WHERE id = ?");
         }
         pstmUpdateArticle.setInt(1, raw_isi_id);
         pstmUpdateArticle.setInt(2, candidate.getID());
@@ -141,7 +145,7 @@ public class Deduplicator {
 
         // Update journals
         if (pstmUpdateJournal == null) {
-            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".journals SET is_isi = 1 WHERE id = ?");
+            pstmUpdateJournal = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUTPUT + ".journals SET is_isi = 1 WHERE id = ?");
         }
 
         int journalID = candidate.getJournalID();
@@ -246,7 +250,7 @@ public class Deduplicator {
                     article.isISI() ? candidate.getID() : article.getID(),
                     titleScore, journalScore);
 
-        } else if (titleScore >= 0.85d) {
+        } else if (titleScore >= 0.8d) {
             return new Match(journalScore >= 0.85d ? Match.DUPLICATED : Match.POSSIBLY_DUPLICATED,
                     article.isISI() ? article.getID() : candidate.getID(),
                     article.isISI() ? candidate.getID() : article.getID(),
@@ -264,17 +268,8 @@ public class Deduplicator {
         }
     }
 
-    public static boolean areSameJournals(Article article, Article candidate) {
-        return LCS.isMatch(article.getJournal(), candidate.getJournal(), 0.2d)
-                || LCS.isMatch(article.getAbbrJourna(), candidate.getAbbrJourna(), 0.2d);
-    }
-
-    public static boolean areSameTitles(Article article, Article candidate) {
-        return LCS.isMatch(article.getTitle(), candidate.getTitle(), 0.3d);
-    }
-
     public static double titleScore(Article article, Article candidate) {
-        return 1.0d - LCS.approxDistance(article.getTitle(), candidate.getTitle());
+        return 1.0d - LCS.preciseDistanceRelaxed(article.getTitle(), candidate.getTitle());
     }
 
     public static double journalScore(Article article, Article candidate) {

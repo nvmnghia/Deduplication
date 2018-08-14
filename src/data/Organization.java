@@ -74,6 +74,10 @@ public class Organization {
         this._rgt = _rgt;
     }
 
+    public String getSuffix() {
+        return getSuffix(this.name);
+    }
+
     public static final int SUBSEQUENCE = 1;
     public static final int CONTAIN = 2;
     public static final int COMMON = 3;
@@ -98,10 +102,18 @@ public class Organization {
             return 0.0d;
         }
 
+        // There're cases where  several organizations are lumped together
+        // This check avoid them to be matched with an individual organization
+        // For example: "Ton Duc Thang, Dai hoc Quoc gia" won't be matched against either "Ton duc thang" or "Dai hoc quoc gia"
+        if (tokenizedA.length() <= tokenizedB.length() / 2 ||
+            tokenizedB.length() <= tokenizedA.length() / 2) {
+            return 0.0d;
+        }
+
         // Check for country: ... Vietnam and ... China are obviously not the same
-//        if (tokenizedA.charAt(tokenizedA.length() - 1) != tokenizedB.charAt(tokenizedB.length() - 1)) {
-//            return 0.0d;
-//        }
+        if (tokenizedA.charAt(tokenizedA.length() - 1) != tokenizedB.charAt(tokenizedB.length() - 1)) {
+            return 0.0d;
+        }
 
         String shorter, longer;
         if (tokenizedA.length() < tokenizedB.length()) {
@@ -146,5 +158,22 @@ public class Organization {
 
     public static double nameSimilarity(String A, String B) {
         return nameSimilarity(A, B, SUBSEQUENCE);
+    }
+
+    public static String getSuffix(String organization) {
+        if (organization.length() < 2) {
+            return null;
+        }
+
+        organization = organization.toLowerCase().trim().replace("viet nam", "vietnam");
+
+        for (int i = organization.length() - 2; i >= 0; --i) {
+            char character = organization.charAt(i);
+            if (character == ' ' || character == ',' || character == '.' || character == ';') {
+                return organization.substring(++i).trim();
+            }
+        }
+
+        return null;
     }
 }

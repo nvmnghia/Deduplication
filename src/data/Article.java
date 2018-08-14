@@ -5,7 +5,9 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Article {
     public static final int SCOPUS = 1;
@@ -16,6 +18,7 @@ public class Article {
     private int ID, journalID = -1, mergedID;
     private String rawAuthorStr, doi, issn, journal, journal_abbr, language, publisher, title, type, volume, authors_json, uri, reference, keywords, abstracts, number;
     private List<Author> listAuthors;
+    private List<String> listOrganizations;
     private boolean is_isi, is_scopus, is_vci;
     private int year;
 
@@ -236,29 +239,52 @@ public class Article {
 
     public List<Author> getListAuthors() {
         if (listAuthors == null) {
-            if (authors_json != null) {
-                this.listAuthors = gson.fromJson(authors_json, new TypeToken<List<Author>>(){}.getType());
-            } else {
-                String[] listAuthorFullNames = null;
+            String[] listAuthorFullNames = null;
 
-                if (is_isi) {
-                    listAuthorFullNames = rawAuthorStr.split(" and ");
-                }
-                if (is_scopus) {
-                    listAuthorFullNames = rawAuthorStr.split(", ");
-                }
-
-                List<Author> authors = new ArrayList<>(listAuthorFullNames.length);
-
-                for (String authorFullName : listAuthorFullNames) {
-                    authors.add(new Author(authorFullName));
-                }
-
-                listAuthors = authors;
+            if (is_isi) {
+                listAuthorFullNames = rawAuthorStr.split(" and ");
             }
+            if (is_scopus) {
+                listAuthorFullNames = rawAuthorStr.split(", ");
+            }
+
+            if (listAuthorFullNames == null) {
+                return null;
+            }
+
+            List<Author> authors = new ArrayList<>(listAuthorFullNames.length);
+
+            for (String authorFullName : listAuthorFullNames) {
+                authors.add(new Author(authorFullName));
+            }
+
+            listAuthors = authors;
         }
 
         return listAuthors;
+    }
+
+    public List<String> getListOrganizations() {
+        if (listOrganizations == null) {
+            if (this.listAuthors == null) {
+                getListAuthors();
+            }
+
+            if (this.listAuthors == null) {
+                return null;
+            }
+
+            Set<String> organizations = new HashSet<>();
+            for (Author author : listAuthors) {
+                for (String organization : author.getOrganizations()) {
+                    organizations.add(organization);
+                }
+            }
+
+            listOrganizations = new ArrayList<>(organizations);
+        }
+
+        return listOrganizations;
     }
 
     public boolean isISI() {

@@ -1,5 +1,6 @@
 package importer;
 
+import com.sun.tools.corba.se.idl.constExpr.Or;
 import comparator.LCS;
 import config.Config;
 import data.Article;
@@ -19,6 +20,7 @@ import java.sql.*;
 import java.util.*;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
+import static util.DataUtl.getDBStatement;
 
 /**
  * Import Article to DB
@@ -47,14 +49,14 @@ public class ImportDB {
 
         // Prepare uncategorized values for journals and organizes table
         try {
-            ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
             while (rs.next()) {
                 UNCATEGORIZED_JOURNAL_ID = rs.getInt("id");
                 System.out.println("this is it " + UNCATEGORIZED_JOURNAL_ID);
             }
 
             if (UNCATEGORIZED_JOURNAL_ID == -1) {
-                UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.OUPUT,
+                UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.OUTPUT,
                         "INSERT INTO journals (name, name_en, slug) VALUES('Chưa phân loại', 'Uncategorized', '')");
             }
 
@@ -64,7 +66,7 @@ public class ImportDB {
         }
 
         try {
-            ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT,
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT,
                     "SELECT id FROM organizes WHERE name_en LIKE 'Uncategorized'");
             while (rs.next()) {
                 UNCATEGORIZED_ORGANIZATION_ID = rs.getInt(1);
@@ -72,13 +74,78 @@ public class ImportDB {
 
             if (UNCATEGORIZED_ORGANIZATION_ID == -1) {
                 int _rgt = ++numOfOrganization << 1;    // Look at the comments in findOrCreateOrganizations
-                UNCATEGORIZED_ORGANIZATION_ID = DataUtl.insertAndGetID(Config.DB.OUPUT,
+                UNCATEGORIZED_ORGANIZATION_ID = DataUtl.insertAndGetID(Config.DB.OUTPUT,
                         "INSERT INTO organizes (name, _rgt, _lft, slug, name_en) VALUES('Chưa phân loại', " + _rgt + ", " + --_rgt + ", '', 'Uncategorized')");
             }
 
             System.out.println("UNCATEGORIZED_ORGANIZATION_ID: " + UNCATEGORIZED_ORGANIZATION_ID);
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    static {
+        try {
+            if (Config.DB.NUCLEAR_OPTION) {
+                String[] truncateTables = {"articles", "articles_authors", "authors", "authors_organizes", "journals", "merge_logs", "organizes", "organize_representative"};
+                Statement stm = getDBStatement();
+
+                for (String table : truncateTables) {
+                    String query = "TRUNCATE " + table;
+                    System.out.println(query);
+
+                    try {
+                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
+
+                        stm.executeQuery("USE " + Config.DB.OUTPUT);
+                        stm.executeUpdate(query);
+
+                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static Set<String> organizationSuffixes;
+    static {
+        organizationSuffixes = new HashSet<>();
+        String[] tables = {"isi_documents", "scopus_documents"};
+
+        for (String table : tables) {
+            String query = "SELECT authors_json FROM " + table;
+
+            try {
+                ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, query);
+
+                while (rs.next()) {
+                    Article article = new Article();
+                    article.setAuthorsJSON(rs.getString(1));
+
+                    List<String> organizations = article.getListOrganizations();
+                    if (organizations == null) {
+                        continue;
+                    }
+
+                    for (String organization : organizations) {
+                        organization = organization.toLowerCase().trim();
+
+                        for (int i = organization.length() - 2; i >= 0; --i) {
+                            if (organization.charAt(i) == ' ') {
+
+                                organizationSuffixes.add(organization.substring(i + 1).trim());
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -95,7 +162,7 @@ public class ImportDB {
         // Insert the article
         if (pstmInsertArticle == null) {
             pstmInsertArticle = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug, raw_scopus_id, raw_isi_id) " +
+                    "INSERT INTO " + Config.DB.OUTPUT + ".articles (title, author, volume, number, year, uri, abstract, usable, reference, journal_id, language, is_reviewed, keyword, doi, document_type, is_scopus, is_isi, is_vci, is_international, slug, raw_scopus_id, raw_isi_id) " +
                             "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
@@ -140,7 +207,7 @@ public class ImportDB {
         // Link articles and authors
         if (pstmInsertArticleAuthors == null) {
             pstmInsertArticleAuthors = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".articles_authors (author_id, article_id) VALUES(?, ?)");
+                    "INSERT INTO " + Config.DB.OUTPUT + ".articles_authors (author_id, article_id) VALUES(?, ?)");
         }
 
         List<Integer> authorIDs = createAuthors(article);
@@ -221,7 +288,7 @@ public class ImportDB {
         // No match, create a new one
         if (pstmInsertJournal == null) {
             pstmInsertJournal = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUTPUT + ".journals (name, issn, is_scopus, is_isi, is_vci, is_international, type, slug, type_platform, archive_url, is_new_article, name_en) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         pstmInsertJournal.setString(1, article.getJournal());
@@ -276,7 +343,7 @@ public class ImportDB {
 
         if (pstmInsertAuthor == null) {
             pstmInsertAuthor = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUTPUT + ".authors (name) VALUES(?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         for (Author author : authors) {
@@ -289,7 +356,7 @@ public class ImportDB {
 
         if (pstmInsertAuthorOrganization == null) {
             pstmInsertAuthorOrganization = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".authors_organizes (author_id, organize_id) VALUES(?, ?)");
+                    "INSERT INTO " + Config.DB.OUTPUT + ".authors_organizes (author_id, organize_id) VALUES(?, ?)");
         }
 
         for (int i = 0; i < authorIDs.size(); ++i) {
@@ -360,7 +427,7 @@ public class ImportDB {
 
         if (pstmInsertOrganization == null) {
             pstmInsertOrganization = DataUtl.getDBConnection().prepareStatement(
-                    "INSERT INTO " + Config.DB.OUPUT + ".organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    "INSERT INTO " + Config.DB.OUTPUT + ".organizes (name, _lft, _rgt, slug, name_en) VALUES(?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
         }
 
         // NestedSet logic:
@@ -425,27 +492,33 @@ public class ImportDB {
 
         QueryBuilder builder = QueryBuilders.matchQuery("name", organization);
         SearchHits hits = DataUtl.queryES("available_organizations", builder);
+        String temp = null;
 
         Integer ID = null;
-        double highestScore = -1d;
+        double highestScore = 0.95d;    // The condition is quite strict, as organization names are messy and need a separate deduplication
 
         for (SearchHit hit : hits) {
-            // The condition is quite strict, as organization names are messy and need a separate deduplication
-            // So only the closest match is examined
             Map map = hit.getSourceAsMap();
             double nameScore = Organization.nameSimilarity(organization, (String) map.get("name"));
 
-            if (nameScore >= 0.9d && nameScore >= highestScore) {
+            if (nameScore >= highestScore) {
+                temp = (String) map.get("name");
                 highestScore = nameScore;
                 ID = (Integer) map.get("original_id");
             }
+        }
+
+        if (ID != null) {
+            System.out.println(organization);
+            System.out.println(temp);
+            System.out.println();
         }
 
         return ID;
     }
 
     private static int getNumOfOrganizations() throws SQLException {
-        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT COUNT(*) FROM organizes");
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT COUNT(*) FROM organizes");
         rs.next();
         return rs.getInt(1);
     }

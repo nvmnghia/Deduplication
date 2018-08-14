@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static util.StringUtl.flattenToASCII;
 import static util.StringUtl.generateTokenizedString;
 import static util.StringUtl.removeDiacritics;
 
@@ -19,7 +20,27 @@ public class LCS {
     private static LongestCommonSubsequence LCS = new LongestCommonSubsequence();
 
     public static double preciseDistance(String A, String B) {
+        if (A == null || B == null) {
+            return 1.0d;
+        }
+
+        if (A.equals(B)) {
+            return 0.0d;
+        }
+
         return metricLCS.distance(A, B);
+    }
+
+    public static double preciseDistanceRelaxed(String A, String B) {
+        if (A == null || B == null) {
+            return 1.0d;
+        }
+
+        if (A.equals(B)) {
+            return 0.0d;
+        }
+
+        return metricLCS.distance(flattenToASCII(A).toLowerCase(), flattenToASCII(B).toLowerCase());
     }
 
     public static int length(String A, String B) {

@@ -24,8 +24,8 @@ public class Sluginator {
     public static void slugifyArticles() throws SQLException {
         HashSet<String> articleSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT id, title, slug FROM articles");
-        PreparedStatement pstmSlugifyArticles = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".articles SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT id, title, slug FROM articles");
+        PreparedStatement pstmSlugifyArticles = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUTPUT + ".articles SET slug = ? WHERE id = ?");
 
         int counter = 0;
 
@@ -52,8 +52,8 @@ public class Sluginator {
     public static void slugifyJournals() throws SQLException {
         HashSet<String> journalSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT id, name, slug FROM journals");
-        PreparedStatement pstmSlugifyJournals = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".journals SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT id, name, slug FROM journals");
+        PreparedStatement pstmSlugifyJournals = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUTPUT + ".journals SET slug = ? WHERE id = ?");
 
         int counter = 0;
 
@@ -80,8 +80,8 @@ public class Sluginator {
     public static void slugifyOrganizations() throws SQLException {
         HashSet<String> organizationSlugs = new HashSet<>();
 
-        ResultSet rs = DataUtl.queryDB(Config.DB.OUPUT, "SELECT id, name, slug FROM organizes");
-        PreparedStatement pstmSlugifyOrganizes = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUPUT + ".organizes SET slug = ? WHERE id = ?");
+        ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT id, name, slug FROM organizes");
+        PreparedStatement pstmSlugifyOrganizes = DataUtl.getDBConnection().prepareStatement("UPDATE " + Config.DB.OUTPUT + ".organizes SET slug = ? WHERE id = ?");
 
         int counter = 0;
 

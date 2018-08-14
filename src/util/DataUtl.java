@@ -74,6 +74,8 @@ public class DataUtl {
     public static Connection getDBConnection() throws SQLException {
         if (connection == null) {
             MysqlDataSource dataSource = new MysqlDataSource();
+            dataSource.setUseUnicode(true);
+            dataSource.setEncoding("utf-8");
             dataSource.setUser(Config.DB.USERNAME);
             dataSource.setPassword(Config.DB.PASSWORD);
 
@@ -144,5 +146,15 @@ public class DataUtl {
         System.out.println("Max ID of " + dbName + "." + tableName + ": " + maxIDOfMergedDB);
 
         return maxIDOfMergedDB;
+    }
+
+    public static void truncate(String dbName, String tableName) throws SQLException {
+        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
+
+        Statement stm = getDBStatement();
+        stm.executeQuery("USE " + dbName);
+        stm.executeUpdate("TRUNCATE " + tableName);
+
+        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
     }
 }

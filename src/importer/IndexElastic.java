@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
@@ -75,6 +77,9 @@ public class IndexElastic {
         }
     }
 
+    public static Set<Integer> unavailableISI = new HashSet<>();
+    public static Set<Integer> unavailableScopus = new HashSet<>();
+
     /**
      * Index ISI and Scopus DB into ES. This index will be used as the input source for the deduplication process
      * @throws IOException
@@ -92,9 +97,15 @@ public class IndexElastic {
                 "type, volume, year, authors_json, unique_id, abstract, cited_references, number, keyword FROM isi_documents";
         ResultSet articleSet = DataUtl.queryDB(Config.DB.INPUT, query);
 
-        // Read the received ResultSet to Elastic
-        int counter = 0;
+        int counter = 0, prev = -1;
         while (articleSet.next()) {
+            if (articleSet.getInt(1) != ++prev) {
+                for (int i = articleSet.getInt(1) - 1; i >= prev; --i) {
+                    unavailableISI.add(i);
+                }
+                prev = articleSet.getInt(1);
+            }
+
             bulkRequest.add(client.prepareIndex(Config.ES.INDEX, "articles", String.valueOf(counter++))
                     .setSource(jsonBuilder()
                             .startObject()
@@ -136,10 +147,17 @@ public class IndexElastic {
                 "page_end, doi, affiliations, funding_text, " +
                 "publisher, issn, isbn, language_of_original_document, " +
                 "abbreviated_source_title, document_type, authors_json, abstract, `references`, index_keywords, link, issue FROM scopus_documents";
-
         articleSet = DataUtl.queryDB(Config.DB.INPUT, query);
 
+        prev = -1;
         while (articleSet.next()) {
+            if (articleSet.getInt(1) != ++prev) {
+                for (int i = articleSet.getInt(1) - 1; i >= prev; --i) {
+                    unavailableScopus.add(i);
+                }
+                prev = articleSet.getInt(1);
+            }
+
             bulkRequest.add(client.prepareIndex(Config.ES.INDEX, "articles", String.valueOf(counter++))
                     .setSource(jsonBuilder()
                             .startObject()
@@ -187,7 +205,7 @@ public class IndexElastic {
     public static void indexAvailableArticles() throws IOException, SQLException {
         String query = "SELECT ar.id, ar.title, ar.year, j.name, ar.doi, ar.is_isi, ar.is_scopus, ar.uri, ar.journal_id FROM articles ar " +
                 "JOIN journals j ON ar.journal_id = j.id";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUTPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -222,7 +240,7 @@ public class IndexElastic {
      */
     public static void indexAvailableJournals() throws IOException, SQLException {
         String query = "SELECT id, name, issn, is_isi, is_scopus, is_vci from journals";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUTPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();
@@ -254,7 +272,7 @@ public class IndexElastic {
      */
     public static void indexAvailableOrganizations() throws IOException, SQLException {
         String query = "SELECT id, name FROM organizes";
-        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUPUT, query);
+        ResultSet articleSet = DataUtl.queryDB(Config.DB.OUTPUT, query);
 
         Client client = DataUtl.getESClient();
         BulkRequestBuilder bulkRequest = client.prepareBulk();

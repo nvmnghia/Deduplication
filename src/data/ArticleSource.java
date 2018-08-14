@@ -1,6 +1,7 @@
 package data;
 
 import config.Config;
+import importer.IndexElastic;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -13,60 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleSource {
-    /**
-     * Do the same things as the above function, but filter out the type
-     * @param index
-     * @param type
-     * @param field
-     * @param value
-     * @return
-     * @throws UnknownHostException
-     * @throws SQLException
-     */
-    public static List<Article> getArticles(String index, int type, String field, String value) throws UnknownHostException {
-        List<Article> articles = getArticles(index, field, value);
-
-        if (type == Article.SCOPUS) {
-            for (int i = 0; i < articles.size(); ++i) {
-                if (! articles.get(i).isScopus()) {
-                    articles.remove(i--);
-                }
-            }
-        } else {
-            for (int i = 0; i < articles.size(); ++i) {
-                if (! articles.get(i).isISI()) {
-                    articles.remove(i--);
-                }
-            }
-        }
-
-        return articles;
-    }
-
-    public static Article getArticleByID(String index, int type, int ID) throws UnknownHostException {
-        List<Article> articles = getArticles(index, "original_id", String.valueOf(ID));
-
-        if (articles == null) {
-            return null;
-        } else {
-            if (type == Article.SCOPUS) {
-                for (Article article : articles) {
-                    if (article.isScopus() && article.getID() == ID) {
-                        return article;
-                    }
-                }
-            } else {
-                for (Article article : articles) {
-                    if (article.isISI() && article.getID() == ID) {
-                        return article;
-                    }
-                }
-            }
-
-            return null;
-        }
-    }
-
     private static List<Article> getArticles(String index, String field, String value) throws UnknownHostException {
         List<Article> articles = new ArrayList<>();
 
@@ -105,5 +52,65 @@ public class ArticleSource {
         }
 
         return articles;
+    }
+
+    /**
+     * Do the same things as the above function, but filter out the type
+     * @param index
+     * @param type
+     * @param field
+     * @param value
+     * @return
+     * @throws UnknownHostException
+     * @throws SQLException
+     */
+    public static List<Article> getArticles(String index, int type, String field, String value) throws UnknownHostException {
+        List<Article> articles = getArticles(index, field, value);
+
+        if (type == Article.SCOPUS) {
+            for (int i = 0; i < articles.size(); ++i) {
+                if (! articles.get(i).isScopus()) {
+                    articles.remove(i--);
+                }
+            }
+        } else {
+            for (int i = 0; i < articles.size(); ++i) {
+                if (! articles.get(i).isISI()) {
+                    articles.remove(i--);
+                }
+            }
+        }
+
+        return articles;
+    }
+
+    public static Article getArticleByID(String index, int type, int ID) throws UnknownHostException {
+        List<Article> articles = getArticles(index, "original_id", String.valueOf(ID));
+
+        if (articles != null) {
+            if (type == Article.SCOPUS) {
+                for (Article article : articles) {
+                    if (article.isScopus() && article.getID() == ID) {
+                        return article;
+                    }
+                }
+            } else {
+                for (Article article : articles) {
+                    if (article.isISI() && article.getID() == ID) {
+                        return article;
+                    }
+                }
+            }
+        }
+
+        if (type == Article.SCOPUS && ! IndexElastic.unavailableScopus.contains(ID)) {
+            System.out.println("MISSING Scopus-" + ID + ", ES PROBLEM");
+        }
+
+        if (type == Article.ISI && ! IndexElastic.unavailableISI.contains(ID)) {
+            System.out.println("MISSING ISI-" + ID + ", ES PROBLEM");
+        }
+
+        return null;
     }
 }

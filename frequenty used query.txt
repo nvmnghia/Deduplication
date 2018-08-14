@@ -1,15 +1,61 @@
 1. Select articles with organization properties
 
 SELECT DISTINCT ar.id, ar.title FROM articles ar
-	JOIN articles_authors aa ON aa.article_id = ar.id
+    JOIN articles_authors aa ON aa.article_id = ar.id
     JOIN authors_organizes ao ON ao.author_id = aa.author_id
     JOIN organizes o ON o.id = ao.organize_id
     WHERE o.name LIKE '%ton duc thang%'
 
-2.
+2. Check merge_logs
 
 SELECT ml.duplication_of FROM merge_logs ml
 	WHERE CONCAT(ml.duplication_of, '') NOT IN (
         SELECT isi.raw_scopus_id FROM isi_documents isi
         	WHERE isi.raw_scopus_id != ''
     )
+
+3. Count num of crawled scopus
+
+SELECT COUNT(*) FROM isi_documents.scopus_documents
+
+3. Count num of crawled isi
+
+SELECT COUNT(*) FROM isi_documents.isi_documents
+
+4. Count num of merged scopus
+
+SELECT COUNT(*) FROM articles WHERE is_scopus = 1
+
+5. Count num of merged isi
+
+SELECT COUNT(*) FROM articles WHERE is_isi = 1
+
+6. Count num of duplicated
+
+SELECT COUNT(*) FROM articles WHERE is_scopus = 1 AND is_isi = 1
+
+7. Show isi crawled, merged, and scopus crawled organizations/affiliations
+
+SELECT isi.title, ar.title, scopus.title, isi.affiliation AS isi_crawled_organizes, GROUP_CONCAT(DISTINCT o.name SEPARATOR '\n') AS merged_organizes, scopus.affiliations AS scopus_crawled_organizes FROM merge_logs ml
+	JOIN isi_documents isi ON isi.id = ml.isi_id
+    JOIN articles ar ON ar.id = ml.duplication_of
+    JOIN articles_authors aa ON aa.article_id = ar.id
+    JOIN authors_organizes ao ON ao.author_id = aa.author_id
+    JOIN organizes o ON o.id = ao.organize_id
+    JOIN scopus_documents scopus ON scopus.id = isi.raw_scopus_id
+    GROUP BY ml.isi_id
+    HAVING NOT (
+        (isi_crawled_organizes LIKE '%ton duc thang%' AND merged_organizes LIKE '%ton duc thang%' AND scopus_crawled_organizes LIKE '%ton duc thang%') OR
+        (isi_crawled_organizes NOT LIKE '%ton duc thang%' AND merged_organizes NOT LIKE '%ton duc thang%' AND scopus_crawled_organizes NOT LIKE '%ton duc thang%')
+    )
+
+8. Select articles without "ton duc thang" but is merged as "ton duc thang" and vice versa
+
+SELECT DISTINCT ar.id, ar.title, isi.title, GROUP_CONCAT(DISTINCT o.name SEPARATOR '\n') AS merged_organizations, isi.affiliation FROM articles ar
+    JOIN articles_authors aa ON aa.article_id = ar.id
+    JOIN authors_organizes ao ON ao.author_id = aa.author_id
+    JOIN organizes o ON o.id = ao.organize_id
+    JOIN isi_documents isi ON isi.id = ar.raw_isi_id
+    GROUP BY ar.id
+    HAVING (merged_organizations LIKE '%ton duc thang%' AND isi.affiliation NOT LIKE '%ton duc thang%') OR
+    	(merged_organizations NOT LIKE '%ton duc thang%' AND isi.affiliation LIKE '%ton duc thang%')
