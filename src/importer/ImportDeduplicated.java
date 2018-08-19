@@ -36,12 +36,20 @@ public class ImportDeduplicated {
 //            Thread.sleep(20000);
         }
 
+        long start = System.nanoTime();
+
         IndexElastic.indexCrawledISIAndScopus();
         importAllScopus();
         importNonDuplicatedISI();
         markDuplicatedScopus();
 
         Sluginator.slugifyAll();
+
+        IndexElastic.cleanTemporaryIndices();
+
+        long elapsed = System.nanoTime() - start;
+
+        System.out.println("All took " + elapsed + " nanoseconds");
 
         System.out.println("Remember to run representative code");
         System.err.println("Remember to run representative code");
@@ -138,7 +146,6 @@ public class ImportDeduplicated {
         for (Map.Entry<Integer, Integer> entry : ISI2Scopus.entrySet()) {
             System.out.println(entry.getKey() + ", ");
         }
-
 
         Runner.writeLogToDB(matches);
     }

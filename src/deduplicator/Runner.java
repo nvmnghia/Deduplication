@@ -86,9 +86,9 @@ public class Runner {
 
         Sluginator.slugifyAll();
 
-        long elapsed = System.nanoTime() - start;
-
         IndexElastic.cleanTemporaryIndices();
+
+        long elapsed = System.nanoTime() - start;
 
         System.out.println("All took " + elapsed + " nanoseconds");
     }

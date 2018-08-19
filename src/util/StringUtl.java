@@ -356,6 +356,10 @@ public class StringUtl {
         return new String(out);
     }
 
+    public static String normalize(String str) {
+        return str.trim().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+    }
+
     public static boolean isNumber(String str) {
         try {
             Double.valueOf(str);
@@ -365,8 +369,33 @@ public class StringUtl {
         }
     }
 
-    public static String normalize(String str) {
-        return str.trim().toLowerCase().replaceAll("[^A-Za-z0-9]", "");
+    public static int countOccurences(String A, String B) {
+        if (A.length() < B.length()) {
+            return 0;
+        }
+
+        int indexOf = 0, counter = 0;
+
+        while (true) {
+            indexOf = A.indexOf(B, indexOf);
+
+            if (indexOf < 0) {
+                break;
+            } else {
+                if ((indexOf == 0 || !Character.isAlphabetic(A.charAt(indexOf - 1))) &&
+                        (indexOf == A.length() - B.length() || !Character.isAlphabetic(A.charAt(indexOf + B.length())))) {
+                    ++counter;
+                }
+
+                ++indexOf;
+            }
+        }
+
+        return counter;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(countOccurences("a AA", "AA"));
     }
 }
 

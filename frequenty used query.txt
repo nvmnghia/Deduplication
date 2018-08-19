@@ -59,3 +59,28 @@ SELECT DISTINCT ar.id, ar.title, isi.title, GROUP_CONCAT(DISTINCT o.name SEPARAT
     GROUP BY ar.id
     HAVING (merged_organizations LIKE '%ton duc thang%' AND isi.affiliation NOT LIKE '%ton duc thang%') OR
     	(merged_organizations NOT LIKE '%ton duc thang%' AND isi.affiliation LIKE '%ton duc thang%')
+
+9. Count representative articles
+
+SELECT rep.id, rep.name, COUNT(DISTINCT ar.id) AS counter FROM representatives rep
+    LEFT JOIN organize_representative org_rep ON org_rep.representative_id = rep.id
+    LEFT JOIN authors_organizes ao ON org_rep.organize_id = ao.organize_id
+    LEFT JOIN articles_authors aa ON aa.author_id = ao.author_id
+    LEFT JOIN articles ar ON ar.id = aa.article_id
+    WHERE ar.year = 2016 AND ar.is_isi = 1
+    GROUP BY rep.id
+    ORDER BY counter DESC
+
+10. Show possibly duplicated organizations
+
+SELECT o1.id, o1.name, o1.slug, o2.id, o2.name, o2.slug FROM organizes o1
+	JOIN organizes o2 ON o2.slug = SUBSTR(o1.slug, 1, CHAR_LENGTH(o1.slug) - 2)
+    WHERE o1.slug LIKE '%-1'
+    	OR o1.slug LIKE '%-2'
+        OR o1.slug LIKE '%-3'
+        OR o1.slug LIKE '%-4'
+        OR o1.slug LIKE '%-5'
+        OR o1.slug LIKE '%-6'
+        OR o1.slug LIKE '%-7'
+        OR o1.slug LIKE '%-8'
+        OR o1.slug LIKE '%-9'

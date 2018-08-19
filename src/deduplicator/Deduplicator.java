@@ -191,7 +191,7 @@ public class Deduplicator {
     }
 
     /**
-     * Given the year of the input article, filter out the candidates which has the same year
+     * Given the year of the input article, filter out the candidates which have the same year
      * @param candidates candidates of the input article
      * @param year publication year of the input article
      */
@@ -210,6 +210,7 @@ public class Deduplicator {
     }
 
     /**
+     * Main comparison function
      * Check if the 2 articles are the same (match)
      * If not, return null
      * @param article an Article of either ISI or Scopus matchType

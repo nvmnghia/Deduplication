@@ -65,6 +65,10 @@ public class DataUtl {
         client.admin().indices().flush(flushRequest).actionGet();
     }
 
+    public static void refreshES(String index) throws UnknownHostException {
+        getESClient().admin().indices().prepareRefresh(index).get();
+    }
+
     /**
      * DB
      */

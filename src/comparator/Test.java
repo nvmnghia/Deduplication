@@ -5,6 +5,7 @@ import config.Config;
 import data.Article;
 import data.Organization;
 import util.DataUtl;
+import util.StringUtl;
 
 import javax.swing.text.TabExpander;
 import java.io.File;
@@ -19,11 +20,19 @@ public class Test {
     public static void main(String[] args) throws SQLException, FileNotFoundException {
         System.setOut(new PrintStream(new FileOutputStream(new File("log.txt"))));
 
-        showPossiblyWrongOrganizationSet();
+        testSuffix();
     }
 
-    public static void showOrganizationSuffixes() throws SQLException {
-        Set<String> organizationSuffixes = new HashSet<>();
+    /**
+     * Use suffix list to split clumped organization string
+     */
+    public static void testSuffix() throws SQLException {
+        Set<String> organizationSuffixes = getOrganizationSuffixes();
+        for (String suffix : organizationSuffixes) {
+            System.out.print(suffix + "    ");
+        }
+        System.out.println();
+
         String[] tables = {"isi_documents", "scopus_documents"};
 
         for (String table : tables) {
@@ -40,22 +49,65 @@ public class Test {
                 }
 
                 for (String organization : organizations) {
-                    organization = organization.toLowerCase().trim();
+                    organization = StringUtl.correct(organization).toLowerCase().trim();
+                    int suffixCounter = 0;
 
-                    for (int i = organization.length() - 2; i >= 0; --i) {
-                        if (organization.charAt(i) == ' ') {
+                    for (String suffix : organizationSuffixes) {
+                        suffixCounter += StringUtl.countOccurences(organization, suffix);
+                    }
 
-                            organizationSuffixes.add(organization.substring(i + 1).trim());
-                            break;
+                    if (suffixCounter > 1) {
+                        System.out.println(suffixCounter + "    " + organization);
+                    }
+                }
+            }
+        }
+    }
+
+    public static Set<String> getOrganizationSuffixes() throws SQLException {
+        Map<String, Integer> counter = new HashMap<>();
+        String[] tables = {"isi_documents", "scopus_documents"};
+
+        for (String table : tables) {
+            String query = "SELECT authors_json FROM " + table;
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, query);
+
+            while (rs.next()) {
+                Article article = new Article();
+                article.setAuthorsJSON(rs.getString(1));
+
+                List<String> organizations = article.getListOrganizations();
+                if (organizations == null) {
+                    continue;
+                }
+
+                for (String organization : organizations) {
+                    String suffix = Organization.getSuffix(organization);
+                    if (suffix != null) {
+                        if (counter.containsKey(suffix)) {
+                            counter.put(suffix, counter.get(suffix) + 1);
+                        } else {
+                            counter.put(suffix, 1);
                         }
                     }
                 }
             }
         }
 
-        for (String suffix : organizationSuffixes) {
-            System.out.println(suffix);
+        int sum = 0;
+        for (Map.Entry<String, Integer> entry : counter.entrySet()) {
+            sum += entry.getValue();
         }
+        int threshold = sum / counter.entrySet().size();
+
+        Set<String> organizationSuffixes = new HashSet<>();
+        for (Map.Entry<String, Integer> entry : counter.entrySet()) {
+            if (entry.getValue() > threshold) {
+                organizationSuffixes.add(entry.getKey());
+            }
+        }
+
+        return organizationSuffixes;
     }
 
     public static void showPossiblyWrongOrganizationSet() throws SQLException {

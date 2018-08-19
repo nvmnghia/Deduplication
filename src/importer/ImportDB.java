@@ -1,6 +1,5 @@
 package importer;
 
-import com.sun.tools.corba.se.idl.constExpr.Or;
 import comparator.LCS;
 import config.Config;
 import data.Article;
@@ -21,6 +20,7 @@ import java.util.*;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static util.DataUtl.getDBStatement;
+import static util.DataUtl.refreshES;
 
 /**
  * Import Article to DB
@@ -76,10 +76,10 @@ public class ImportDB {
 
         // Prepare uncategorized values for journals and organizes table
         try {
-            ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
+            ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT,
+                    "SELECT * FROM journals WHERE name_en LIKE 'Uncategorized'");
             while (rs.next()) {
                 UNCATEGORIZED_JOURNAL_ID = rs.getInt("id");
-                System.out.println("this is it " + UNCATEGORIZED_JOURNAL_ID);
             }
 
             if (UNCATEGORIZED_JOURNAL_ID == -1) {
@@ -147,6 +147,12 @@ public class ImportDB {
                 e.printStackTrace();
             }
         }
+
+        System.out.println("List suffixes:");
+        for (String suffix : organizationSuffixes) {
+            System.out.print(suffix + "    ");
+        }
+        System.out.println("\n");
     }
 
     /**
@@ -158,6 +164,7 @@ public class ImportDB {
      */
     private static PreparedStatement pstmInsertArticle = null;
     private static PreparedStatement pstmInsertArticleAuthors = null;
+
     public static void createArticle(Article article) throws IOException, SQLException {
         // Insert the article
         if (pstmInsertArticle == null) {
@@ -406,7 +413,7 @@ public class ImportDB {
 
         // This is bullshit
 //        for (String organization : organizationSet) {
-//            int organizationID = isOrganizationCreated(organization);
+//            int organizationID = findOrganization(organization);
 //
 //            if (organizationID != -1) {
 //                mapping.put(organization, organizationID);
@@ -417,7 +424,7 @@ public class ImportDB {
         // Remove organizations which are already stored in the output DB
         for (Iterator<String> it = organizationSet.iterator(); it.hasNext(); ) {
             String organization = it.next();
-            Integer ID = isOrganizationCreated(organization);
+            Integer ID = findOrganization(organization);
 
             if (ID != null) {
                 mapping.put(organization, ID);
@@ -473,6 +480,7 @@ public class ImportDB {
         }
 
         bulkRequest.get();
+        refreshES("available_organizations");
 
         return mapping;
     }
@@ -484,7 +492,7 @@ public class ImportDB {
      * @return
      * @throws UnknownHostException
      */
-    public static Integer isOrganizationCreated(String organization) throws UnknownHostException {
+    public static Integer findOrganization(String organization) throws UnknownHostException {
 
         if (organization == null || organization.trim().equals("")) {
             return UNCATEGORIZED_ORGANIZATION_ID;
