@@ -1,6 +1,7 @@
 package data;
 
 import comparator.LCS;
+import util.StringUtl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -126,7 +127,7 @@ public class Organization {
 
         switch (OPTION) {
             case SUBSEQUENCE:
-                return LCS.length(shorter, longer) / (double) shorter.length();
+                return LCS.length(shorter, longer) / (double) longer.length();
 
             case STD:
                 String subsequence = LCS.subsequence(shorter, longer);
@@ -165,15 +166,22 @@ public class Organization {
             return null;
         }
 
-        organization = organization.toLowerCase().trim().replace("viet nam", "vietnam");
+        organization = StringUtl.correct(organization);
 
         for (int i = organization.length() - 2; i >= 0; --i) {
             char character = organization.charAt(i);
-            if (character == ' ' || character == ',' || character == '.' || character == ';') {
+            if (character == ',' || character == ';') {
                 return organization.substring(++i).trim();
             }
         }
 
         return null;
+    }
+
+    public static void main(String[] args) {
+        String A = "Fac Math Mech Informat, Dept Informat, Hanoi, Vietnam";
+        String B = "Departement Informatics, Faculty of Mathematics Mechanics Informatics, VNU University of Science, Vietnam";
+
+        System.out.println(Organization.nameSimilarity(A, B));
     }
 }

@@ -45,6 +45,21 @@ public class StringUtl {
         return false;
     }
 
+    public static List<Integer> strToListInt(String str) {
+        if (str.endsWith(",")) {
+            str = str.substring(0, str.length() - 1);
+        }
+
+        String[] temp = str.split(", ");
+        List<Integer> listInt = new ArrayList<>(temp.length);
+
+        for (int i = 0; i < temp.length; ++i) {
+            listInt.add(Integer.valueOf(temp[i]));
+        }
+
+        return listInt;
+    }
+
     /**
      * Remove all diacritics, accents,...
      * NFD is unnecessarily slow
@@ -198,12 +213,62 @@ public class StringUtl {
         }
     }
 
-    private static Map<String, String> corrector = new HashMap<>();
+    private static Map<String, String> corrector = new LinkedHashMap<>();    // To retain insertion order
     static {
         corrector.put("Viet nam", "Vietnam");
         corrector.put("Việt nam", "Vietnam");
         corrector.put("Viet Nam", "Vietnam");
         corrector.put("Việt Nam", "Vietnam");
+        corrector.put("Vietnamese", "Vietnam");
+
+        corrector.put("Ha noi", "Hanoi");
+        corrector.put("Hà nội", "Hanoi");
+        corrector.put("Ha Noi", "Hanoi");
+        corrector.put("Hà Nội", "Hanoi");
+
+        corrector.put("Ho chi minh", "Ho Chi Minh");
+        corrector.put("Hochiminh", "Ho Chi Minh");
+        corrector.put("Ho-Chi-Minh", "Ho Chi Minh");
+        corrector.put("VNUHCM", "temp-V-N-U-H-C-M-temp");
+        corrector.put("HCMUS", "temp-H-C-M-U-S-temp");
+        corrector.put("HCMUT", "temp-H-C-M-U-T-temp");
+        corrector.put("HCMC", "Ho Chi Minh City");
+        corrector.put("Hcmc", "Ho Chi Minh City");
+        corrector.put("HCM", "Ho Chi Minh");    // Sometimes, order is very important
+        corrector.put("temp-H-C-M-U-S-temp", "HCMUS");
+        corrector.put("temp-H-C-M-U-T-temp", "HCMUT");    // RegEx is too damn slow
+        corrector.put("temp-V-N-U-H-C-M-temp", "VNUHCM");
+        corrector.put("HoChiMinh", "Ho Chi Minh");
+        corrector.put("HochiMinh", "Ho Chi Minh");
+        corrector.put("HoChi Minh", "Ho Chi Minh");
+
+        corrector.put("Danang", "Da Nang");
+        corrector.put("Da nang", "Da Nang");
+        corrector.put("DaNang", "Da Nang");
+
+        corrector.put("Cantho", "Can Tho");
+        corrector.put("Can tho", "Can Tho");
+        corrector.put("CanTho", "Can Tho");
+
+        corrector.put("Thainguyen", "Thai Nguyen");
+        corrector.put("Thai nguyen", "Thai Nguyen");
+
+        corrector.put("Quynhon", "Quy Nhon");
+
+        corrector.put("Univ.", "University");
+        corrector.put("Universities", "University");
+
+        corrector.put("Sciences", "Science");
+
+        corrector.put("Ton-Duc-Thang", "Ton Duc Thang");
+        corrector.put("Ton Due Thang", "Ton Duc Thang");
+        corrector.put("TonDucThang", "Ton Duc Thang");
+
+        corrector.put("Nguyen-Tat-Thanh", "Nguyen Tat Thanh");
+        corrector.put("NguyenTatThanh", "Nguyen Tat Thanh");
+
+        corrector.put("DuyTan", "Duy Tan");
+        corrector.put("Duytan", "Duy Tan");
     }
 
     public static String correct(String str) {
@@ -212,6 +277,48 @@ public class StringUtl {
         }
 
         return str;
+    }
+
+    public static String removeConsecutiveDuplicated(String str, char c) {
+        if (str == null || str.length() == 0) {
+            return str;
+        }
+
+        StringBuilder out = new StringBuilder(str.substring(0, 1));
+
+        for (int i = 1; i < str.length(); ++i) {
+            if (str.charAt(i) != str.charAt(i - 1)) {
+                out.append(str.charAt(i));
+            }
+        }
+
+        return out.toString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(removeConsecutiveDuplicated("%% a%%%sd asd%", '%'));
+    }
+
+    public static String normalizeSpaces(String str) {
+        if (str != null) {
+            return str.replaceAll("\\s+", " ").trim();
+        } else {
+            return null;
+        }
+    }
+
+    public static String cleanComma(String str) {
+        str = normalizeSpaces(str);
+
+        if (str.startsWith(",")) {
+            str = str.substring(1);
+        }
+
+        if (str.endsWith(",")) {
+            str = str.substring(0, str.length() - 1);
+        }
+
+        return str.trim();
     }
 
     public static String[] generateTokenizedString(String A, String B) {
@@ -392,10 +499,6 @@ public class StringUtl {
         }
 
         return counter;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(countOccurences("a AA", "AA"));
     }
 }
 

@@ -34,7 +34,7 @@ SELECT COUNT(*) FROM articles WHERE is_isi = 1
 
 SELECT COUNT(*) FROM articles WHERE is_scopus = 1 AND is_isi = 1
 
-7. Show isi crawled, merged, and scopus crawled organizations/affiliations
+7. Show isi crawled, merged, and scopus crawled organize/affiliations
 
 SELECT isi.title, ar.title, scopus.title, isi.affiliation AS isi_crawled_organizes, GROUP_CONCAT(DISTINCT o.name SEPARATOR '\n') AS merged_organizes, scopus.affiliations AS scopus_crawled_organizes FROM merge_logs ml
 	JOIN isi_documents isi ON isi.id = ml.isi_id
@@ -71,7 +71,13 @@ SELECT rep.id, rep.name, COUNT(DISTINCT ar.id) AS counter FROM representatives r
     GROUP BY rep.id
     ORDER BY counter DESC
 
-10. Show possibly duplicated organizations
+10. Show organizations of a particular representative
+
+SELECT o.name FROM organizes o
+    JOIN organize_representative org_rep ON org_rep.organize_id = o.id
+    WHERE org_rep.representative_id = 28
+
+11. Show possibly duplicated organize
 
 SELECT o1.id, o1.name, o1.slug, o2.id, o2.name, o2.slug FROM organizes o1
 	JOIN organizes o2 ON o2.slug = SUBSTR(o1.slug, 1, CHAR_LENGTH(o1.slug) - 2)
@@ -84,3 +90,10 @@ SELECT o1.id, o1.name, o1.slug, o2.id, o2.name, o2.slug FROM organizes o1
         OR o1.slug LIKE '%-7'
         OR o1.slug LIKE '%-8'
         OR o1.slug LIKE '%-9'
+
+12. Show organizations with multiple representatives
+
+SELECT o.name, GROUP_CONCAT(org_rep.representative_id SEPARATOR ', '), COUNT(*) as counter FROM organize_representative org_rep
+	JOIN organizes o ON o.id = org_rep.organize_id
+    GROUP BY org_rep.organize_id
+    HAVING counter > 1

@@ -1,13 +1,10 @@
 package data;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Article {
     public static final int SCOPUS = 1;
@@ -218,12 +215,12 @@ public class Article {
     public void setAuthorsJSON(String authors_json) {
         this.authors_json = authors_json;
 
-        if (authors_json != null) {
+        if (authors_json != null ) {
             try {
                 this.listAuthors = gson.fromJson(authors_json, new TypeToken<List<Author>>(){}.getType());
             } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("Parsing error: " + authors_json);
+                System.out.println("Parsing error: " + authors_json.substring(0, authors_json.length() > 50 ? 50 : authors_json.length()));
             }
         }
     }
@@ -264,7 +261,11 @@ public class Article {
         return listAuthors;
     }
 
-    public List<String> getListOrganizations() {
+    /**
+     * Get list of split organization names
+     * @return
+     */
+    public List<String> getOrganizations() {
         if (listOrganizations == null) {
             if (this.listAuthors == null) {
                 getListAuthors();
@@ -276,15 +277,39 @@ public class Article {
 
             Set<String> organizations = new HashSet<>();
             for (Author author : listAuthors) {
-                for (String organization : author.getOrganizations()) {
-                    organizations.add(organization);
-                }
+                organizations.addAll(Arrays.asList(author.getOrganizations()));
             }
 
             listOrganizations = new ArrayList<>(organizations);
         }
 
         return listOrganizations;
+    }
+
+    /**
+     * Get list of raw, unsplit organization names.
+     * Not recommended. Use Article.getOrganizations instead.
+     * This function only serves the ImportDB.createOrganizationSuffixes function.
+     *
+     * Without this raw function, ImportDB.createOrganizationSuffixes will call Article.getOrganizations,
+     * which depends on the output of ImportDB.createOrganizationSuffixes itself.
+     * Not a good day for circular dependency. NOT A FUCKING GOOD DAY.
+     *
+     * @return
+     */
+    @NotNull
+    public List<String> getRawOrganizations() {
+        List<String> listRawOrganizations = new ArrayList<>();
+
+        if (this.listAuthors == null) {
+            return listRawOrganizations;
+        }
+
+        for (Author author : listAuthors) {
+            listRawOrganizations.addAll(Arrays.asList(author.getRawOrganizations()));
+        }
+
+        return listRawOrganizations;
     }
 
     public boolean isISI() {
@@ -340,7 +365,7 @@ public class Article {
     }
 
     public String toShortString() {
-        String strID = "";
+        String strID;
 
         if (is_scopus && is_isi) {
             strID = "Scopus&ISI";

@@ -45,6 +45,7 @@ public class Sluginator {
                 pstmSlugifyArticles.executeBatch();
             }
         }
+        rs.close();
 
         pstmSlugifyArticles.executeBatch();
     }
@@ -73,6 +74,7 @@ public class Sluginator {
                 pstmSlugifyJournals.executeBatch();
             }
         }
+        rs.close();
 
         pstmSlugifyJournals.executeBatch();
     }
@@ -101,6 +103,7 @@ public class Sluginator {
                 pstmSlugifyOrganizes.executeBatch();
             }
         }
+        rs.close();
 
         pstmSlugifyOrganizes.executeBatch();
     }

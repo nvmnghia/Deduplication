@@ -50,6 +50,9 @@ public class Deduplicator {
 
         filterByYear(candidates, article.getYear());
 
+        // Get the first 10 candidates
+        candidates = candidates.subList(0, candidates.size() > 10 ? 10 : candidates.size());
+
         List<Match> listMatches = new ArrayList<>();
         boolean duplicated = false;
 
@@ -251,7 +254,7 @@ public class Deduplicator {
                     article.isISI() ? candidate.getID() : article.getID(),
                     titleScore, journalScore);
 
-        } else if (titleScore >= 0.8d) {
+        } else if (titleScore >= 0.75d) {
             return new Match(journalScore >= 0.85d ? Match.DUPLICATED : Match.POSSIBLY_DUPLICATED,
                     article.isISI() ? article.getID() : candidate.getID(),
                     article.isISI() ? candidate.getID() : article.getID(),

@@ -1,13 +1,18 @@
 package data;
 
 import com.google.gson.annotations.SerializedName;
+import importer.ImportDB;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Author {
     private String first_name, last_name, fullName;
     @SerializedName(value = "organize", alternate = {"organizes", "organization", "organizations"})
     private String[] organize;
+    private String[] splittedOrganizations = null;
     private ArrayList<String> listAbbrName;
 
     public Author() {
@@ -17,11 +22,52 @@ public class Author {
         this.fullName = fullName;
     }
 
+
     public String[] getOrganizations() {
+        if (splittedOrganizations == null) {
+            List<String> tempSplittedOrganizations = new ArrayList<>(Arrays.asList(organize));
+
+            for (int i = 0; i < tempSplittedOrganizations.size(); ++i) {
+                String organization = tempSplittedOrganizations.get(i);
+                List<String> splitted = ImportDB.splitLumpedOrganizations(organization);
+
+                if (splitted.size() > 1) {
+                    tempSplittedOrganizations.remove(i--);
+                    tempSplittedOrganizations.addAll(splitted);
+                }
+            }
+
+            splittedOrganizations = new String[tempSplittedOrganizations.size()];
+            splittedOrganizations = tempSplittedOrganizations.toArray(splittedOrganizations);
+
+            if ((splittedOrganizations.length == 0 && organize.length != 0) || splittedOrganizations.length < organize.length) {
+                System.out.println("FUCK, LESS???");
+
+                for (String str : organize) {
+                    System.out.println(str);
+                }
+
+                System.out.println("IS MORE THAN");
+
+                for (String str : splittedOrganizations) {
+                    System.out.println(str);
+                }
+            }
+        }
+
+        return splittedOrganizations;
+    }
+
+    /**
+     * Not recommended. Use getOrganizations instead.
+     * This function only serves the Article.getRawOrganizations function.
+     * @return
+     */
+    public String[] getRawOrganizations() {
         return organize;
     }
 
-    public void setOrganizations(String[] organize) {
+    public void setOrganize(String[] organize) {
         this.organize = organize;
     }
 

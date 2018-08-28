@@ -90,14 +90,10 @@ public class DataUtl {
     }
 
     public static Statement getDBStatement() throws SQLException {
-        if (statement == null) {
-            statement = getDBConnection().createStatement();
-        }
-
-        return statement;
+        Statement stm = getDBConnection().createStatement();
+        stm.closeOnCompletion();
+        return stm;
     }
-
-    private static Statement statement = null;
 
     public static ResultSet queryDB(String dbName, String query) throws SQLException {
         Statement stm = getDBStatement();
@@ -106,11 +102,26 @@ public class DataUtl {
         return stm.executeQuery(query);
     }
 
+    public static int updateDB(String dbName, String query) throws SQLException {
+        System.out.println(query);
+
+        Statement stm = getDBStatement();
+
+        stm.executeQuery("USE " + dbName);
+
+        int temp =  stm.executeUpdate(query);
+        stm.close();
+        return temp;
+    }
+
     public static int insertAndGetID(String dbName, String insertQuery) throws SQLException {
         Statement stm = getDBStatement();
 
         stm.executeQuery("USE " + dbName);
-        return stm.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
+        int temp = stm.executeUpdate(insertQuery, Statement.RETURN_GENERATED_KEYS);
+
+        stm.close();
+        return temp;
     }
 
     public static void batchInsert(String dbName, List<String> insertQueries) throws SQLException {
@@ -149,16 +160,16 @@ public class DataUtl {
         int maxIDOfMergedDB = rs.getInt(1);
         System.out.println("Max ID of " + dbName + "." + tableName + ": " + maxIDOfMergedDB);
 
+        rs.close();
+
         return maxIDOfMergedDB;
     }
 
     public static void truncate(String dbName, String tableName) throws SQLException {
-        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
+        DataUtl.updateDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
 
-        Statement stm = getDBStatement();
-        stm.executeQuery("USE " + dbName);
-        stm.executeUpdate("TRUNCATE " + tableName);
+        DataUtl.updateDB(Config.DB.OUTPUT, "TRUNCATE " + tableName);
 
-        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
+        DataUtl.updateDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
     }
 }

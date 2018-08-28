@@ -5,6 +5,7 @@ import data.Article;
 import data.ArticleSource;
 import importer.ImportDB;
 import importer.IndexElastic;
+import representative.Representative;
 import util.DataUtl;
 import util.Sluginator;
 
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 
 import static util.DataUtl.getMaxIDOfTable;
@@ -48,12 +50,15 @@ public class Runner {
             String myDearestWarning = "NUCLEAR_OPTION ENABLED... RUN FOR YOUR FUCKIN LIFE (i.e. ask yourself if you ABSOLUTELY need this)\n" +
                     "THIS OPTION SHOULD BE USED ONLY FOR TESTING. IT WILL DELETE THESE TABLES TO START A FRESH DEDUPLICATION/MERGE:\n" +
                     "articles, articles_authors, authors, authors_organizes, journals, merge_logs, organizes\n" +
-                    "YOU HAVE 20 SECONDS TO THINK ABOUT YOUR LIFE...";
+                    "CONTINUE? (y/n)";
 
             System.out.println(myDearestWarning);
             System.err.println(myDearestWarning);
 
-            Thread.sleep(20000);
+            Scanner scanner = new Scanner(System.in);
+            if (! scanner.nextLine().equals("y")) {
+                return;
+            }
         }
 
         long start = System.nanoTime();
@@ -85,6 +90,7 @@ public class Runner {
         }
 
         Sluginator.slugifyAll();
+        Representative.apply();
 
         IndexElastic.cleanTemporaryIndices();
 

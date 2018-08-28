@@ -1,0 +1,2010 @@
+SET FOREIGN_KEY_CHECKS = 0
+TRUNCATE organize_representative
+SET FOREIGN_KEY_CHECKS = 1
+ALTER TABLE organize_representative ADD UNIQUE 'organize_representative_pair' (organize_id, representative_id)
+Representative: Vietnam National University, Hanoi
+Representative ID: 1
+Processing IDS:
+vietnam natl univ%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vietnam natl univ%hanoi%'
+hanoi%vietnam natl univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%vietnam natl univ%'
+vietnam national university%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vietnam national university%hanoi%'
+hanoi%vietnam national university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%vietnam national university%'
+vnu%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vnu%hanoi%'
+hanoi%vnu
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%vnu%'
+ussh%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%ussh%hanoi%'
+hanoi%ussh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%ussh%'
+univ social sci & humanities%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%univ social sci & humanities%hanoi%'
+hanoi%univ social sci & humanities
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%univ social sci & humanities%'
+vnu%uet
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vnu%uet%'
+uet%vnu
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%uet%vnu%'
+univ eng technol%vietnam nat%univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%univ eng technol%vietnam nat%univ%'
+vietnam nat%univ%univ%eng%technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vietnam nat%univ%univ%eng%technol%'
+univ%eng%technol%vnu
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%univ%eng%technol%vnu%'
+vnu%univ%eng%technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vnu%univ%eng%technol%'
+university of engineering and technology%vietnam
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%university of engineering and technology%vietnam%'
+univ engn & technol%vietnam
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%univ engn & technol%vietnam%'
+hanoi%univ sci
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%univ sci%'
+hanoi%university of science
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%hanoi%university of science%'
+univ sci%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%univ sci%hanoi%'
+university of science%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%university of science%hanoi%'
+university of science%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%university of science%hanoi%'
+vnuh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vnuh%'
+vietnam national university, hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%vietnam national university, hanoi%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vju%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%hanoi univ sci & technol%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%hanoi university of science technology%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%hanoi university of science and technology%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%hanoi university of science & technology%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam acad sci & technol%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%hust%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vnua%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam natl univ agr%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam national university of agriculture%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vnuf%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam natl univ forestry%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam national university of forestry%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vnu%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%ho chi minh%vnu%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam natl univ%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%ho chi minh%vietnam natl univ%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam national university%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%ho chi minh%vietnam national university%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%university of science%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%university of science and technology%hanoi%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vnuhcm%'
+
+Organizations of this representative have one of those 488 segments:
+vietnam national university, cau giay, hanoi
+hanoi university of science, vietnam national university, 334 nguyen trai str., thanh xuan, hanoi
+vnu univ sci, cetasd, nguyen trai st 334, hanoi
+vietnam natl univ hanoi, fac chem, 19 le thanh tong st, hanoi 10999
+vietnam natl univ, univ engn & technol, adv mat & struct lab, 144 xuan thuy, hanoi
+univ sci, hanoi
+vietnam national university, 144 xuan thuy street, cau giay, hanoi
+univ sci & technol hanoi vietnam france univ, dept adv mat sci & nanotechnol, 18 hoang quoc viet, hanoi
+vnu vietnam japan univ, infrastruct engn program, my dinh 1, hanoi
+univ engn & technol, adv mat & struct lab, 144 xuan thuy, hanoi, vietnam
+vnu university of science, 334 nguyen traithanh xuan, hanoi
+vnu-university of science, vietnam national university-hanoi, nguyen trai street, hanoi
+vietnam national university, university of science, thanh xuan district, hanoi
+vietnam national university at hanoi, 334 nguyen trai, thanh xuan, hanoi
+university of science, hanoi national university, hanoi
+vnu university of science, thanh xuan district, hanoi city
+hanoi univ sci, genet dept, hanoi
+vietnam natl univ hanoi, univ engn & technol, hanoi
+vietnam national university, 144 xuanthuy, caugiay hanoi
+hanoi univ sci, geol, hanoi
+hanoi univ sci, mineral, hanoi
+vnu univeristy of science, hanoi
+vnu university of engineering and technology, vietnam national university, hanoi
+nu hanoi university of science, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, vietnam national university, 19 le thanh tong, hoankiem, hanoi
+vietnam national university, hanoi (vnu), university of engineering and technology (uet), 144, xuan thuy, cau giay, hanoi
+vietnam natl univ, dept math, 334 nguyen trai st, hanoi
+vietnam national university, hanoi, 144 xuanthuy, caugiay, hanoi
+hanoi university of science, 19-le thanh tong, hoan kiem, hanoi
+vnu university of engineering and technology, e3 building, 144 xuan thuy, cau giay, hanoi
+vnu hanoi university of science, 334 nguyen trai road, thanh xuan district, hanoi
+vnu-university of social science and humanities hanoi, 336 nguyen trai, thanh xuan, hanoi
+hanoi univ sci, biol, hanoi
+university of science, vietnam national university, hanoi, 144 xuan thuy, cau giay, hanoi
+vietnam natl univ, dept mat, 334 nguyen trai st, hanoi
+vnu university of science, vietnam national university, hanoi, nguyen trai, hanoi
+vnu university of science, 334 nguyen trai, thanhxuan, hanoi
+vietnam national university, no. 144 xuan thuy st, cau giay district, hanoi
+hanoi university of science, 334, nguyen trai str., thanh xuan, hanoi
+univ sci, univ informat technol, hanoi
+vietnam natl univ, dept polit econ, hanoi
+vietnam national university (vnu), institute of vietnamese studies and development science (ivides), 336 nguyen trai, thanh xuan, hanoi
+vietnam national university, university of science, 334 nguyen trai, thanh xuan, hanoi
+vietnam national university, thanh xuan, hanoi
+hanoi univ sci vnu, res ctr environm technol & sustainable dev cetasd, hanoi
+vietnam national university hanoi, 144 xuan thuy, hanoi
+vnu-university of engineering and technology, hanoi
+vietnam national university, hanoi (vnu), 144, xuan thuy, cau giay, hanoi
+vietnam national university (vnu), vnu-university of engineering and technology (uet), no. 144, xuan thuy, cau giay, hanoi
+vnu university of engineering and technology, hanoi city
+vnu—hanoi university of science, 19 le thanh tong street, hanoi
+vietnam national university, 144 xuan thuy rd., cau giay, dist., hanoi
+vnu university of economics and business, hanoi
+univ sci & technol hanoi, dept adv mat sci & nanotechnol, 18 hoang quoc viet, hanoi
+vietnam natl univ, vnu univ engn & technol, fac engn phys & nanotechnol, 144 xuan thuy, hanoi
+vnu univ sci, nano & energy ctr, room 503,5th floor,t2 bldg 334 nguyen trai st, hanoi
+vnu university of science, hanoi, 19 le thanh tong, hoan kiem, hanoi
+vnu univ sci, nano & energy ctr, 334 nguyen trai st, hanoi
+vnuh university of engineering and technology, hanoi
+vnu-university of engineering and technology (uet), 144, xuan thuy, cau giay, hanoi
+vietnam natl univ, hanoi univ sci, dept math, hanoi
+hanoi univ sci, dept math, hanoi
+vietnam natl univ, inst informat technol, 144 xuan thuy, hanoi
+vnu univ engn & technol, fac informat technol, bldg e3,144 xuan thuy str, hanoi 100000, vietnam
+vnu univ engn & technol, fac informat technol, bldg e3,144 xuan thuy str, hanoi 100000, vietnam
+vietnam national university, hanoi university of science
+vietnam natl univ, dept clin psychol, hanoi
+vietnam natl univ hanoi, int sch, 144 xuan thuy, hanoi
+hanoi university of science, viennam national university, 19 le thanh tong, hanoi
+vietnam natl univ hanoi, univ engn & technol, 144 xuan thuy, hanoi
+vietnam natl univ hanoi, ctr educ testing, 144 xuan thuy, hanoi
+vnu - university of engineering and technology, 144 xuan thuy, hanoi
+vietnam natl univ, nano & energy ctr, hanoi
+vietnam natl univ, univ sci, hanoi
+vietnam national university, 144 xuan thuy road, cau giay district, hanoi
+vnu university of engineering and technology, vietnam national university, 144 xuan thuy road, cau giay, hanoi
+hanoi university of science, 334, nguyen trai road, hanoi
+vnu, university of science, hanoi
+university of science (vnu), no. 334 nguyen trai st., thanh xuan, hanoi
+vietnam national university in hanoi, 144 xuan thuy st., cau giay district, hanoi
+vnu university of science hanoi, 19 le thanh tong, hoankiem, hanoi
+vnu university of engineering and technology, no. 144 xuan thuy street, dich vong hau ward, cau giay district hanoi
+grad univ sci & technol, hanoi
+vnu university, hanoi
+vietnam national university-university of engineering and technology, hanoi
+vnu - university of engineering and technology, hanoi
+vnu hanoi university of science, 19 le thanh tong, hoan kiem, hanoi
+vnu university of engineering and technology
+hanoi university of science, vietnam national university, no. 334, nguyen trai str., thanh xuan dist, hanoi
+vietnam national university, hanoi
+vnu university of science, hanoi
+vietnam national university hanoi
+hanoi university of science, 334 nguyen trai street, hanoi
+hanoi university of science (hus-vnu), vietnam national university, no. 334, nguyen trai road, thanh xuan, hanoi
+vietnam natl univ, hanoi
+vietnam national university of hanoi, 144 xuan thuy, hanoi
+vnu university of science, 19 le thanh tong street, hanoi
+vnu university of science, 19 le thanh tong street, hoankiem, hanoi
+vnu university of science, 334 nguyen trai street, thanhxuan, hanoi
+vietnam natl univ hanoi, fac literature, art studies, hanoi
+vnu key laboratory of geoenvironment and climate change response, vietnam national university, hanoi, 334 nguyen trai, thanh xuan, hanoi
+vnu hanoi university of science, hanoi
+hanoi university of science, 334 nguyen trai, hanoi
+vietnam national university of science, hanoi
+vietnam national university, hanoi, 144 xuan thuy road, hanoi
+vnu university of science, vietnam national university, 334 nguyen trai street, thanh xuan district, hanoi
+vietnam national university, office 506, building y1, 144 xuan thuy, cau giay, hanoi
+university of engineering and technology, vnu
+hanoi university of science (hus-vnu), no. 334, nguyen trai road, hanoi
+university of science (hus), vietnam national university, hanoi
+vietnam national university – university of science, 334 nguyen trai, thanh xuan, hanoi
+university of engineering and technology, vietnam national university (vnu)
+hanoi university of science, vietnam national university, hanoi city
+hanoi university of science, vietnam national university, 334 nguyen trai street, thanh xuan, hanoi
+hanoi university of science, hanoi
+vietnam national university, building e3, 144 xuan thuy, cau giay, hanoi
+university of engineering and technology, vnuh
+vietnam national university, faculty of electronics and telecommunications, hanoi
+vnu key laboratory 'multiscale simulation of complex systems', vnu university of science, vietnam national university, hanoi
+vnu university of science, 334 nguyen trai ,thanh xuan district, hanoi
+vietnam natl univ, coll sci, dept math, hanoi
+vnu university of science, 334 nguyen trai, thanh xuan district, hanoi
+vietnam natl univ, hanoi univ sci, fac phys, 334 nguyen trai, hanoi
+hanoi univ sci, fac phys, 334 nguyen trai, hanoi
+vietnam natl univ, hanoi univ sci, nano & energy ctr, 334 nguyen trai, hanoi
+vietnam natl univ, fac phys, hanoi univ sci, 334 nguyen trai, hanoi
+hanoi univ sci, 334 nguyen trai, hanoi
+vietnam natl univ, fac engn phys & nanotechnol, vnu univ engn & technol, nano magnet mat & devices dept, e3 bldg,144 xuan thuy rd, hanoi
+vietnam national university - university of science, 334 nguyen trai, thanh xuan, hanoi
+hanoi university of science (hus-vnu), no. 334, nguyen trai road, thanh xuan, hanoi
+vnu-hanoi, university of engineering and technology, hanoi
+univ sci & technol hanoi, hanoi
+vnu hanoi university of science (hus), hanoi
+university of science, vietnam national university, 144 xuan thuy, hanoi
+vietnam national university, hanoi (vnu), 144 xuan thuy, cau giay, hanoi
+hanoi university of science, vnu, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, vietnam national university, hanoi
+university of science, vietnam national university, 19 le thanh tong, hanoi
+vnu-university of social science and humanities, hanoi
+hanoi university of science, 334 nguyen trai str., thanh xuan dist. hanoi
+hanoi university of science, 334 nguyen trai str., thanh xuan dist., hanoi
+vietnam national university-hanoi, 336 nguyen trai street, thanh xuan district, hanoi
+vnu hanoi university of science, 334 nguyen trai, thanh xuan, hanoi
+vietnam natl univ, vnu univ sci, vnu key lab multiscale simulat complex syst, hanoi
+vietnam natl univ, hanoi univ sci, 334 nguyen trai, hanoi
+vietnam national university, 19 le thanh tong, hanoi
+vietnam national university, 40 nguyen trai road, thanh xuan district, hanoi
+vietnam national university (vnu)hanoi
+hanoi university of science, 334 nguyen trai, thanh xuan, hanoi
+vnu-hanoi, university of engineering and technology
+hanoi university of science and engineering, hanoi
+vietnam national university, hanoi, college of science, 334 nguyen trai, thanh xuan, hanoi
+hanoi university of science (vnu), hanoi
+vietnam national university, 144-xuan thuy, cau giay, hanoi
+vnu university of engineering and technologyhanoi
+vnu university of science, 334 nguyen trai str., thanh xuan dist, hanoi
+vnu university of science, 334 nguyen trai str., thanh xuan dist., hanoi
+vnu university of science, vietnam national university, 334 nguyen trai street, thanh xuan, hanoi
+vnu university of science, vietnam national university, 334-nguyen trai st., thanh xuan, hanoi
+vietnam national university, hanoi, building e4, 144 xuan thuy street, cau giay district, hanoi
+vnu university of science, 334, nguyen trai street, thanh xuan district, hanoi
+vietnam national university, 144 xuan thuy, hanoi
+vietnam national university school of medicine and pharmacy, hanoi
+hanoi university of science, 19 le thanh tong road, hanoi
+vietnam national university (vnu), 19 le thanh tong, hanoi
+vnu university of engineering and technology, vietnam national university, hanoi, 144 xuan thuy road, cau giay, hanoi
+vietnam natl univ, hanoi univ sci, hanoi
+vietnam national university in hanoi, 144 xuanthuy rd, caugiay district, hanoi
+vnu - university of economics and business, 144 xuan thuy, cau giay, hanoi
+vietnam national university, 334 nguyen trai street, thanh xuan dist., hanoi
+vietnam national university, g7 build., 144 xuan thuy rd., cau giay dist., hanoi
+vnu university of science, hanoi, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, vietnam national university, vietnam 334 nguyen trai, hanoi
+vnu university of engineering and technology, hanoi
+vietnam national university, hanoi, cau giay district, hanoi city
+vnu university of science, vietnam national university, hanoi, 334 nguyen trai street, thanh xuan, hanoi
+hanoi university of science, vietnam national university, hanoi
+vietnam national university, hanoi, room 100, building e4, 144 xuan thuy road, cau giay district, hanoi
+vietnam national university, 144 xuan thuy street, cau giay district, hanoi
+vnu hanoi university of science
+vnu university of science, vietnam national university, hanoi, 334 nguyen trai, hanoi
+vnu university of science, vietnam national university, 334 nguyen trai, thanh xuan, hanoi
+vietnam national university (vnu), hanoi
+vietnam national university, hanoi university of science, hanoi
+vnu university of economics and business, e4 building, 144 xuan thuy road, cau giay district, hanoi
+vnu university of economics and business, room no. 307, e4 building, 144 xuan thuy road, cau giay district, hanoi
+vnu university of economics and business room, no. 307, e4 building, 144 xuan thuy road, cau giay district, hanoi
+vnu-hanoi, university of engineering and technology, 144 xuan thuy, cau giay, hanoi
+vietnam national university, hanoi – 144, xuan thuy – cau giay, hanoi
+vnu- hanoi university of science
+vnu university of business and economics, hanoi
+vietnam national university in hanoi, hanoi
+vietnam national university, km 20, hanoi highway
+vnu-hanoi, university of engineering and technology, 144, xuan thuy, cau giayhanoi
+hanoi school of business and management (hsb), vietnam national university (vnu)
+vietnam natl univ, vnu univ sci, fac phys, 334 nguyentrai, hanoi
+vietnam natl univ, vnu univ engn & technol, fac engn phys & nanotechnol, bldg e3,144 xuanthuy, hanoi
+hanoi univ sci, nano & energy ctr, 334 nguyen trai, hanoi
+hanoi univ sci, ctr mat sci, 334 nguyen trai, hanoi
+vnu univ engn & technol, fac engn phys & nanotechnol, hanoi, vietnam
+vnu univ sci, fac chem, hanoi
+vietnam natl univ, univ sci, ctr environm fluid dynam, 334 nguyen trai, hanoi
+vietnam natl univ, vnu univ engn & technol, fac phys engn & nanotechnol, 144 xuan thuy rd, hanoi
+vietnam natl univ, vnu univ engn & technol, vnu key lab micronano technol, 144 xuan thuy rd, hanoi
+vnu-hanoi university of science, 19 le thanh tong street, hanoi
+vietnam national university, hanoi (vnu), 144 xuan thuy street, cau giay, hanoi
+university of engineering and technology, vnu hanoi
+vietnam national university, hanoi university of languages & international studies
+vietnam national university, dai lo thang long, hoa lac, thach that hanoi
+vietnam natl univ, fac int studies, hanoi
+hanoi university of science (hus), vietnam national university (vnu), hanoi
+vietnam national university, faculty of electronics and telecommunication, hanoi
+vietnam natl univ, sch med & pharm, hanoi
+vnu univ sci, fac chem, 19 le thanh tong, hanoi
+hanoi university of science, vietnam national university, hanoi, 334 nguyen trai road, hanoi
+vietnam national university ? university of science, hanoi
+hanoi univ sci, fac environm sci, 334 nguyen trai rd, hanoi
+vietnam national university, room 100, building e4, no. 144, xuan thuy street, cau giay district, hanoi
+vietnam national university, university of science, hanoi
+vnu, hanoi – university of engineering and technology, 144, xuan thuy road, cau giay district, hanoi
+hanoi university of science, nguyen trai street 334, hanoi
+vietnam natl univ, dept meteorol & climate change, 334 nguyen trai thanh xuan, hanoi
+hanoi university of science, vnu hanoi, hanoi
+vnu university of science, 19 le thanh tong, hoan kiem, hanoi
+vietnam national university, hanoi 301, e4, 144 xuan thuy, cau giay, hanoi
+vnu univ sci, med chem lab, fac chem, 19 le thanh tong, hanoi
+vnu university of science, 19 le thanh tong, hanoi
+vnu univ sci, catalysis lab, fac chem, 19 le thanh tong, hanoi
+vnu university of science (vietnam national university), 19 le thanh tong, hoan kiem, hanoi
+hanoi university of science, 19 le thanh tong, hanoi
+vnu university of engineering and technology, building e3, 144 xuan thuy, cau giay, hanoi
+university of science-vnu, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, 334 nguyen trai, hanoi
+international school (vnu-is), vietnam national university (vnu), hanoi
+vnu-hus, 19 le thanh tong, hoan kiem, hanoi
+hanoi school of business, vietnam national university
+vietnam national university, 334 nguyen trai str., hanoi
+vnu university of science, vietnam national university, hanoi (vnu), 334-nguyen trai, thanh xuan, hanoi
+university of languages and international studies vietnam national university, hanoi, no. 2 pham vang dong road, cau giay district, hanoi
+vnu university of science, vietnam national university, hanoi, 19 le thanh tong, hoan kiem, hanoi
+vnu university of science (hus), 334 nguy?n trãi street, hanoi
+vnu university of science, nguyen trai, hanoi
+univ social sci & humanities, hanoi
+vietnam national university hanoi, 144 xuan thuy, cau giay, hanoi
+university of science, vnu hanoi
+hanoi university of science, vnu, 334, nguyen trai street, hanoi
+vnu-hanoi university of science, 334 nguyen trai, thanh xuan, hanoi
+vnu-university of engineering and technology, 144 xuan thuy, cau giay, hanoi
+vietnam national university, e2, 144 xuan thuy, cau giay, hanoi
+hanoi university of sciencehanoi
+vietnam national university, 144 xuan thuy, cau giay, hanoi
+vnu university of engineering and technology, 144 xuan thuy, cau giay, hanoi
+vnu university of technology and engineering, 144 xuan thuy, cau giay, hanoi
+vnu university of science, 334 nguyen trai, thanh xuan, hanoi
+vietnam natl univ hanoi, int sch, 144 xuan thuy st, hanoi
+hanoi university of science - vietnam national university, hanoi
+university of science, hanoi
+hanoi university of science, vietnam national university, 144, xuan thuy, cau giay, hanoi
+vietnam national university hanoi (vnu), hanoi
+vnu university of engineering and technology (vnu-uet), hanoi
+vietnam national university of hanoi, my dinh i, hanoi
+university of natural science (vnu), hanoi
+vietnam natl univ, univ engn & technol, hanoi
+vnu university of engineering and technology, faculty of electronics and telecommunications, hanoi
+vnu university of science, 334 nguyen trai street, thanh xuan, hanoi
+vnu university of science, vietnam national university, hanoi 120000
+vietnam national university, 334 nguy?n trai, thanh xuan, hanoi
+vnu key laboratory for multiscale simulation of complex systems, vietnam national university, 334 nguyen trai street, thanh xuan, hanoi
+univ sci & technol, 18 hoang quoc viet, hanoi
+vnu institute of vietnamese studies and development science, hanoi
+vietnam national university in hanoi, 334 nguyen trai st., thanh xuan, hanoi
+vnu university of science, national vietnam university, 19 le thanh tong, hanoi
+vietnam national university of hanoi, hanoi
+vnu univ engn & technol, fac informat technol, 144 xuan thuy, hanoi, vietnam
+vietnam natl univ, thach that, hanoi
+vnu univ sci, hanoi
+hanoi college of science, vietnam national university
+vnu university of science, thanh xuan, hanoi
+vietnam national university hanoi, 144 xuan thuy street, hanoi
+hanoi school of business and management, vietnam national university
+hanoi university of science, vietnam national university ? 19 le thanh tong, hanoi
+vietnam national university, hanoi, hanoi
+vnu university of science, vietnam national university, hanoi – 19 le thanh tong, hanoi
+vietnam national university – hanoi, 144 xuan thuy, cau giay, hanoi
+vnu university of science hanoi (vnu-hus), 19 le thanh tong, hoan kiem, hanoi
+vietnam natl univ, univ social sci & humanities, fac psychol, hanoi
+univ social sci & humanities, fac psychol, hanoi
+vnu key laboratory for micro-nanotechnology, vietnam national university, hanoi, 144 xuan thuy, cau giay, hanoi
+vietnam national university, school of medicine and pharmacy, hanoi
+vnu university of engineering and technology, vietnam national university, hanoi, 144 xuan thuy, cau giay, hanoi
+vietnam natl univ, coll sci, hanoi
+vietnam national university, 144-xuan thuy, cau giay, hanoi 84
+vnu university of engineering and technology, 144 xuan thuy road, cau giay district, hanoi
+vnu key laboratory for smart integrated systems (sislab), vnu university of engineering and technology, hanoi
+vietnam national university, hanoi 19 le thanh tong street, hanoi
+vnu university of engineering and technology, 144 xuan thuy road, cau giay, hanoi
+vnu university of science vietnam national university, hanoi
+vietnam national university hanoi, e3, 144 xuanthuy, caugiay, hanoi
+vietnam national university, 144 xuanthuy rd., caugiay, hanoi
+vnu-university of engineering and technology
+vnu university of science, vietnam national university, 19 le thanh tong street, hanoi
+vnu university of science, vietnam national university, 334 nguyen trai street, hanoi
+vnu, university of engineering and technology, cau giay, hanoi
+vietnam national university, p407 - e4 - 144 xuan thuy - cau giay, hanoi
+vietnam national university, 334-nguyen trai st., thanh xuan dist., hanoi
+vnu key laboratory of geoenvironment and climate change response, hanoi
+vnu univ engn & technol, cau giay, hanoi, vietnam
+vietnam natl univ, univ social sci & humanities, hanoi
+vietnam natl univ, fac elect & telecommun, hanoi
+vnu university of engineering and technology, 144 xuan thuy str., cau giay distr., hanoi
+univ engn & technol, vnu hanoi, vietnam
+univ engn & technol, hanoi, vietnam
+vietnam national university, no. 144, xuan thuy road, cau giay district, hanoi
+vietnam national university, building e3, 144 xuan thuy, hanoi
+vnu university of education, vietnam national university, hanoi, 144 xuan thuy road, hanoi
+vnu-university of social science and humanities, no. 336, nguyen trai street, thanh xuan dist., hanoi
+hanoi university of science (hus-vnu), vietnam national university, 334 nguyen trai str., thanh xuan, hanoi
+vnu univ engn & technol, fac informat technol, hanoi, vietnam
+vietnam national university, 334-nguyen trai street, thanh xuan, hanoi
+vietnam national university, 19 le thanh tong st., hanoi
+vnu vietnam-japan university, my dinh 1, tu liem, hanoi
+nu hanoi univ sci, 334 nguyen trai, hanoi
+hanoi university of science, department of geology, hanoi
+vnu university of science, 334 nguyen trai street, thanh xuan district, hanoi
+vnu university of engineering and technology, e3 building, 144 xuan thuy street, cau giay, hanoi
+vietnam national university (vnu), university of engineering and technology (uet), hanoi
+university of engineering and technology (vnuh), hanoi
+university of science, vietnam national university, thanh xuan district, hanoi
+vnu university of engineering and technology (vnu-uet), 144 xuan thuy road cau giay dist., hanoi
+vnu university of science, vietnam national university, 334-nguyen trai, thanh xuan, hanoi
+vnu, int sch vnu is, hanoi
+vietnam national university, cau giay hanoi (vnu), 144 xuan thuy, hanoi
+hanoi university of science and tech.
+vnu university of science, vietnam national university, 19 le thanh tong, hanoi
+vietnam national university at hanoi, g7 building, 144 xuan thuy street, cau giay districthanoi
+univ sci sociales & humaines hanoi, sect linguist comparee, dept vietnamol & langage, hanoi
+vietnam national university, hanoi hanoi
+vietnam natl univ, univ engn & technol, fac elect & telecommun, hanoi
+vietnam national university, 144-xuan thuy street, hanoi
+vietnam national university, 334 nguyen trai street, hanoi
+univ engn & technol, fac elect & telecommun, hanoi, vietnam
+vnu university of engineering and technology (vnu-uet)
+hanoi university of science, 19 le thanh tong street, hoan kiem district, hanoi
+vietnam national university, pham van dong road, hanoi
+vnu university of engineering and technology, 144 xuan thuy, hanoi
+vietnam national university, hanoi144 xuan thuy, cau giay, hanoi
+university of science, vietnam national university, 144 xuân thu?, c?u gi?y, hanoi
+vnu univ engn & technol, hanoi, vietnam
+vnu university of science, department of inorganic chemistry, 19 le thanh tong street, hoan kiem discrict, hanoi
+vietnam natl univ, law sci, e1,144 xuan thuy, hanoi 1000000
+vnu univ engn & technol, 144 xuan thuy, hanoi, vietnam
+vnu univ engn & technol, 144 xuan thuy, hanoi, vietnam
+vietnam natl univ hanoi, univ engn & technol, 144 xuan thuy, hanoi 10000
+vietnam natl univ, law, e1,144 xuan thuy, hanoi 1000000
+univ engn & technol, 144 xuan thuy, hanoi 10000, vietnam
+vietnam national university, hanoi 144 xuanthuy road, caugiay, hanoi
+univ engn & technol, vnu hanoi, adv mat & struct lab, 144 xuan thuy, hanoi, vietnam
+hanoi university of science, hanoi, vnu
+university of engineering and technology (uet), vietnam national university in hanoi (vnuh)
+university of science, vietnam national university, 19 lethanh tong hoan kiem, hanoi
+hanoi university of science, 19 le thanh tong, hoan kiem, hanoi
+vnu center for urban studies, vietnam national university, hanoi
+vnu university of science, department of inorganic chemistry, 19 le thanh tong street, hoan kiem district, vietnam hanoi
+vnu - hanoi university of science, nguyen trai, hanoi
+vietnam national university hanoi (vnu)
+vietnam national university, 144 xuan thuy, cau giay district, hanoi
+vietnam national university, e3, 144 xuan thuy, cau giay, hanoi
+university of science, vietnam national university in hanoi, 334 nguyen trai, hanoi
+vietnam national university, hanoi - university of economics and business, faculty of finance and banking, 705 e4, 144 xuanthuy, caugiay dist., hanoi
+vnu univ engn & technol, 144 xuan thuy rd, hanoi, vietnam
+vietnam national university, e4 building, 144 xuan thuy, cau giay, hanoi
+vietnam national university, hanoi (vnu) 144 xuan thuy, cau giay, hanoi
+vietnam national university, hanoi, 334 nguy?n trãi street, hanoi
+hanoi university of science, vietnam national university, hanoi, 19 le thanh tong, hoan kiem, hanoi
+university of engineering and technology (uet), vietnam national university, hanoi (vnuh)
+vietnam natl univ, dept hist, hanoi
+hanoi university of science (vietnam national university, hanoi), 334 nguyen trai, thanh xuan, hanoi
+vietnam natl univ, hist, hanoi
+hanoi university of science, vietnam national university, 334 nguyen trai, thanh xuan district, hanoi
+vietnam national university (vnu), 144 xuan thuy, hanoi
+hanoi university of science, vnu, hanoi
+vnu university of science, vietnam national university, hanoi, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, vietnam national university hanoi, 19 le thanh tong, hoankiem, hanoi
+vietnam national university, 336 nguyen trai, thanh xuan, hanoi
+vietnam natl univ, vnu univ sci, fac biol, hanoi
+vnu univ sci, fac biol, hanoi
+vietnam natl univ, vnu univ sci, key lab enzyme & prot technol, 334 nguyen trai, hanoi
+vnu univ sci, key lab enzyme & prot technol, 334 nguyen trai, hanoi
+university of engineering andtechnology, vnu hanoi
+vnu university of science, vietnam national university, nguyen trai, thanh xuan, hanoi
+vietnam natl univ, univ languages & int studies, hanoi
+vietnam national university, e3 building, 144 xuan thuy, cau giay, hanoi
+vnu-university of science, vietnam national university, hanoi, 334 nguyen trai, thanh xuan, hanoi
+vietnam natl univ hanoi, hanoi
+vietnam natl univ hanoi, fac chem, 19 le thanh tong st, hanoi 100000
+vnu hanoi univ engn & technol, hmi lab, hanoi, vietnam
+vietnam national university, 334 nguyen trai street, thanh xuan, hanoi
+vnu, msi, ifi, hanoi
+vietnam natl univ, grad univ sci & technol, hanoi
+vietnam natl univ, ifi, hanoi
+vnu university of engineering and technology, xuan thuy, hanoi
+hanoi university of science, 334 nguyen trai, thanh xuan district, hanoi
+vietnam national university, 334, nguyen trai str., thanh xuan, hanoi
+hanoi university of science andtechnology, hanoi
+vnu hanoi university of science, nguyen trai, thanh xuan, hanoi
+university of engineering and technology, vnu
+hanoi university of science-vietnam national university, hanoi, 334 nguyen trai street, thanh xuan district, hanoi
+vietnam natl univ, univ social sci & humanities, fac lib & informat sci, floor 4,bldg a,336 nguyen trai rd, hanoi
+vietnam national university, hanoi, 334 - nguyen trai street, hanoi
+univ social sci & humanities, fac lib & informat sci, floor 4,bldg a,336 nguyen trai rd, hanoi
+university of science, vietnam national university, hanoi
+vnu, equipe msi, ifi, hanoi
+university of engineering and technology, vnuh
+hanoi university of science, vietnam national university, 334 nguyen trai road, thanh xuan district, hanoi
+vnu-hanoi, university of engineering and technology, cau giay, hanoi
+university of engineering and technology, vietnam national university, hanoi (vnu)
+university of science–vietnam national university, hanoi
+vnu hanoi university of engineering and technology, hanoi
+vnu-uet
+hanoi univ sci, dept invertebrate zool, fac biol, 325,block t1,334 nguyen trai rd, hanoi
+hanoi university of science, vietnam national university, 334 nguyen trai, hanoi
+hanoi university of science, vnu, 19 le thanh tong street, hoan kiem district, hanoi
+vnu, hanoi university of science, hanoi
+university of engineering and technology, vnu-hn
+hanoi university of science, vietnam national university, hanoi, 334 nguyen trai, thanh xuan, hanoi
+vnu university of science, 334 nguyen trai street, hanoi
+university of engineering and technology, vietnam national university, hanoi (vnu-h)
+grad univ sci & technol, 18 hoang quoc viet str, hanoi
+vnu department of academic affairs, hanoi law university
+vnu hanoi university of sciencehanoi
+vnu university of science, vietnam national university, hanoi, 334 nguyen trai road, thanh xuan district, hanoi
+hanoi univ sci, hanoi
+hanoi university of science, vietnam national university, hanoi, 334 nguyen trai, hanoi
+vnu hanoi university of science, 334 nguyen trai, hanoi
+hanoi university of science, vietnam national university, 334 nguyen trai road, hanoi
+vnu - hanoi university of science, hanoi
+vnu university of science, 334 nguyen trai road, hanoi
+vnu university of science, hanoi. 19 le thanh tong street, hanoi
+vnu university of engineering and technology (vnu-uet), 144 xuan thuy road, cau giay, hanoi
+vietnam natl univ, hanoi univ sci, res ctr environm monitoring & modeling, hanoi
+vnu key laboratory for smart integrated systems, vnu university of technology and engineering, hanoi
+vnu-uet, hanoi
+vietnam natl univ, ctr nat resources & environm studies, hanoi
+vietnam natl univ, dept environm sci, hanoi
+vietnam natl univ, anthropol, hanoi
+vietnam national university, hanoi, 144 xuan thuy street, cau giay, hanoi
+vnu-hanoi university of science, 19 le thanh tong, hanoi
+vnu hanoi univ sci, fac chem, 334 nguyen trai, hanoi
+vnu hanoi univ sci, fac chem, 334 nguyen trai, hanoi
+vnu-university of science, 334 nguyen trai, hanoi
+vnu-university of engineering and technology, 144 xuan thuy, hanoi
+vnu univ sci, 334 nguyen trai, hanoi
+hanoi university of science, vietnam national university, 334 nguyen trai, thanh xuan, hanoi
+vnuh univ engn & technol, fac informat technol, hanoi, vietnam
+vnu-hanoi, vietnam-japan university, tu liem, hanoi
+vnu university of science, vietnam national university, hanoi, 19 le thanh tong street, hanoi
+univ sci, dept comp sci, hanoi
+vietnam national universityhanoi
+hanoi (vnu), 144 xuan thuy, cau giay, hanoi
+vietnam national university, vnu university of science, hanoi
+vnu univ engn & technol, fac engn phys & nanotechnol, 144 xuan thuy, hanoi, vietnam
+vnu univ sci, fac phys, 334 nguyen trai, hanoi
+vnu univ engn & technol, fac engn phys & nanotechnol, 144 xuan thuy, hanoi, vietnam
+university of engineering and technology, vietnam national university hanoi vnuh
+grad univ sci & technol, 18 hoang quoc viet, hanoi
+vietnam natl univ, univ econ & business, fac polit econ, hanoi
+university of engineering and technology, vnu-hn hanoi
+vnu univ social sci & humanities, block d,336 nguyen trai, hanoi
+grad univ sci & technol, 18 hoang quoc viet rd, hanoi
+hanoi university of science (hus), vietnam national university (vnu), 334 nguyen trai, thanh xuan district, hanoi
+vnu university of science, 19 le thanh tong street, hoan kiem district, hanoi
+hanoi univ sci, nano & energy ctr, vnu, hanoi
+vietnam national university of hanoi, vietnam-australia building, luu huu phuoc street, my dinh i, nam tu liem, hanoi
+v n u university of science, vietnam national university, 334 nguyen trai, thanh xuan, hanoi
+vnu univ sci, dept meteorol & climate change, hanoi
+vietnam national university, no. 144 xuan thuy street, cau giay district, hanoi
+vnu-hanoi, vietnam japan university, hanoi
+vietnam natl univ, univ econ & business, fac business adm, hanoi
+vietnam national university at hanoi, hanoi
+vietnam natl univ, univ econ & business, hanoi
+hanoi university of science-vnu, 334 nguyen trai, thanh xuan, hanoi
+vnu key laboratory “multiscale simulation of complex systems”, vnu university of science, vietnam national university, 334 nguyen trai street, thanh xuan, hanoi
+vnu hanoi univ sci, 334 nguyen trai, hanoi
+vietnam natl univ, vnu univ sci, hanoi
+univ sci, vietnam natl univ, res grp physiol & applicat microorganisms, pham grp,ctr life sci res,fac biol, 334 nguyen trai, hanoi
+univ sci, vietnam natl univ, fac biol, dept microbiol, 334 nguyen trai, hanoi
+hanoi univ sci, fac geog, hanoi
+vnu university of science, vietnam national university, 334 nguyen trai, hanoi
+
+
+
+Representative: Vietnam National University, Ho Chi Minh City
+Representative ID: 2
+Processing IDS:
+vnu%hcm
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vnu%hcm%'
+hcm%vnu
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%hcm%vnu%'
+vietnam natl univ%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam natl univ%ho chi minh%'
+ho chi minh%vietnam natl univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%vietnam natl univ%'
+vietnam national univ%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam national univ%ho chi minh%'
+ho chi minh%vietnam national univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%vietnam national univ%'
+ho chi minh%int univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%int univ%'
+int univ%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%int univ%ho chi minh%'
+ho chi minh%international univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%international univ%'
+international univ%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%international univ%ho chi minh%'
+vietnam natl univ%int univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam natl univ%int univ%'
+int univ%vietnam natl univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%int univ%vietnam natl univ%'
+vietnam national univ%international univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam national univ%international univ%'
+international univ%vietnam national univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%international univ%vietnam national univ%'
+ho chi minh%univ technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%univ technol%'
+univ technol%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%univ technol%ho chi minh%'
+university of technol%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%university of technol%ho chi minh%'
+ho chi minh%university of technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%university of technol%'
+hcmcut
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%hcmcut%'
+bach khoa%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%bach khoa%ho chi minh%'
+ho chi minh%univ informat technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%univ informat technol%'
+univ informat technol%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%univ informat technol%ho chi minh%'
+ho chi minh%university of information technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%university of information technol%'
+university of information technol%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%university of information technol%ho chi minh%'
+vietnam national univ%university of information technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam national univ%university of information technol%'
+university of information technol%vietnam national univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%university of information technol%vietnam national univ%'
+ho chi minh%university of science
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%university of science%'
+university of science%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%university of science%ho chi minh%'
+ho chi minh%univ sci
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%univ sci%'
+univ sci%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%univ sci%ho chi minh%'
+university of information technol%ho chi minh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%university of information technol%ho chi minh%'
+ho chi minh%university of information technol
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%ho chi minh%university of information technol%'
+vietnam national university, ho chi minh city
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 2 FROM organizes o WHERE o.name LIKE '%vietnam national university, ho chi minh city%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vnua%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam natl univ agr%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam national university of agriculture%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vnuf%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam natl univ forestry%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam national university of forestry%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam natl univ%hanoi%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%hanoi%vietnam natl univ%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam national university%hanoi%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%hanoi%vietnam national university%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%science and techno%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%vietnam acad sci & technol%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%ho chi minh%university of technology and education%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%university of technology and education%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%ho chi minh%univ technol & edu%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%univ technol & edu%ho chi minh%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%university of food industry%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%univ food ind%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%univ%foreign language%informat%techno%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%rmit%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 2 AND o.name LIKE '%hutech%'
+
+Organizations of this representative have one of those 753 segments:
+ho chi minh city university of technology, ho chi minh city
+vnu-ho chi minh university of science, ho chi minh city
+ho chi minh city university of science, vietnam national university, ho chi minh
+faculty of computer science and engineering of ho chi minh city, university of technology, vietnam national university
+budapest university of technology and economics, magyar tudósok korútja 2, budapest, hungary, division of knowledge and system engineering for ict (kse-ict), faculty of information technology, ton due thang university, ho chi minh city
+vietnam natl univ ho chi minh city, sch med, obstet & gynecol, ho chi minh
+ho chi minh city university of technology (hcmut), vietnam national university ho chi minh city (vnu-ho chi minh), 268 ly thuong kiet st, dist. 10, ho chi minh city
+international university - vnu-ho chi minh city, ho chi minh
+ho chi minh city univ technol, fac elect & elect engn, dept power syst, ho chi minh city
+ho chi minh city univ technol, elect engn, ho chi minh city
+vietnam national university ho chi minh city-university of science, faculty of biology, 227 nguyen van cu, district 5, ho chi minh city
+university of science, national university of ho chi minh
+university of science, vietnam national university ho chi minh city, 227 nguyen van cu street, ho chi minh city
+vietnam natl univ, ho chi minh city
+ho chi minh city, univ sci
+ho chi minh city university of technology, 268 ly thuong kiet st., dist. 10, ho chi minh
+ho chi minh city university of technology - vnuhcm, district 10, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh city
+ho chi minh city university of technology (vnu-ho chi minh), 268 ly thuong kiet str., ho chi minh city
+ho chi minh city university of technology - vnu-ho chi minh, 268 lythuongkiet street, 14 ward, 10 district, ho chi minh city
+ho chi minh city university of technology (hcmut), ho chi minh city
+ho chi minh city university of technology - vnu-ho chi minh, 268 ly thuong kiet street, ward 14, district 10, ho chi minh city
+hcmut-vnuhcm
+ho chi minh city university of technology, faculty of computer science and engineering, 268 ly thuong kiet, q10, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh 268 ly thuong kiet str., 10th dist., ho chi minh city
+univ sci ho chi minh city, ho chi minh city
+ho chi minh city international university, vietnam national university ho chi minh city
+vietnam natl univ, univ sci, lab stem cell res & applicat, 227 nguyen van cu,dist 5, ho chi minh city
+ho chi minh university of technology, 268 ly thuong kiet, district 10, ho chi minh
+bach khoa university (vnu-ho chi minh), 268 ly thuong kiet str., ho chi minh city
+university of science, vnu- ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+university of science (vnu-ho chi minh), 227 nguyen van cu str., ho chi minh city
+national university - ho chi minh city, university of technology
+ho chi minh city university of technology, vnuhcm, ho chi minh
+university of technology, ho chi minh city national university
+vietnam natl univ ho chi minh city, int univ, linhtrung ward, quarter 6, ho chi minh city
+ho chi minh university of technology, ho chi minh city national university
+university of science, 227 nguyen van cu, dist. 5, ho chi minh city
+ho chi minh city university of technology, vnu, ho chi minh, ho chi minh
+bach khoa university, vietnam national university, ho chi minh city
+ho chi minh city int univ
+university of information technology, vnu, ho chi minh city
+vnuhcm - university of science, 227 nguyen van cu, ho chi minh city
+university of science, vnu-ho chi minh city, 227 nguyen van cu street, ho chi minh city
+university of information technology, vietnam national university, ho chi minh city, ho chi minh city
+university of science, vietnam national university ho chi minh city, 227 nguyen van cu street, ward 4, district 5, ho chi minh city
+vietnam natl univ, univ social sci & humanities, ho chi minh city
+university of science, national university - ho chi minh city, ho chi minh city
+vietnam national university school of medicine, linh trung ward, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet st, district 10, ho chi minh city
+bach khoa university (bku), ho chi minh city
+vnuhcm univ sci, fac biol & biotechnol, dept genet, mol biol lab, ho chi minh
+ho chi minh city international university, ho chi minh city
+university of science, ho chi minh city-vnu, ho chi minh city
+vnuhcmc-university of science, center for bioscience and biotechnology, 227 nguyen van cu, ho chi minh
+vietnam national university ho chi minh city, 6 quarter, thu duc district, ho chi minh city
+vnuhcmc-university of science, laboratory of molecular biotechnology, 227 nguyen van cu, ho chi minh
+vnuhcmc-university of science, department of microbiology, 227 nguyen van cu, ho chi minh
+international university (iu), vietnam national university, ho chi minh city
+university of information technology, km20 xa lo hanoi, thu duc district, ho chi minh city
+int univ, anat, ho chi minh
+ho chi minh city university of technology - vietnam (hcmut)
+ho chi minh city univ technol, dept heat & refrigerat engn, ho chi minh city
+university of science-vietnam national university ho chi minh city
+international university, vietnam national university - ho chi minh city, linh trung ward, thu duc district, ho chi minh city
+university of science, 227 nguyen van cu str, dist 5, ho chi minh city
+ho chi minh city university of technology, vnu ho chi minh city, 268, lythuongkiet, ho chi minh city
+university of science vnu-ho chi minh, ho chi minh
+ho chi minh city university of technology, ho chi minh national university, department of biotechnology, faculty of chemical engineering, ho chi minh city
+vietnam natl univ, int univ, sch business, linh trung ward, quarter 6, ho chi minh city
+vietnam natl univ ho chi minh city, int univ, sch business, ho chi minh city
+university of technology, ho chi minh city university of technology, no. 268, ly thuong kiet street, district 10, ho chi minh city
+international university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+vietnam natl univ social sci & humanities, ho chi minh city
+university of science, ho chi minh
+vietnam national university, ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+international university, vnu-ho chi minh, block 6, linhtrung ward, ho chi minh city
+vietnam natl univ, univ sci, dept informat technol, ho chi minh
+vietnam national university, ho chi minh city, 227 nguyen van cu road, district 5, ho chi minh city
+university of science, 227 nguyen van cu, ho chi minh city
+international university, vnu, ho chi minh city
+vietnam national university, 10-12 dinh tien hoang street, ben nghe ward, district 1, ho chi minh city
+vietnam national university, ho chi minh city, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh city university of science, vietnam national university, ho chi minh city
+univ sci, vnu ho chi minh, lab stem cell res & applicat, ho chi minh city
+univ sci, vnu ho chi minh, biol fac, ho chi minh city
+ho chi minh city university of technology – vietnam national university
+international university, vnu ho chi minh city, quarter 6, linh trung, thu duc district, ho chi minh city
+international university, vietnam national university, thu duc district, ho chi minh city
+bach khoa univ, fac civil engn, ho chi minh
+ho chi minh city university of technology, vnu-ho chi minh, district 10, 268 ly thuong kiet, ho chi minh city
+international university, vietnam national university, ho chi minh
+ho chi minh university of technology, 268 ly thuong kiet, district 10, ho chi minh city
+univ sci, vnu ho chi minh, fac biol & biotechnol, ho chi minh
+international university, vnu-ho chi minh city, quarter 6, linh trung, thu duc district, ho chi minh city
+university of science, 227 nguyen van cu str. district 5, ho chi minh city
+univ sci, vietnam natl univ ho chi minh city, fac environm sci, 227 nguyen van cu str,dist 5, ho chi minh city
+vietnam natl univ, univ sci, lab stem cell res & applicat, ho chi minh city, ho chi minh
+vnuhcm-university of science, 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh city university of science, 227 nguyen van cu st., ho chi minh city
+international university, vietnam national university at ho chi minh
+univ sci ho chi minh city, 227 nguyen van cu,dist 5, ho chi minh city
+international university-vietnam, national university of ho chi minh city, ho chi minh city
+university of science, national university, 227 nguyen van cu str., dist. 5, ho chi minh city
+vietnam national university - ho chi minh city (vnu-ho chi minh), community 6, linh trung ward, thu duc district, ho chi minh city
+university of science, vietnam national university, ho chi minh city (vnu-ho chi minh), 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet street, ho chi minh city
+vietnam natl univ, ic design res & educ ctr, ho chi minh city
+international university - vietnam national university ho chi minh city
+vietnam national university ho chi minh city, university of information technology, ho chi minh city
+ho chi minh city university of science – vnu, 227 nguyen van cu st., ward 4, district 5, ho chi minh city
+vietnam natl univ, univ sci, dept math & comp sci, ho chi minh city
+international university – vietnam national university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+international university, vnu-ho chi minh city, ho chi minh city
+university of science, vnu-ho chi minh city, nguyen van cu street, district 5, ho chi minh city
+saigontourist college and international university-vietnam national university
+ho chi minh city university of science, vnu-ho chi minh, ho chi minh city
+university of information technology - vnu-ho chi minh
+ho chi minh city university of technology - vnuhcm
+international university, vietnam national university-ho chi minh city (vnu-ho chi minh), quarter 6, thu duc district, ho chi minh city
+vietnam national university, ho chi minh city, ho chi minh
+vietnam natl univ ho chi minh city, ho chi minh city univ technol, fac elect elect engn, ho chi minh city
+ho chi minh city univ technol, fac elect elect engn, ho chi minh city
+vietnam natl univ ho chi minh city, ho chi minh city univ technol, dcselab, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university ho chi minh city (vnu-ho chi minh)
+university of information technology (uit), ho chi minh city
+university of information technology, vietnam national university ho chi minh city
+university of science, 227 nguyen van cu street, ward 4, district 5, ho chi minh city, ho chi minh city
+ho chi minh city university of technology, vietnam national university, ho chi minh city
+university of science, vnu-ho chi minh city
+vietnam national university, ho chi minh city
+international university, vietnam national university
+university of technology, vietnam national university–ho chi minh city, ho chi minh city
+international university–vietnam national university of ho chi minh city
+ho chi minh city university of technology, 106 blg8, 168 ly thuong kiet, dist.10, ho chi minh city
+university of information technology, national university ho chi minh city
+vo anh kha ho chi minh city university of technology, vnu-ho chi minh
+ho chi minh university of technology, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong kiet street, ho chi minh city
+ho chi minh city univ technol, dept civil engn, 268 ly thuong kiet st,dist 10, ho chi minh
+university of information technology, vietnam national university, ho chi minh city
+university of information technology, vietnam national university, ho chi minh city
+ho chi minh city, university of information technology
+international university, vietnam national university-ho chi minh, ho chi minh city
+university of science, vietnam national university, (vnu-ho chi minh city), ho chi minh city
+international university, ho chi minh city
+vietnam natl univ ho chi minh, int univ, ho chi minh
+international university, vietnam national university-ho chi minh city (vnu-ho chi minh city), ho chi minh city
+ho chi minh city university, university of technology
+vietnam national university ho chi minh city (vnu-ho chi minh), university of science, 227 nguyen van cu street, district 5, ho chi minh city
+vietnam national university at ho chi minh city, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university ho chi minh city (vnu-ho chi minh), ho chi minh city
+vnu ho chi minh city, university of science
+ho chi minh university of science, ho chi minh city
+international university - vietnam national university, ho chi minh city
+university of science, ho chi minh city
+international university-vnuhcm, quarter 6 linh trung, thu duc ho chi minh city
+ho chi minh city university of technology, ho chi minh city vietnam national university, ho chi minh city
+international university, vnu-ho chi minh city
+vietnam national university at ho chi minh city, linh trung, thu duc, ho chi minh city
+ho chi minh city international university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong kiet, district 10, ho chi minh city
+university of information technology, vietnam national university of ho chi minh city, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet street, ward 14, district 10, ho chi minh city
+ho chi minh city university of science, 227 nguyen van cu street, ward 4, district 5, ho chi minh city
+vnuhcm-university of science, 227, nguyen van cu street, ho chi minh city
+univ sci vnu ho chi minh, dept comp vis & robot, ho chi minh
+international university—vietnam national university ho chi minh city, block 6, linh trung ward, thu duc district, ho chi minh city
+international university-vietnam national university, ho chi minh city, quarter 6, linh trung ward, ho chi minh city
+international university, kp6, linh trung, thu duc, ho chi minh city
+ho chi minh city university of technology – vnu-ho chi minh, ho chi minh city
+university of information technology, ho chi minh city, ho chi minh city
+university of information technology, vnu-ho chi minh, ho chi minh
+ho chi minh city university of technology, ho chi minh national university
+vnuhcm - the university of science, ho chi minh city
+ho chi minh city univ sci, dept phys, 227 nguyen van cu, ho chi minh city
+vietnam national university ho chi minh city, room 608, vnu-ho chi minh administrative building, quarter 6, linh trung ward, thu duc district, ho chi minh city
+university of information technology, vnu ho chi minh city, ho chi minh city
+ho chi minh city university of technology
+vietnam natl univ ho chi minh, int univ, sch biotechnol, quarter 6,linh trung ward, ho chi minh city 70000
+university of information technology - vietnam, km 20, hanoi highway, linh trung ward, thu duc district, ho chi minh city
+univ sci, lab stem cell res & applicat, ho chi minh
+univ sci, vnu ho chi minh, lab stem cell res & applicat, ho chi minh
+university of information technology, vietnam national university of ho chi minh city, thu duc district, linh trung ward, ho chi minh city
+university of science vnu-ho chi minh, 227 nguyen van cu street, ho chi minh
+ho chi minh city university of science, 227 nguyen van cu street, district 5, ho chi minh city
+university of science, vnu-ho chi minh, ho chi minh
+ho chi minh city university of technology, vietnam national university - ho chi minh city, ho chi minh city
+university of technology, vietnam national university ho chi minh city, 268 ly thuong kiet, ho chi minh city
+int univ, ho chi minh city
+ho chi minh city university of technology, vnu power electronics research lab, ho chi minh city
+university of science, vietnam national university-ho chi minh city
+vietnam national university - ho chi minh city, university of science, faculty of environmental science, 227 nguyen van cu str., dist.5, ho chi minh city
+vietnam national university ho chi minh city, university of science, 227 nguyen van cu st., w4, d5, ho chi minh city
+ho chi minh city international university, vietnam national university, ho chi minh city
+ho chi minh international university-vietnam national university, block 6, linh trung ward, thu duc district, ho chi minh city
+international university, vietnam national university, ho chi minh city
+vietnam national university of ho chi minh city, ho chi minh
+university of technology, vietnam national university - ho chi minh, district 10, ho chi minh city
+university of science, vnu - ho chi minh
+university of economics and law–vietnam national university (ho chi minh city), ho chi minh city
+ho chi minh city university of technology, district 10, ho chi minh city
+univ sci vnuhcm, dept analyt chem, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet, ho chi minh city
+ho chi minh city university of technology, ho chi minh
+ho chi minh city university of technology, vietnam national university - ho chi minh city, 268 ly thuong kiet street, district 10, ho chi minh city
+university of science, vietnam national university ho chi minh city, ho chi minh city
+university of science, ho chi minh city national university, no. 227 nguyen van cu street, ward 4, district 5, ho chi minh city
+ho chi minh university of technology
+int univ vnu ho chi minh city, dept english, ho chi minh city
+univ sci, dept comp vis & robot, thu duc, ho chi minh
+school of medicinevietnam national university ho chi minh city, linh trung, thu dú'c, ho chi minh
+university of science, vietnam national university ho chi minh city, 227 nguyen van cu, district 5, ho chi minh city
+university of technology, vietnam national university-ho chi minh city (vnu-ho chi minh), ho chi minh city
+international university (vnu-ho chi minh), quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city university of technology ho chi minh b2015-20-02, 268 ly thuong kiet street, district 10, ho chi minh city
+vietnam natl univ, univ sci, lab res & applicat stem cell, ho chi minh city
+univ sci, lab res & applicat stem cell, ho chi minh city
+university of technology, vietnam national university ho chi minh city, 268 ly thuongkiet, dist. 10, ho chi minh
+university of science, vietnam national univeristy, ho chi minh city
+chi minh city university of technology, ho chi minh city
+bach khoa university, vnu-ho chi minh, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh city university of technology, vnu–ho chi minh, ho chi minh city
+school of biotechnology of ho chi minh international university, vietnam national university, ho chi minh city
+ho chi minh city university of technology, ward 14, 68 ly thuong kiet street, district 10, ho chi minh city
+university of science, 227 nguyen van cu, district 5, ho chi minh city
+university of technology, vietnam national university ho chi minh city (vnuhcm), 268 ly thuong kiet st, 10th dist., ho chi minh city
+vietnam natl univ ho chi minh city, int univ, ho chi minh city
+ho chi minh city university of technology, vietnam national university-ho chi minh city, ho chi minh city
+ho chi minh city univ technol, ho chi minh city
+ho chi minh city university of science, vietnam national university ho chi minh city, 227 nguyen van cu q 5, ho chi minh city
+university of science, vnu-ho chi minh city, ho chi minh city
+university of science, 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh city university of technology, 10th district, 268 ly thuong kiet street, ho chi minh city
+vietnam national university-ho chi minh city, materials technology key laboratory (mtlab), 268 ly thuong kiet, ho chi minh city
+university of science, vnu-ho chi minh city, 227 nguyen van cu str. dist. 5, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university, faculty of materials technology, 268 ly thuong kiet, ho chi minh city
+vietnam national university-ho chi minh(vnu-ho chi minh), ho chi minh city
+vietnam national university - ho chi minh city vietnam (vnuhcm)
+vietnam natl univ, john von neumann inst, ho chi minh 70000
+department of physicsho chi minh international university-vnu, block 6, linh trung ward, ho chi minh city
+ho chi minh university of science-vnu, 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh city university of technology - vnu ho chi minh, 268 ly thuong kiet street, district 10, ho chi minh city
+international university, vietnam national university-ho chi minh city
+vietnam national university-ho chi minh city, faculty of chemistry, university of science, 227 nguyen van cu, district 5, ho chi minh city
+university of technology, vietnam national university in ho chi minh city, 268 ly thuong kiet street, district 10, ho chi minh city
+vietnam national university-ho chi minh city, cancer research laboratory, ho chi minh city
+vietnam natl univ, ctr innovat mat & architectures, ho chi minh city 721337
+vnuhcm–university of science, 227 nguyen van cu street227 nguyen van cu street, district 5, ho chi minh city
+university of science, vietnam national university – ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh (ho chi minh) city university of technology, ho chi minh
+vietnam national university – ho chi minh city, linh trung, thu duc district, ho chi minh city
+international university, vietnam national university, ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+university of science, vnu-ho chi minh city, 227 nguyen van cu, dist. 5, ho chi minh
+university of science, vietnam national university, 115 hospital, ho chi minh city
+university of science – vnuhcm, 225 nguyen van cu, ho chi minh city
+international university - vietnam national university ho chi minh, block 6, linh trung, thu duc, ho chi minh city
+ho chi minh city university of technology, vietnam natl. university– ho chi minh city
+international university-vietnam national university ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+vnuhcm-university of science, 227, nguyen van cu street, district 5, ho chi minh city
+ho chi minh city university of technology (ho chi minh cityut), ho chi minh city
+vnu university of science, ho chi minh city
+vietnam natl univ, univ sci, lab stem cell res & applicat, ho chi minh city
+ho chi minh city university of technology -vnu
+univ sci, lab stem cell res & applicat, ho chi minh city
+vietnam natl univ, lab res & applicat stem cell, univ sci, ho chi minh city
+univ sci, ho chi minh city
+international university - vnu ho chi minh, ho chi minh
+university of science, ho chi minh-vnu, ho chi minh city
+vietnam natl univ, natl key lab digital control & syst engn, ho chi minh city
+international university, vnu-ho chi minh, linh trung, thu duc, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet str., district 10, ho chi minh city
+university of information technology, vnu-ho chi minh, ho chi minh city
+vietnam natl univ, univ sci, ho chi minh city
+university of science, vietnam national university, ho chi minh city
+ho chi minh city university of technology, vietnam national university ho chi minh city, 268 ly thuong kiet st., ho chi minh city
+university of technology, vietnam national university, ho chi minh city
+international university, vietnam national university ho chi minh city
+international university, national university in ho chi minh city, ho chi minh city
+vietnam national university in ho chi minh city
+int univ vnuhcm, sch comp sci & engn, ho chi minh city
+hcmut, vnu-ho chi minh
+ho chi minh city univ technol, dept elect & elect engn, ho chi minh city
+university of science, vnu-ho chi minhs, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh
+ho chi minh city university of technology, address: 268 ly thuongkietstreet, district 10, ho chi minh
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong kiet, ho chi minh city
+university of information technology, faculty of information technology, industrial university of ho chi minh city, ho chi minh city
+university of technology-vnuhcm
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong, kiet street, district 10, ho chi minh city
+university of technology-vnuhcm, ho chi minh city
+university of science, vietnam national university in ho chi minh city, 227 nguyen van cu, ho chi minh city
+ho chi minh city, university of science
+vnuhcm-university of science, 227 nguyen van cu, dist. 5, ho chi minh city
+university of information technology, vnu-ho chi minh, kp6, linh trung, thu duc, ho chi minh city
+international university of vietnam national university, ho chi minh city
+university of science, molecular genetics and genomics research group, cancer research laboratory, vnu-ho chi minh
+ho chi minh city university of technology-vietnam national university, ho chi minh city
+university of science, department of genetics, faculty of biology and biotechnology, vnu-ho chi minh, 227 nguyen van cu street, ward 4, ho chi minh city
+international university, vietnam national university, ho chi minh city (vnu-ho chi minh)
+institute for environment and resources (ier) – vietnam national university ho chi minh city (vnu ho chi minh), ho chi minh city
+vnu-hcmus
+ho chi minh university of science, 227 nguyen van cu str., dist. 5, ho chi minh city
+ho chi minh city university of information technology, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu, ho chi minh city
+ho chi minh city university of science, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu, ho chi minh city
+university of information technology, vnu-ho chi minh
+university of science, vnu-ho chi minh
+vnuhcm-university of science, ho chi minh city
+bach khoa university, vietnam national university in ho chi minh city, 268 ly thuong kiet street, district 10, ho chi minh city
+international university, vietnam national university in ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+university of science, vnu-ho chi minh, 227 nguyen van cu street, district 5, ho chi minh city
+university of information technology, vnu-ho chi minh, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet, district 10, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh, ho chi minh city
+university of information technology, vietnam national university ho chi minh city, faculty of computer networks and communications, dept. of computer networks, 6 quarter, linh trung ward, thu duc district, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu str., 5 dist, ho chi minh city
+university of science, john von neumann institute, vnu-ho chi minh
+university of science, university of information technology, vnu-ho chi minh
+university of technology, ho chi minh city
+university of information technology (uit), vietnam national university of ho chi minh city, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university, ho chi minh city
+ho chi minh city university of technology (hcmut)
+international university - ho chi minh city, vietnam national university
+vnuhcm - university of science, 227 nguyen van cu str., dist. 5, ho chi minh city
+int univ, ho chi minh
+vietnam national university – ho chi minh city, 227 nguyen van cu street, award 4, district 5, ho chi minh city
+university of science (ho chi minh vnu)
+university of information technology, linh trung ward, thu duc dist, ho chi minh city
+ho chi minh city university of science - vnu, 227 nguyen van cu st. district 5, ho chi minh city
+national university of science, linh trung campus, thu duc district, ho chi minh city
+university of science, vietnam national university ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+vnuhcm–university of science, 227 nguyen van cu street, ho chi minh city
+univ sci, lab stem cell res & applicat, vnu ho chi minh, ho chi minh city
+vnuhcm–school of medicine and pharmacy
+vietnam natl univ, univ sci, dept anim physiol & biotechnol, ho chi minh city
+university of science vnu-ho chi minh city, ho chi minh city
+univ sci, dept anim physiol & biotechnol, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet street-distric10, ho chi minh city
+vietnam national university—ho chi minh city, quarter 6, linh trung, thu duc, ho chi minh city
+bach khoa university (formerly known as ho chi minh city university of technology (hcmut)), ho chi minh city
+university of science, vnu-ho chi minh city, district 5, ho chi minh city
+university of technology, vnu-ho chi minh, 268 ly thuong kiet str. dist. 10, ho chi minh city
+vietnam national university ho chi minh city (vnuhcm) – university of science, 227 nguyen van cu street, district 5, ho chi minh city
+vietnam natl univ ho chi minh city, inst environm & resources, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu street, ho chi minh city
+ho chi minh international university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+vietnam natl univ ho chi minh city vnu ho chi minh
+ho chi minh city university of technology – vietnam national university, ho chi minh city
+vietnam natl univ ho chi minh city vnu ho chi minh, ctr water management & climate change wacc, quarter 6,linhtrung ward, ho chi minh city
+university of science, national university of ho chi minh city, 227 nguyen van cu, ho chi minh city, ho chi minh
+ho chi minh city university of technology, vietnam national university (vnu–ho chi minh), 268 ly thuong kiet, district 10, ho chi minh city
+ho chi minh city university of technology, vietnam national university (vnu–ho chi minh), 268 ly thuong kiet, district 10, ho chi minh city
+international university - vnu ho chi minh
+university of technology, vietnam national university - ho chi minh, no. 268 ly thuong kiet street, district 10, ho chi minh city
+university of science, vnu-ho chi minh, 227 nguyen van cu street, award 4, district 5, ho chi minh city
+vietnam natl univ, john von neumann inst, ho chi minh city
+univ sci vnuhcm, 227 nguyen van cu st, ho chi minh city
+vietnam national university - ho chi minh city (vnu-ho chi minh)
+university of science - vietnam national university ho chi minh city, 227 nguyen van cu street, ho chi minh city
+university of information technology, vietnam national university-ho chi minh city, thu duc district, ho chi minh city
+vietnam national university, 227 nguyen van cu, dist.1, ho chi minh city, ho chi minh city
+international university, vietnam national university-ho chi minh city, thu duc district, ho chi minh city
+university of technology -vnu ho chi minh, 268 ly thuong kiet str., distr. 10, ho chi minh city
+international university, vietnam national university-ho chi minh city (vnu-ho chi minh), ho chi minh city
+international university, vietnam national university-ho chi minh city (vnu-ho chi minh)
+univ sci, vnuhcm, fac informat technol, ho chi minh city
+vietnam natl univ, fac environm, univ sci, ho chi minh city
+ho chi minh university of technology, 144/24, dien bien phu, binh thanh district, ho chi minh city
+vietnam natl univ, univ sci, fac environm, ho chi minh city
+vnu-ho chi minh - university of science, ho chi minh city
+vietnam national university ho chi minh
+international university – vietnam national university - ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city univ technol, fac informat technol, ho chi minh
+vnuhcm - university of science, ho chi minh city
+vietnam natl univ, john von neumann inst, quantitat computat finance lab, ho chi minh city
+vietnam natl univ, john von neumann inst, linh trung ward, vnu it pk, ho chi minh city
+vietnam national university - ho chi minh city community, 6, linh trung ward, thu duc district, ho chi minh city
+int univ, sch comp sci & engn, ho chi minh city
+university of science, vietnam national university - ho chi minh city, 227 nguyen van cu st., dist. 5, ho chi minh city
+univ informat technol, comp engn fac, ho chi minh
+ho chi minh international university, vnu, block 6, linh trung ward, thu duc district, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu, district 5, ho chi minh city
+ho chi minh city univ technol, vnuhcm, fac comp sci & engn, ho chi minh city
+univ sci, fac math & comp sci, ho chi minh city
+head off vietnam natl univ, ho chi minh city
+university of science, vietnam national university ho chi minh city (vnu-ho chi minh), ho chi minh city
+vnuhcm-university of science, 227 nguyen van cu street, ho chi minh city
+ho chi minh univ technol hcmut, fac civil engn, ho chi minh city
+vietnam national university, ho chi minh city (vnu-ho chi minh), ho chi minh
+ho chi minh city univ technol, vnu ho chi minh, fac comp sci & engn, hpc lab, ho chi minh city
+ho chi minh city univ technol, vnu ho chi minh, fac civil engn, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu street, district 5, ho chi minh city
+university of technology, vietnam national university, ho chi minh
+vietnam national university, ho chi minh university of science, 227 nguyen van cu, district 5, ho chi minh city
+vnu international university, school of electrical engineering, ho chi minh
+international university-vietnam national university
+ho chi minh city international university, vietnam national university ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet street, district 10, ho chi minh city
+international university, vietnam national university in ho chi minh city
+vietnam natl univ hochiminh city, ho chi minh city int univ, sch biotechnol, quarter 6, ho chi minh city
+vietnam natl univ, ho chi minh city int univ, sch biotechnol, ho chi minh city
+ho chi minh city university of technology, vietnam, ho chi minh city
+university of information technology in vnuhcm
+univ sci, dept plant biotechnol, 227 nguyen van cu, ho chi minh city
+international university, ho chi minh city vietnam national university
+international university of ho chi minh city, school of computer science and engineering, quarter 6, linh trung, thu duc, ho chi minh
+university of technology, vnuhcm, no 268, ly thuong kiet street district 10, ho chi minh city
+ho chi minh city university of technology, vnuhcm, 268 ly thuong kiet street, ho chi minh city
+vietnam national university ho chi minh city, 227 nguyen van cu str., dist. 5, ho chi minh city
+ho chi minh city univ technol, fac informat technol, ho chi minh city
+international university, vietnam national university ho chi minh city, linh trung, thu duc, ho chi minh city
+university of science - vnuhcm, 227-nguyen van cu street, 5th district, ho chi minh city
+vietnam national university, ho chi minh city (vnu-ho chi minh), quart 6, linh trung ward, thu duc district, ho chi minh city
+vietnam national university ho chi minh city (vnuhcm), university of science, 227 nguyen van cu street, district 5, ho chi minh city
+vietnam natl univ ho chi minh city, univ sci, 227 nguyen van cu st,dist 5, ho chi minh city
+university of science, vietnam national university, ho chi minh city, ho chi minh city
+international university-vietnam national university, ho chi minh
+international university - vnu ho chi minh city, ho chi minh city
+univ informat technol, vnu ho chi minh, multimedia commun lab, ho chi minh city
+ho chi minh city univ technol, vnu ho chi minh
+ho chi minh city univ technol, vnu ho chi minh, ho chi minh city
+ho chi minh city univ technol, vnu ho chi minh, fac comp sci & engn, ho chi minh city
+university of science ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+university of science, vnuhcm, 227 nguyen van cu str., dist. 5, ho chi minh city
+international university, vietnam national university-ho chi minh
+university of science, nguyen van cu st., ho chi minh city
+ho chi minh city university of technology, department of electrical engineering, faculty of electrical and electronic engineering, district 10, ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu q5, ho chi minh city
+vietnam national university - ho chi minh city (vnu-ho chi minh), quarter 6, linhtrung ward, thu duc district ho chi minh city
+university of information technology, department of knowledge engineering and machine learning, ho chi minh city
+univ informat technol, ho chi minh city
+univ informat technol, vnu ho chi minh city, ho chi minh
+univ sci, vnu ho chi minh city, ho chi minh
+univ sci, vnu ho chi minh city, ho chi minh city
+ho chi minh city univ technol, vnu, fac elect & elect engn, ho chi minh city
+int univ, vnu ho chi minh city, dept ind & syst engn, ho chi minh city
+ho chi minh city university of technology, ho chi minh city, ho chi minh
+hcmut vnu, fac elect & elect engn, hcm city
+hcmut vnu, power elect res lab, hcm city
+ho chi minh city univ technol
+hcmut vnu, dept mech engn, hcm city
+hcmut vnu, dept ind syst engn, hcm city
+school of electrical engineering international university, vietnam national university
+ho chi minh city univ technol, fac civil engn, ho chi minh city
+vietnam national university—ho chi minh city (vnu—ho chi minh), ho chi minh city
+vietnam national university, center of water management and climate change, ho chi minh city
+ho chi minh city university of technology, department of chemical process and equipment, ho chi minh city
+ho chi minh city univ technol, fac elect & elect engn, ho chi minh city
+bach khoa univ, fac elect & elect engn, ho chi minh city
+vietnam national university - ho chi minh city (vnu - ho chi minh)
+ho chi minh city univ technol, hcmut vnu, fac elect & elect engn, ho chi minh
+bach khoa university, vietnam national university–ho chi minh city, ly thuong kiet street, district 11, ho chi minh city
+international university, vietnam national university–ho chi minh city, quarter 6, linhtrung ward, thu duc district, ho chi minh city
+ho chi minh city univ technol vnu ho chi minh, fac mech engn, dept mechatron, ho chi minh city
+vietnam national university at ho chi minh city
+univ technol, dept elect & elect engn, ho chi minh city
+ho chi minh city univ technol, vnu, power elect res lab, ho chi minh city
+vietnam national university-ho chi minh city (vnu-ho chi minh city), international university
+international university, vietnam national university in ho chi minh city, block 6, linh trung ward, ho chi minh city
+ho chi minh city university of science, 227 nguyen van cu, district 5, ho chi minh city
+university of science – vnuhcm
+ho chi minh city univ technol, sch elect & elect engn, ho chi minh city
+ho chi minh city university of technology- vnuhcm
+ho chi minh city univ sci, dept math & comp sci, 227 nguyen van cu st, ho chi minh city
+international university, vietnam national university, quarter 6, linh trung ward, ho chi minh
+univ informat technol, ho chi minh city
+the ho chi minh city university of technology, ho chi minh city
+ho chi minh city univ technol, control & automat lab, 268 ly thuong kiet,dist 10, ho chi minh city
+ho chi minh city univ technol, fac comp sci & engieering, ho chi minh city
+ho chi minh city univ technol, control & automat lab, 268 ly thuong kiet, ho chi minh city
+ho chi minh city univ technol, fac comp sci & engn, ho chi minh city
+ho chi minh city univ technol, fac comp sci & engn, 268 ly thuong kiet, ho chi minh city
+international university-vietnam national university ho chi minh city (ho chi minh city), ho chi minh city
+ho chi minh city univ technol, fac comp sci & engn, dept comp sci, dept informat syst, ho chi minh city
+international university, vietnam national university-ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+univ technol, petr vietnam chem fertilizer co, ho chi minh city
+vietnam natl univ ho chi minh city, univ informat technol, ho chi minh city
+ho chi minh city univ technol, fac comp sci & engn, vnu ho chi minh, ho chi minh city
+university of science, vnu-ho chi minh, ho chi minh city
+vietnam natl univ, ho chi minh city univ technol, ho chi minh city
+vietnam natl univ ho chi minh city, univ informat technol, fac comp sci, ho chi minh city
+ho chi minh city univ technol, key lab internal combust engine, ho chi minh city
+ho chi minh city univ technol, fac comp engn, ho chi minh city
+international university-vnu, ho chi minh city
+univ informat technol, fac comp engn, ho chi minh city
+ho chi minh city univ technol, vnu ho chi minh, feee, dcselab, ho chi minh city
+ho chi minh univ technol, fac elect elect engn, ho chi minh city
+international university, vietnam national university in ho chi minh city, ho chi minh city
+ho chi minh univ technol, fac elect & elect engn, ho chi minh city
+univ sci, physcis & engn phys fac, phys & comp sci dept, ho chi minh city
+int univ ho chi minh city
+vietnam natl univ, ho chi minh city univ technol, dept elect, ho chi minh city
+ho chi minh city univ technol, dept elect, ho chi minh city
+international university, ho chi minh city national university
+vietnam national university - ho chi minh city (vnu-ho chi minh), quarter 6, linhtrung ward, thu duc district, ho chi minh city
+bach khoa university, ho chi minh city
+university of science, vietnam national university–ho chi minh city, ho chi minh city
+university of technology, national university of ho chi minh city, ho chi minh city
+ho chi minh city university of technology, 475a dien bien phu street, binh thanh district, ho chi minh city
+international university, vietnam national university - ho chi minh city
+university of science, vietnam national university, 227, nguyen van cu street, district 5, ho chi minh city
+university of technology, vnu-ho chi minh, 268 ly thuong kiet str., dist. 10, ho chi minh city
+university of technology, ho chi minh
+univ sci, vnu ho chi minh, fac informat technol, ho chi minh city
+univ informat technol, fac software engn, vnu ho chi minh, ho chi minh city
+ho chi minh city university of technology, vietnam national university, ho chi minh city, 268 ly thuong kiet, district 10, ho chi minh city
+vietnam national university, quarter 6 linh trung ward thu duc district, ho chi minh city
+east asia university of technology, ho chi minh city
+ho chi minh city university of technology, vietnam national university - ho chi minh city, 268 ly thuong kiet st., dist. 10, ho chi minh city
+vietnam national university - ho chi minh city, linhtrung ward, thuduc dist., ho chi minh city
+vietnam national university of ho chi minh city, 142 to hien thanh street, district 10, ho chi minh city
+ho chi minh city university of technology – vietnam national university, ho chi minh city
+ho chi minn city university of technology, vnu-ho chi minh
+vietnam national university, 142 to hien thanh street, ward 14, district 10, ho chi minh city
+vietnam national university ho chi minh city, cancer research laboratory, 227 nguyen van cu, district 5, ho chi minh city
+university of science, vietnam national university ho chi minh city, faculty of chemistry, 227 nguyen van cu, district 5, ho chi minh city
+university of science, vnu ho chi minh, ho chi minh
+vnuhcm-university of science, ho chi minh
+university of technology, vietnam national university-ho chi minh city, ho chi minh city
+university of science, department of genetics, faculty of biology, 227 nguyen van cu street, district 5, ho chi minh city
+vietnam natl univ, univ econ & law, dept econ math, ho chi minh city
+ho chi minh city university of technology, faculty of civil engineering, 268 ly thuong kiet st., ho chi minh city
+univ informat technol, sch comp sci, ho chi minh city
+ho chi minh university of science, ho chi minh
+university of science, national university - ho chi minh city, dist. 5, ho chi minh city
+ho chi minh city university of technology, vietnam national university ho chi minh city (vnu-ho chi minh), ho chi minh city
+university of information technology, ho chi minh
+vnuhcm-university of science, 227 nguyen van cu, ho chi minh city
+international university, vnu-ho chi minh city, thu duc district, ho chi minh city
+ho chi minhc univ sci, ho chi minh city
+faculty of mathematics and computer science university of science, vietnam national university, ho chi minh city 227 nguyen van cu street, district 5, ho chi minh city
+ho chi minh city univ informat technol, fac comp engn, ho chi minh city
+int univ vietnam, natl univ, ho chi minh city
+int univ vietnam, ho chi minh city
+univ sci, vnuhcm, fac biol & biotechnol, ho chi minh city
+int univ, vnuhcm, sch biotechnol, ho chi minh city
+university of science, vietnam national university in ho chi minh, 227 nguyen van cu, district 5, ho chi minh city
+university of information technology, vietnam national university ho chi minh
+bach khoa university, vietnam national university ho chi minh
+vietnam national university-ho chi minh city, university of information technology
+vietnam natl univ ho chi minh, ho chi minh city univ technol, dept civil engn, 268 ly thuong kiet st, ho chi minh city
+ho chi minh city univ technol, dept civil engn, 268 ly thuong kiet st, ho chi minh city
+university of science, vietnam national university-ho chi minh city, ho chi minh city
+university of science, vnu, ho chi minh city
+ho chi minh city university of technology, vnu ho chi minh, ho chi minh city
+vietnam natl univ ho chi minh city, int univ, sch elect engn, ho chi minh city
+biomedical engineering department international university, vietnam national university, ho chi minh
+university of science of ho chi minh city, ho chi minh city
+bach khoa university, university of technology-hcmut, ho chi minh city
+university of science, vietnam university in ho chi minh, 227 nguyen van cu street, ho chi minh city
+university of science-vietnam national university ho chi minh city, 227 nguyen van cu, district 5, ho chi minh city
+vietnam natl univ ho chi minh city, univ sci, ho chi minh city
+international university, vietnam national university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city univ technol, ho chi minh
+university of science, vnuhcm, ho chi minh
+ho chi minh city university of technology, vietnam national university, ho chi minh city, 268 ly thuong kiet st, dist. 10, ho chi minh city
+vietnam national university of ho chi minh city
+university of science, vietnam national university, 227 nguyen van cu, dist.5, ho chi minh city
+ho chi minh city university of technology, 19 nguyen huu tho street, tan phong ward, district 7, ho chi minh city
+bach khoa university, vnu-ho chi minh, 268 ly thuong kiet, district ho chi minh city 10
+ho chi minh univ technol, dept automat control, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet street, district 10,ho chi minh city
+bach khoa university, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh city univ technol, dept biotechnol, ho chi minh city
+grad univ sci & technol, 01 mac dinh chi,dist 1, ho chi minh
+ho chi minh univ technol, dept chem engn, 268 ly thuong kiet,dist 10, ho chi minh
+vnu-ho chi minh, ho chi minh city university of technology
+international university – vietnam national university of ho chi minh city, ho chi minh city
+vietnam national university, university of social science and humanities, ho chi minh city
+ho chi minh city univ technol vnu ho chi minh, 268 ly thuong kiet str, ho chi minh city
+vietnam natl univ ho chi minh city, ho chi minh city int univ, ho chi minh city
+vietnam natl univ, bach khoa univ, ho chi minh city
+bach khoa research center for manufacturing engineering, hcmut, ho chi minh city
+ho chi minh city university of technology, school of industrial management vnu-ho chi minh
+vietnam natl univ, fac econ, univ econ & law, ho chi minh city
+vnuhcm - university of science
+vietnam natl univ ho chi minh city, int univ, ho chi minh
+bach khoa university, vnu-ho chi minh, ho chi minh city
+vietnam national university ho chi minh city-university of science, 227 nguyen van cu, district 5, ho chi minh city
+international university, vietnam national university ho chi minh city, ho chi minh city
+university of technology—vietnam national university, ho chi minh city
+ho chi minh city international university, ho chi minh
+international university - vietnam national university, ho chi minh city
+bach khoa university (vnu-ho chi minh), 268 ly thuong kiet, district 10, ho chi minh city
+multimedia communications laboratory at university of information technology, vietnam national university, ho chi minh city
+ho chi minh city univ technol, fac mech engn, 268 ly thuong kiet st,dist 10, ho chi minh city
+vietnam natl univ, univ sci, falcuty biol & biotechnol, ho chi minh city
+univ sci, falcuty biol & biotechnol, ho chi minh city
+ho chi minh city university of technology, vietnam national university-ho chi minh city
+university of information technology, ho chi minh city
+vietnam natl univ, univ sci, fac biol biotechnol, ho chi minh city
+univ sci, fac mat sci, vnu ho chi minh city, ho chi minh city
+ho chi minh city university of technology (hcmut), vnu-ho chi minh, ho chi minh city
+vietnam natl univ ho chi minh city vnu ho chi minh, univ sci, fac biol & biotechnol, dept biochem, ho chi minh city 702500
+vietnam natl univ, univ sci, lab canc res, ho chi minh city
+univ sci, lab canc res, ho chi minh city
+university of information technology (uit), vietnam national university - ho chi minh city, ho chi minh city
+vietnam natl univ ho chi minh city, thu duc, ho chi minh
+international university-vnuhcm, department of electrical and electronics engineering, university of technology-vnuhcm
+ho chi minh city university of technology, vnu, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong kiet str., district 10, ho chi minh city
+ho chi minh university of science, 227 nguyen van cu, district 5, ho chi minh city
+vietnam national university, 10-12 dinh tien hoang street, ben nghe ward, district. 1, ho chi minh city
+university of science, vnu ho chi minh, ho chi minh city
+international university, vietnam national university of ho chi minh-city
+international university – vietnam national university, ho chi minh
+university of information technology, vnu ho chi minh city
+university of science - vnuhcm, ho chi minh city
+university of technology, vietnam national university in ho chi minh city
+university of science, vietnam national university ho chi minh city
+university of science, vietnam national university-ho chi minh city, 227 nguyen van cu str., dist. 5, ho chi minh city
+bach khoa university, vnu, ho chi minh city
+university of information technology, vietnam national university - ho chi minh city, ho chi minh city
+university of information technology, vietnam national university - ho chi minh city, ho chi minh city
+univ sci, fac informat technol, ho chi minh city
+univ sci, stem cell inst, ho chi minh city
+ho chi minh university of scienceho chi minh
+international university (iu), vietnam national university ho chi minh city, ho chi minh city
+university of science, vietnam national university, ho chi minh
+university of science, vietnam national university?ho chi minh city, 227 nguyen van cu street, district 5, ho chi minh city
+vnuhcm univ sci, fac informat technol, ho chi minh city
+university of information technology, vnu-ho chi minh city ho chi minh
+university of science, vnuhcm, ho chi minh city
+university of information technology, vnuhcm, ho chi minh city
+ho chi minh city university of science, vnu-ho chi minh
+international university - vnuhcm, ho chi minh
+vietnam national university, ho chi minh city, university of science, 227 nguyen van cu str., dist. 5, ho chi minh city
+vietnam natl univ, fac social sci & humanities, dept orietnal studies, ho chi minh city
+university of information technology, national university ho chi minh city, ho chi minh city
+university of science, department of computer science, ho chi minh city
+international university, vietnam national university-ho chi minh, quarter 6, linh trung ward, thu duc district, ho chi minh city
+ho chi minh city univ technol, dept food technol, fac chem engn, ho chi minh city
+university of technology, vietnam national university, 268 ly thuong kiet str., district 10, ho chi minh city
+university of science, vietnam national university-ho chi minh (vnu-ho chi minh), ho chi minh city
+vietnam national university ho chi minh city, community 6, linh trung ward, thu duc district, ho chi minh city
+university of science, national university – ho chi minh city, 227 nguyen van cu str., dist. 5, ho chi minh city
+university of science (ho chi minh vnu), ho chi minh city
+vnuhcm - university of science, campus 2, linh trung ward, thu duc district, ho chi minh city
+vnuhcm - university of science, campus 1, 227 nguyen van cu street, district 5, ho chi minh city
+vietnam national university, ho chi minh-city
+vietnam natl univ ho chi minh city, dept biochem, sch biotechnol, int univ, ho chi minh city
+university of science, vietnam national university - ho chi minh city, 227 nguyen van cu st., ward 4, district 5, ho chi minh city
+vietnam natl univ ho chi minh city, dept biochem, sch biotechnol, int univ
+university of science, university of science, vietnam national university, ho chi minh
+university of technology, vnu-ho chi minh, 268 ly thuong kiet street, district 10, ho chi minh city
+international university, vnu-ho chi minh, thu duc district, ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet str., dist. 10, ho chi minh city
+vietnam natl univ, fac biol, dept anim physiol & biotechnol, ho chi minh city
+univ sci ho chi minh, dept biochem, ho chi minh
+vietnam national university, university of information technology, ho chi minh city
+vietnam natl univ, sch biotechnol, int univ, quarter 6,linh trung ward, ho chi minh city
+ho chi minh city univ technol, fac chem engn, ho chi minh city
+vietnam national university, ho chi minh city, 268 ly thuong kiet, district 10, ho chi minh city
+vietnam national university, ho chi minh, 268 ly thuong kiet, district 10, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university, 268 ly thuong kiet, district 10, ho chi minh city
+university of science, faculty of chemistry, 227 nguyen van cu, district 5, ho chi minh
+vietnam national university, cancer research laboratory, 227 nguyen van cu, district 5, ho chi minh
+vietnam natl univ, ho chi minh city, int univ, ho chi minh city
+international university, vietnam national university of ho chi minh city, ho chi minh city
+vietnam natl univ, ho chi minh city, int univ
+ho chi minh city univ technol, dept power syst, ho chi minh city
+biomedical engineering dept. international university, vietnam national university, ho chi minh
+university of information technology, vietnam national university-ho chi minh city, linh trung ward, thu duc district, ho chi minh city
+university of technology vnu ho chi minh, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh university of technology, ho chi minh
+international university, vietnam national university, ho chi minh city, ho chi minh
+vietnam natl univ, fac math & comp sci univ sci, ho chi minh city
+vietnam natl univ, univ sci, fac math & comp sci, ho chi minh city
+international university-vnu ho chi minh city
+vietnam natl univ, dept vietnamese studies, univ social sci & humanities, ho chi minh city
+international university of vietnam national university
+ho chi minh city university of technology - ho chi minh-vnu, ho chi minh
+university of science, vnu-ho chi minh city, ho chi minh
+vietnam national university ho chi minh city, university of science
+university of technology, vietnam national university–ho chi minh city, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh university of technology, vnu-ho chi minh
+vietnam national university–ho chi minh city, quarter 6, linh trung ward, thu duc district, ho chi minh city
+vietnam national university ho chi minh city, 227 nguyen van cu, ho chi minh city
+university of technology, 268 ly thuong kiet street, district 10, ho chi minh city
+int univ vnuhcm, sch elect engn, ho chi minh city
+univ technol vnuhcm, dept elect & elect engn, ho chi minh city
+vietnam natl univ, inst environm & resources, 142 to hien thanh st,dist 10, ho chi minh city 700000
+vnuhcm-international university, school of biotechnology, quarter 6, linh trung ward, ho chi minh city
+university of science, 227 nguyen van cu st., ho chi minh city
+vnuhcm-university of science, faculty of mathematics and computer science, 227 nguyen van cu street, ho chi minh city
+international university, vietnam national university, ho chi minh city, ho chi minh city
+university of science, vietnam national university, ward 4, district 5, ho chi minh city
+ho chi minh university of science, vietnam national university
+ho chi minh city university of science, 227 nguyen van cu, ho chi minh city
+ho chi minh city university of technology, no. 286 ly thuong kiet street, ho chi minh city
+university of science, ho chi minh city, 227 nguyen van cu st., ho chi minh city
+international university, vietnam national university–ho chi minh city, ho chi minh
+int univ, sch biotechnol, ho chi minh city
+university of information technology, vnuhcm, linh trung ward, thu duc district, ho chi minh city
+university of science, ho chi minh city, 227 nguyen van cu st., dist. 5, ho chi minh city
+ho chi minh city univ technol, vnu ho chi minh, falculty comp sci & engn, ho chi minh city
+university of technology-vnu ho chi minh, ho chi minh city
+university of technology, vnu-ho chi minh, ho chi minh city
+ho chi minh city university of technology, hcmut-vnu, ho chi minh city
+ho chi minh city university of technology (vnu-ho chi minh), ho chi minh city
+ho chi minh city international university, ho chi minhiu-vnu, ho chi minh city
+ho chi minh city international university, hcmut-vnu, ho chi minh city
+university of science, vietnam national university-ho chi minh city, 227 nguyen van cu street, ward 4, district 5, ho chi minh city
+international university-vietnam national university, ward 6, linh trung, thu duc district, ho chi minh city
+vietnam national university, ho chi minh city (vnu-ho chi minh)
+vietnam national university-ho chi minh city, international university
+vietnam national university, university of technology, ho chi minh-city
+university of science, vietnam national university, 227 nguyen van cu, ward 4, district 5, ho chi minh city
+univ sci, 227 nguyen van cu st,dist 5, ho chi minh city
+ho chi minh international university, thu duc, ho chi minh city
+univ technology vnu ho chi minh, fac chem engn, ho chi minh city
+university of science, vietnam national university ho chi minh city (vnu)
+univ sci, dept optimizat & syst theory, 227 nguyen van cu,dist 5, ho chi minh city
+univ sci, biol biotechnol dept, ho chi minh
+international university vietnam national university, ho chi minh city
+university of technology, vnu-ho chi minh
+university of technology, vnu ho chi minh, ho chi minh city
+university of science-vnuhcm, ho chi minh city
+ho chi minh city university of technology, vnu-ho chi minh, 268 ly thuong kiet street, district 10, ho chi minh city
+university of science, national university of ho chi minh city (vnu-ho chi minh)
+national university of science of ho chi minh city, ho chi minh city
+vietnam national university ho chi minh city, kp 3, linh xuan ward, thu duc district, ho chi minh city
+university of science, vietnam national university - ho chi minh city, 227 nguyen van cu str., dist. 5, ho chi minh city
+univ sci, fac phys & engn phys, ho chi minh 700000
+vietnam natl univ, law course s1580107, linh trung ward, 6 quarter, ho chi minh city
+vietnam national university - ho chi minh city, it park, linh trung ward, thu duc district, ho chi minh city
+vietnam natl univ, econ law, dept law, univ econ & law,linh trung ward, 6 quarter, ho chi minh city
+univ sci, stem cell inst, vnuhcm, ho chi minh city
+ho chi minh university of technology, 268 ly thuong kiet, ward 14, district 10, ho chi minh city
+ho chi minh city university of technology, vietnam national university, 268 ly thuong kiet, district 10, ho chi minh city
+univ sci vnu ho chi minh city, fit, ho chi minh city
+vietnam national university in ho chi minh city, thu duc district, ho chi minh city
+university of technology, vietnam national university, 268 ly thuong kiet street, district 10, ho chi minh city
+ho chi minh city university of science, vietnam national university, 227 nguyen van cu, district 5, ho chi minh city
+vietnam national university ho cho minh city, university of science, ho chi minh city
+ho chi minh university of technology (hcmut), ho chi minh city
+bach khoa university (vnu-ho chi minh), 268 ly thuong kiet, d. 10, ho chi minh city
+ho chi minh city university of technology (hcmut), vietnam national university (vnuhcm), 268 ly thuong kiet, ho chi minh city
+bach khoa university of ho chi minh city
+ho chi minh city university of technology, 268 ly thuong kiet str, ho chi minh city
+ho chi minh city univ technol, fac sci appl, dept engn mech, 268 ly thuong kiet st,dist 10, ho chi minh city
+ho chi minh city university of technology, 475a dien bien phu street, ward 25, binh thanh district, ho chi minh city
+vnuhcm-university of science, 227 nguyen van cu, district 5, ho chi minh
+international university- vietnam national university, quarter 6, linh trung ward, thu duc district, ho chi minh city
+university of science- vietnam national university, 227 nguyen van cu street, ward 4, district 5, ho chi minh city
+vnuhcm–university of science, 227 nguyen van cu, ho chi minh city
+ho chi minh city university of technology - vnu-ho chi minh, bldg. b10 – 268 ly thuong kiet str., dist. 10, ho chi minh city
+vietnam national university, thu duc district, ho chi minh city
+university of science, vietnam national university ho chi minh city, ho chi minh
+faculty of chemical engineering ho chi minh city university of technology, vietnam national university, ho chi minh city
+vnu-ho chi minh city, faculty of material science, university of science
+
+
+
+Representative: Vietnam Academy of Science and Technology
+Representative ID: 3
+Processing IDS:
+vast
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 3 FROM organizes o WHERE o.name LIKE '%vast%'
+ncst
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 3 FROM organizes o WHERE o.name LIKE '%ncst%'
+vietnam acad%sci%tech
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 3 FROM organizes o WHERE o.name LIKE '%vietnam acad%sci%tech%'
+vietnam academy of science and technology
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 3 FROM organizes o WHERE o.name LIKE '%vietnam academy of science and technology%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 3 AND o.name LIKE '%military%'
+
+Organizations of this representative have one of those 80 segments:
+vietnam acad sci & technol, ctr high technol dev
+vietnam acad sci & technol, inst biotechnol, natl key lab gene technol
+vietnam acad sci & technol, fac biotechnol
+vast 18 hoang quoc viet road
+institute of chemistry-vast
+institute of geophysics vietnam academy of science and technology
+vietnam acad sci & technol, inst biotechnol
+vietnam academy of science and technology (gust-vast)
+vietnam academy of science and technologies
+vietnam acad sci & technol
+vietnam acad sci & technol, inst trop biol, dept anim biotechnol
+vietnam acad sci & technol, inst biotechnol, lab embryo biotechnol
+vietnam academy of science and techology
+vietnam acad sci & technol, dept adv mat sci & nanotechnol
+institute of tropical biology-vast
+institute of marine biochemistry-vietnam academy of science and technology (vast)
+vietnam acad sci & technol, space technol inst
+vietnam academy of science and technology (vasc)
+vietnam acad sci & technol, grad univ sci & technol
+institute of mathematics-vast
+ibt-vast
+vietnam acad sci & technol, dept pharmacol med & agron biotechnol
+ies vast
+inst chem technol vast
+vast - institute of mechanics
+geological institute of the vietnam academy of science and technologies
+vietnam academy of science & techonlogy
+vietnam academy of science and technology, institute of information technology
+institute of marine biochemistry of the vietnam academy of science and technology (vast)
+itt vietnam academy science and technology
+ho chi minh city institute of resources geography (vast-girs)
+vietnam academy of science and technology, institute of biotechnology
+nhatrang institute of technology and research application vast
+vietnam acad. of science and technology
+vietnam acad sci & technol, inst chem technol
+vietnam national museum of nature (vast)
+institute of chemical technology (vast)
+vietnam acad sci & technol, univ sci & technol
+vietnam acad sci & technol, inst informat technol
+institute of environmental technology (iet) of vast
+institute of mechanics-vast
+inst math hanoi vast
+vietnam academy of science and q1 technology
+vietnam academy science and technology
+institute of geological science – vast
+vietnam academy of science & technology (vast)
+graduate university of science and technology - vast
+vietnam academy of science and technology (vast)
+institute of materials science - vast
+vietnam academy of science and technology, post and telecommunications institute of technology
+vietnam academy of science and technology (vast)hanoi
+vietnam academy of science and technology (gust vast)
+vietnam academy of science and technology (ich vast)
+vast)
+institute of mathematics hanoi (vast)
+vietnam academy of science & technology
+vnsc vast
+institute of natural products chemistry—vietnam academy of science & technology
+vast campus
+vast/institute of physics
+vietnam academy of science and technology (igp vast)
+institute of applied materials science-vietnam academy of science and technology
+vast
+vietnam academy of science and technology
+institute of biotechnology (ibt-vast)
+vietnam academy of science and technology, 18 hoang quoc viet str, cau giay, hanoi, vietnam, institute of information technology
+vasteras
+institute of environmental technology-vietnam academy of science and technology
+vietnam academy for science and technology
+vietnam academy of science and technology
+vietnam academy of science and technology 18
+vietnam acad. sci. technol.
+vietnam academy of science and technology, graduate university of science and technology
+vast institute of marine geology and geophysics
+vietnamese academy of science and technology (vast)
+institute of mechanics - vast
+vnsc/vast
+vietnam acad sci & technol vast
+institute of energy science - vietnam academy of science and technology
+national council for science and technology policy (ncstp)
+
+
+
+Representative: Ton Duc Thang University
+Representative ID: 4
+Processing IDS:
+ton duc thang univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 4 FROM organizes o WHERE o.name LIKE '%ton duc thang univ%'
+ton-duc-thang univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 4 FROM organizes o WHERE o.name LIKE '%ton-duc-thang univ%'
+tonducthang univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 4 FROM organizes o WHERE o.name LIKE '%tonducthang univ%'
+ton due thang univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 4 FROM organizes o WHERE o.name LIKE '%ton due thang univ%'
+ton duc thang university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 4 FROM organizes o WHERE o.name LIKE '%ton duc thang university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 8 segments:
+ton duc thang univeristy
+ton duc thang university
+ton duc thang university ho chi minh city
+ton due thang university
+ton due thang university ho chi minh city
+ton duc thang university (tdtu)
+tdt-ton duc thang university
+ton duc thang univ
+
+
+
+Representative: Nguyen Tat Thanh University
+Representative ID: 5
+Processing IDS:
+nguyen tat thanh university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 5 FROM organizes o WHERE o.name LIKE '%nguyen tat thanh university%'
+nguyen-tat-thanh university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 5 FROM organizes o WHERE o.name LIKE '%nguyen-tat-thanh university%'
+nguyentatthanh university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 5 FROM organizes o WHERE o.name LIKE '%nguyentatthanh university%'
+nguyen tat thanh university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 5 FROM organizes o WHERE o.name LIKE '%nguyen tat thanh university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 2 segments:
+nguyen tat thanh university (nttu)
+nguyen tat thanh university
+
+
+
+Representative: Hanoi University of Science and Technology
+Representative ID: 14
+Processing IDS:
+hanoi university of science and technology
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 14 FROM organizes o WHERE o.name LIKE '%hanoi university of science and technology%'
+hanoi univ sci & tech
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 14 FROM organizes o WHERE o.name LIKE '%hanoi univ sci & tech%'
+hust
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 14 FROM organizes o WHERE o.name LIKE '%hust%'
+hanoi university of science and technology
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 14 FROM organizes o WHERE o.name LIKE '%hanoi university of science and technology%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 14 AND o.name LIKE '%usth%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 14 AND o.name LIKE '%university of science and technology of hanoi%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 14 AND o.name LIKE '%univ sci & technol of hanoi%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 14 AND o.name LIKE '%vast%'
+
+Organizations of this representative have one of those 22 segments:
+hust-cnrs/umi-2954-grenoble inp
+hanoi university of science and technology 325-c1
+hanoi university of science and technology (hust - cnrs/umi-2954 - grenoble inp)
+school of information and communication technology of hust
+hanoi university of technology (hust)
+hanoi university of science and technology
+international training institute for materials science hanoi university of science and technology
+hanoi university of science and technology
+mica hust
+hanoi university of science and technologyhanoi
+hanoi university of science and technology
+mica international research institute (hust - cnrs/umi2954 - grenoble inp)
+hanoi university of science and technology (dai hoc bach khoa hanoi)
+hanoi university of science and technology hanoi
+hanoi univ sci & technol
+hanoi univ sci & technol hanoi
+hust - cnrs/umi-2954 - grenoble inp
+mica institute (hust - cnrs/umi2954 - grenoble inp)
+hust-cnrsumi-2954-grenoble inp
+hanoi university of science and technology
+hanoi university of science and technology
+hanoi university of science and technology (hust)
+
+
+
+Representative: Can Tho University
+Representative ID: 28
+Processing IDS:
+can tho university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 28 FROM organizes o WHERE o.name LIKE '%can tho university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 16 segments:
+can tho university-campus ii
+faculty of education can tho university
+can tho university of technology (ctut)
+can tho university
+cenres can tho university
+can tho university of technology
+can tho university software center
+can tho university of medicine and pharmacy
+can tho university (ctu)
+department of mathematics can tho university
+nam can tho university
+can tho university campus
+cict-can tho university
+cusc-can tho university
+southern can tho university
+can tho university campus ii
+
+
+
+Representative: Hanoi National University of Education
+Representative ID: 29
+Processing IDS:
+national university of education%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%national university of education%hanoi%'
+hnue%vietnam
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%hnue%vietnam%'
+hanoi national university of education
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%hanoi national university of education%'
+Processing CIDS:
+
+Organizations of this representative have one of those 44 segments:
+hanoi national university of education, 136-xuanthuy street, caugiay district, hanoi
+hanoi national university of education, cau giay, hanoi
+hanoi national university of education, building a4, 136 xuan thuy road, cau giay dist., hanoi
+hanoi national university of education, 136 xuanthuy str., cau giay hanoi
+hanoi national university of education, 136 xuan thuy cau giay, hanoi
+hanoi national university of education, str. xuan thuy 136, cau giay district, hanoi
+hanoi national university of education
+hanoi national university of education, 136 xuanthuy st., hanoi
+hanoi national university of education, 136 xuan thuy street, hanoi
+hanoi national university of education, 136 xuanthuy str., caugiay, hanoi
+hanoi national university of education, cau giay district, hanoi
+hanoi national university of education, 136 xuan thuy, hanoi
+hanoi national university of education, 136 xuan thuy, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy street, cau giay district, hanoi
+hanoi national university of education, 136, xuan thuy street, cau giay district, hanoi
+hanoi national university of education, 136 xuanthuy, hanoi
+hanoi national university of educationhanoi
+hanoi national university of education, 136-xuan thuy, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy, caugiay, hanoi
+hanoi national university of education, 136 xuan .uy, cau giay, hanoi
+hanoi national university of education, room 408, block v, 136, xuan thuy street, dich vong hau ward, cau giay district, hanoi city
+hanoi national university of education, 136 xuan thuy road cau giay district, hanoi
+hanoi national university of education, hanoi
+hanoi national university of education, caugiay, hanoi
+hanoi national university of education, 136 xuan thuy street, caugiay district, hanoi
+hanoi national university of education, faculty of chemistry, xuan thuy 136, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy road, hanoi
+national university of education, 136 xuan thuy street, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy st., hanoi
+hanoi national university of education, faculty of chemistry, hanoi
+hanoi national university of education, xuan thuy 13, hanoi
+hanoi national university of education, hanoi 84
+hanoi national university of education, 136 xuanthuy rd, caugiay district, hanoi
+hanoi national university of education, xuan thuy 136, cau giay, hanoi
+hanoi national university of education, 136 xuanthuy, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy road, cau giay district, hanoi
+hanoi national university of education, 136 xuanthuy, caugiay, hanoi
+hnue, vietnam
+hanoi national university of education, 136, xuan thuy street, hanoi city
+hanoi national university of education, 136 xuan thuy street, cau giay, hanoi
+national university of education, hanoi vietnam
+hanoi national university of education, 136 xuan thuy road, cau giay, hanoi
+hanoi national university of education, 136 xuan thuy street, caugiay, hanoi
+hanoi national university of education, faculty of biology, hanoi
+
+
+
+Representative: Posts and Telecommunication Institute of Technology
+New representative with ID: 1
+Processing IDS:
+ptit%vietnam
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%ptit%vietnam%'
+post%telecom%inst%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%post%telecom%inst%hanoi%'
+post%telecom%inst%hochiminh
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%post%telecom%inst%hochiminh%'
+posts and telecommunication institute of technology
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 1 FROM organizes o WHERE o.name LIKE '%posts and telecommunication institute of technology%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 1 AND o.name LIKE '%vietnam acad%sci%tech%'
+
+Organizations of this representative have one of those 29 segments:
+posts and telecommunications institute of technology in hanoi, hanoi
+posts and telecommunications institute of technology, hanoi
+ptit, ha dong district, hanoi, vietnam
+posts and telecommunications institute of technology, km10, nguyen trai, ha dong, hanoi
+posts and telecommunications institute of technology (ptit), km 10, nguyen trai road, hanoi, vietnam
+posts & telecommun inst technol, hanoi
+post and telecommunications institute of technology, 10 km nguyen trai road, hanoi
+posts & telecoms inst technol, hanoi
+ptit, hanoi, vietnam
+post and telecommunications institute of technology, hanoi
+posts and telecommunications, institute of technology, hanoi
+posts & telecoms inst technol hanoi, hanoi
+posts and telecommunications institute of technology, ministry of information and communication, nguyen trai, hanoi
+posts and telecommunications institute of technology, hanoi city
+posts and telecommunications institute of technology, km 10, hadong, hanoi
+posts and telecommunications institute of technology, km 10, nguyen trai, ha dong, hanoi
+posts and telecommunications institute of technology, 122 hoang quoc viet, hanoi
+post and telecommunication institute of technology (ptit), hanoi, vietnam
+posts and telecommunications institute of technology (ptit) and finance-banking universityhanoi, vietnam
+posts & telecoms inst technol, km10 nguyen trai rd, hanoi
+ptit, vietnam
+posts and telecommunications institute of technology (ptit), hanoi, vietnam
+posts and telecommunications institute of technology, km10 nguyen trai, hanoi
+post and telecommunications institute of technology, km 10, nguyen trai, ha dong, district, hanoi
+posts and telecommunications institute of technology (ptit), vietnam
+posts and telecommunications institute of technology (ptit), ho chi minh city, vietnam
+posts and telecommunications institute of technology hanoi city
+posts and telecommunications institute of technology (ptit), finance-banking university, hanoi, vietnam
+posts & telecommun inst technol, fac telecommun, hanoi
+
+
+
+Representative: Da Nang University
+Representative ID: 30
+Processing IDS:
+university of da nang
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%university of da nang%'
+da nang univ,
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%da nang univ,%'
+univ da nang
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%univ da nang%'
+university of economics%danang
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%university of economics%danang%'
+da nang univ econ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%da nang univ econ%'
+da nang university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 30 FROM organizes o WHERE o.name LIKE '%da nang university%'
+Processing CIDS:
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang university of medical technology and pharmacy%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang univ med technol & pharm%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang university of technology%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang univ technol%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%dut%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang university of architecture%'
+DELETE org_rep FROM organize_representative org_rep JOIN organizes o ON o.id = org_rep.organize_id WHERE org_rep.representative_id = 30 AND o.name LIKE '%da nang univ arch%'
+
+Organizations of this representative have one of those 35 segments:
+da nang university of science and technology
+university of education—the university of da nang (vietnam)
+da nang university of science and technology-the unversity of da nang
+university of science and technology-the university of da nang
+the university of da nang—da nang university of science and technology
+the university of da nang-university of science and technology
+da nang university of economics
+college of technology university of da nang
+the university of da nang—university of science and technology
+da nang university of medical technologies and pharmacy
+the university of da nang
+da nang univ, univ foreign language studies
+da nang university of education - university of da nang
+university of science and technology-university of da nang
+da nang university
+university of science and technology - da nang university
+university of da nang
+computer science at the university of da nang (ud)
+university of economics the university of da nang
+the university of da nang – university of education
+univ da nang
+university of da nang - university of education
+university of da nang - universuty of science and technology
+univ da nang univ sci & technol
+univ sci & technol univ da nang
+university of science and technology – the university of da nang
+university of da nang-university of science and technology
+da nang university of education
+duy tan univ da nang
+university of science and technology - the university of da nang
+the university of da nang - university of science and technology
+da nang univ, da nang univ educ
+da nang university of science and technology
+polytechnic institute of da nang university
+university of da nang - university of science and technology
+
+
+
+Representative: Quy Nhon University
+Representative ID: 43
+Processing IDS:
+quy nhon univ
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 43 FROM organizes o WHERE o.name LIKE '%quy nhon univ%'
+university of quy nhon
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 43 FROM organizes o WHERE o.name LIKE '%university of quy nhon%'
+quy nhon university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 43 FROM organizes o WHERE o.name LIKE '%quy nhon university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 7 segments:
+university of quy nhon
+university of quy nhon ? 170 an duong vuong
+quy nhon university
+quy nhon univ
+quy nhon universitybinh dinh
+quy nhon university quy nhon
+2quy nhon university
+
+
+
+Representative: Thai Nguyen University
+Representative ID: 57
+Processing IDS:
+university of thai nguyen
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 57 FROM organizes o WHERE o.name LIKE '%university of thai nguyen%'
+thai nguyen university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 57 FROM organizes o WHERE o.name LIKE '%thai nguyen university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 24 segments:
+thai nguyen universitythai nguyen province
+thai nguyen university of technologythai nguyen
+thai nguyen university (tnu)
+thai nguyen university of agriculture and forestrythai nguyen province
+thai nguyen university of pedagogical
+university of thai nguyen information and communications technology
+thai nguyen university of agriculture and forestry
+thai nguyen university of science
+university of information and communication technology under thai nguyen university
+ictu thai nguyen university
+thai nguyen university of economic and business administrationthai nguyen
+thai nguyen university
+thai nguyen university of economics and business administration (tueba)
+thai nguyen university of technology (tnut)
+thai nguyen university of economics and business and administration
+thai nguyen university of technology
+thai nguyen university of medicine and pharmacy
+thai nguyen university of agriculture and forestry (tuaf)
+thai nguyen university of education
+thai nguyen universitythai nguyen
+the university of information and communication technology under thai nguyen university
+thai nguyen university of information and communication technology
+thai nguyen university of economics and business administration
+thai nguyen university of pharmacy and medicine
+
+
+
+Representative: Hanoi Agricultural University
+Representative ID: 6
+Processing IDS:
+hanoi agricultural university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 6 FROM organizes o WHERE o.name LIKE '%hanoi agricultural university%'
+vietnam nat%univ%agr
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 6 FROM organizes o WHERE o.name LIKE '%vietnam nat%univ%agr%'
+hanoi agricultural university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 6 FROM organizes o WHERE o.name LIKE '%hanoi agricultural university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 8 segments:
+vietnam national university of agriculture (vnua)
+central water & soil lab at vietnam national university of agriculture
+vietnam national university of agriculturehanoi
+vietnam national university of agriculture
+vietnam national university of agriculture, center for agricultural research and ecological studies
+vietnam national university agriculture
+faculty of biotechnology – vietnam national university of agriculture
+vietnam natl univ agr
+
+
+
+Representative: Foreign Trade University
+Representative ID: 62
+Processing IDS:
+foreign trade university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 62 FROM organizes o WHERE o.name LIKE '%foreign trade university%'
+foreign trade university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 62 FROM organizes o WHERE o.name LIKE '%foreign trade university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 4 segments:
+hanoi foreign trade university and researcher
+hanoi foreign trade university (ftu)
+foreign trade university
+hanoi foreign trade university
+
+
+
+Representative: Hanoi Medical University
+Representative ID: 19
+Processing IDS:
+hanoi medical university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 19 FROM organizes o WHERE o.name LIKE '%hanoi medical university%'
+hanoi medical university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 19 FROM organizes o WHERE o.name LIKE '%hanoi medical university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 4 segments:
+hanoi medical university and vietnam national heart institute
+hanoi medical university
+hanoi medical university and national institute for cancer control
+hanoi medical university (hmu)
+
+
+
+Representative: National Economics University
+Representative ID: 63
+Processing IDS:
+national economics university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 63 FROM organizes o WHERE o.name LIKE '%national economics university%'
+national economics university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 63 FROM organizes o WHERE o.name LIKE '%national economics university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 6 segments:
+national economics university (neu)
+vietnam & national economics university
+national economics university
+national economics universityhanoi
+national economics university 1
+the national economics university
+
+
+
+Representative: National Economics University
+Representative ID: 63
+Processing IDS:
+national economics university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 63 FROM organizes o WHERE o.name LIKE '%national economics university%'
+national economics university
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 63 FROM organizes o WHERE o.name LIKE '%national economics university%'
+Processing CIDS:
+
+Organizations of this representative have one of those 6 segments:
+national economics university (neu)
+vietnam & national economics university
+national economics university
+national economics universityhanoi
+national economics university 1
+the national economics university
+
+
+
+Representative: Hanoi National University of Education
+Representative ID: 29
+Processing IDS:
+hanoi national university of education
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%hanoi national university of education%'
+hanoi university of education
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%hanoi university of education%'
+hanoi national university of education
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 29 FROM organizes o WHERE o.name LIKE '%hanoi national university of education%'
+Processing CIDS:
+
+Organizations of this representative have one of those 3 segments:
+hanoi national university of educationhanoi
+hanoi university of education
+hanoi national university of education
+
+
+
+Representative: Hanoi Pedagogical University 2
+Representative ID: 64
+Processing IDS:
+hanoi pedag%univ%2
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 64 FROM organizes o WHERE o.name LIKE '%hanoi pedag%univ%2%'
+pedag%univ%2%hanoi
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 64 FROM organizes o WHERE o.name LIKE '%pedag%univ%2%hanoi%'
+hanoi pedagogical university 2
+INSERT IGNORE INTO organize_representative (organize_id, representative_id) SELECT o.id, 64 FROM organizes o WHERE o.name LIKE '%hanoi pedagogical university 2%'
+Processing CIDS:
+
+Organizations of this representative have one of those 18 segments:
+hanoi pedag univ, 2,32 nguyen van linh
+hanoi pedagogical university 2vinh phuc
+hanoi pedagogical university 2, hanoi
+hanoi pedagogical university 2, 32 nguyen van linh street
+hanoi pedagogical university, no. 2
+hanoi pedagogical university no 2
+hanoi pedagogical university no. 2
+hanoi pedagogical university no. 2, 32 nguyen van linh
+hanoi pedagogical university no.2
+hanoi pedagogical university no2 (hpu2), hanoi
+hanoi pedagogical university, 2
+hanoi pedag univ 2, dept phys, hanoi
+hanoi pedag univ 2, nguyen van linh st, vinh phuc 280000
+hanoi pedagogical university no2, hanoi
+hanoi pedagogical university 2, no. 32 nguyen van linh road
+hanoi pedagogical university number 2
+hanoi pedagogical university 2
+hanoi pedagogical university, no.2
+
+
+

@@ -1,5 +1,6 @@
 package importer;
 
+import com.google.common.collect.*;
 import comparator.LCS;
 import config.Config;
 import data.Article;
@@ -12,6 +13,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import util.DataUtl;
+import util.StringUtl;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -44,23 +46,11 @@ public class ImportDB {
         try {
             if (Config.DB.NUCLEAR_OPTION) {
                 String[] truncateTables = {"articles", "articles_authors", "authors", "authors_organizes", "journals", "merge_logs", "organizes", "organize_representative"};
-                Statement stm = getDBStatement();
 
                 for (String table : truncateTables) {
-                    String query = "TRUNCATE " + table;
-                    System.out.println(query);
-
-                    try {
-                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 0");
-
-                        stm.executeQuery("USE " + Config.DB.OUTPUT);
-                        stm.executeUpdate(query);
-
-                        DataUtl.queryDB(Config.DB.OUTPUT, "SET FOREIGN_KEY_CHECKS = 1");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                    DataUtl.truncate(Config.DB.OUTPUT, table);
                 }
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -81,6 +71,7 @@ public class ImportDB {
             while (rs.next()) {
                 UNCATEGORIZED_JOURNAL_ID = rs.getInt("id");
             }
+            rs.close();
 
             if (UNCATEGORIZED_JOURNAL_ID == -1) {
                 UNCATEGORIZED_JOURNAL_ID = DataUtl.insertAndGetID(Config.DB.OUTPUT,
@@ -98,6 +89,7 @@ public class ImportDB {
             while (rs.next()) {
                 UNCATEGORIZED_ORGANIZATION_ID = rs.getInt(1);
             }
+            rs.close();
 
             if (UNCATEGORIZED_ORGANIZATION_ID == -1) {
                 int _rgt = ++numOfOrganization << 1;    // Look at the comments in findOrCreateOrganizations
@@ -111,42 +103,15 @@ public class ImportDB {
         }
     }
 
-    private static Set<String> organizationSuffixes;
+    private static List<String> organizationSuffixes;
     static {
-        organizationSuffixes = new HashSet<>();
-        String[] tables = {"isi_documents", "scopus_documents"};
-
-        for (String table : tables) {
-            String query = "SELECT authors_json FROM " + table;
-
-            try {
-                ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, query);
-
-                while (rs.next()) {
-                    Article article = new Article();
-                    article.setAuthorsJSON(rs.getString(1));
-
-                    List<String> organizations = article.getListOrganizations();
-                    if (organizations == null) {
-                        continue;
-                    }
-
-                    for (String organization : organizations) {
-                        organization = organization.toLowerCase().trim();
-
-                        for (int i = organization.length() - 2; i >= 0; --i) {
-                            if (organization.charAt(i) == ' ') {
-
-                                organizationSuffixes.add(organization.substring(i + 1).trim());
-                                break;
-                            }
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+        try {
+            organizationSuffixes = createOrganizationSuffixes();
+        } catch (Exception e) {
+            System.err.println("WHAT");
+            e.printStackTrace();
         }
+
 
         System.out.println("List suffixes:");
         for (String suffix : organizationSuffixes) {
@@ -503,7 +468,7 @@ public class ImportDB {
         String temp = null;
 
         Integer ID = null;
-        double highestScore = 0.95d;    // The condition is quite strict, as organization names are messy and need a separate deduplication
+        double highestScore = 0.94d;    // This condition is quite strict, as organization names are messy and need a separate deduplication
 
         for (SearchHit hit : hits) {
             Map map = hit.getSourceAsMap();
@@ -528,6 +493,128 @@ public class ImportDB {
     private static int getNumOfOrganizations() throws SQLException {
         ResultSet rs = DataUtl.queryDB(Config.DB.OUTPUT, "SELECT COUNT(*) FROM organizes");
         rs.next();
-        return rs.getInt(1);
+        int temp = rs.getInt(1);
+        rs.close();
+        return temp;
     }
+
+    /**
+     * Suffix is the last word of the organization name.
+     * Usually there will be one word in the segment, but
+     * It will be used to split lumped together organization names.
+     * @return
+     */
+    private static List<String> createOrganizationSuffixes() {
+        HashMultiset<String> suffixCounter = HashMultiset.create();
+        List<String> organizationSuffixes = new ArrayList<>();
+
+        int total = 0;
+        String[] tables = {"isi_documents", "scopus_documents"};
+
+        for (String table : tables) {
+            String query = "SELECT authors_json FROM " + table;
+
+            try {
+                ResultSet rs = DataUtl.queryDB(Config.DB.INPUT, query);
+
+                while (rs.next()) {
+                    Article article = new Article();
+                    article.setAuthorsJSON(rs.getString(1));
+
+                    List<String> organizations = article.getRawOrganizations();
+
+                    for (String organization : organizations) {
+                        String suffix = Organization.getSuffix(organization);
+                        if (suffix != null) {
+                            suffixCounter.add(Organization.getSuffix(organization));
+                            ++total;
+                        }
+                    }
+                }
+
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Get the 95% most popular
+        total = total * 95 / 100;
+        Iterator<Multiset.Entry<String>> entriesSortedByCount = Multisets.copyHighestCountFirst(suffixCounter).entrySet().iterator();
+        while (total >= 0) {
+            Multiset.Entry<String> entry = entriesSortedByCount.next();
+
+            total -= entry.getCount();
+            organizationSuffixes.add(", " + entry.getElement() + ",");
+        }
+
+        return organizationSuffixes;
+    }
+
+    public static List<String> getOrganizationSuffixes() {
+        return organizationSuffixes;
+    }
+
+    /**
+     * Split the organization if possible
+     * If not, the original string is still added to the output list, intact
+     * @param organization
+     * @return
+     */
+    public static List<String> splitLumpedOrganizations(String organization) {
+        List<String> output = new ArrayList<>();
+
+        Stack<String> splitedParts = new Stack<>();
+        splitedParts.push(organization);
+
+//        if (organization.contains("Department of Otolaryngology Head and Neck")) {
+//            System.out.println("ha");
+//        }
+
+        boolean isSplitted;
+        int threshold;
+        while (! splitedParts.empty()) {
+            String current = splitedParts.pop();
+            isSplitted = false;
+
+            if (current.length() > 65) {
+                threshold = current.length() * 75 / 100;
+
+                for (String suffix : organizationSuffixes) {
+                    int index = current.indexOf(suffix);
+                    if (index == -1) {
+                        continue;
+                    }
+
+                    int endIndex = current.indexOf(suffix) + suffix.length();
+                    if (endIndex <= threshold) {
+                        // Split!
+                        splitedParts.push(StringUtl.cleanComma(current.substring(0, endIndex)));
+                        splitedParts.push(StringUtl.cleanComma(current.substring(endIndex)));
+
+                        ++tempCounter;
+                        isSplitted = true;
+                        break;
+                    }
+                }
+            }
+
+            // No splitting occurred, so just add to the output
+            if (! isSplitted) {
+                output.add(current);
+            }
+        }
+
+        if (output.size() > 1) {
+            System.out.println("Split: " + organization);
+            for (String split : output) {
+                System.out.println(split);
+            }
+            System.out.println();
+        }
+
+        return output;
+    }
+
+    public static int tempCounter = 0;
 }

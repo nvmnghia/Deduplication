@@ -21,7 +21,7 @@ public class Config {
         public static final String PASSWORD = "";
 
         // Always check for this
-        public static final boolean NUCLEAR_OPTION = true;
+        public static boolean NUCLEAR_OPTION = true;
     }
 
     public static final int START_IMPORT_ISI_FROM = 0;
@@ -29,4 +29,6 @@ public class Config {
 
     // Look at the comments at the end of Deduplicator.deduplicate()
     public static final boolean CONTINUOUS_MATCHING = false;
+
+    public static String REPRESENTATIVE_INPUT = "Affiliations.xml";
 }

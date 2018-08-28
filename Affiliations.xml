@@ -2,171 +2,325 @@
 <affiliations>
 <affiliation>
 	<representative>Vietnam National University, Hanoi</representative>
-	<ids>VNU Hanoi</ids>
-	<ids>Vietnam National University, Hanoi</ids>
-	<ids>Vietnam National University Hanoi</ids>
-	<ids>USSH</ids>
-	<cids>
-		<ids>Hanoi University of Science</ids>
-		<excl>Hanoi University of Science and Technology</excl>
-	</cids>
-	<cids>
-		<ids>Vietnam Natl Univ%Hanoi</ids>
-		<excl>Vietnam Natl Univ Agr</excl>
-		<excl>Vietnam Natl Univ Forestry</excl>
-		<excl>Vietnam Natl Univ%Hochiminh</excl>
-		<excl>Vietnam Natl Univ%Ho chi minh</excl>
-	</cids>
-	<cids>
-		<ids>VNU University of Science%Hanoi</ids>
-		<excl>VNU University of Science%Ho chi minh</excl>
-		<excl>VNU University of Science%Hochiminh</excl>
-	</cids>
-	<cids>
-		<ids>VNUH</ids>
-		<excl>VNUHCM</excl>
-	</cids>
+
+	<ids>Vietnam Natl Univ%Hanoi</ids>
+	<ids>Hanoi%Vietnam Natl Univ</ids>
+	<ids>Vietnam National University%Hanoi</ids>
+	<ids>Hanoi%Vietnam National University</ids>
+	<ids>VNU%Hanoi</ids>
+	<ids>Hanoi%VNU</ids>
+
+	<ids>USSH%hanoi</ids>
+	<ids>hanoi%ussh</ids>
+	<ids>Univ Social Sci &amp; Humanities%hanoi</ids>
+	<ids>hanoi%Univ Social Sci &amp; Humanities</ids>
+
+	<ids>VNU%UET</ids>
+	<ids>UET%VNU</ids>
+	<ids>Univ Eng technol%vietnam nat%univ</ids>
+	<ids>vietnam nat%univ%Univ%Eng%technol</ids>
+	<ids>Univ%Eng%technol%vnu</ids>
+	<ids>vnu%Univ%Eng%technol</ids>
+	<ids>University of Engineering and Technology%vietnam</ids>
+	<ids>Univ Engn &amp; Technol%vietnam</ids>
+
+	<excl>VJU</excl>
+
+	<ids>Hanoi%Univ Sci</ids>
+	<ids>Hanoi%University of Science</ids>
+	<ids>Univ Sci%Hanoi</ids>
+	<ids>University of Science%hanoi</ids>
+	<excl>Hanoi Univ Sci &amp; Technol</excl>
+	<excl>Hanoi University of Science Technology</excl>
+	<excl>Hanoi University of Science and Technology</excl>
+	<excl>Hanoi University of Science &amp; Technology</excl>
+	<excl>Vietnam Acad Sci &amp; Technol</excl>
+	<excl>HUST</excl>
+
+	<excl>VNUA</excl>
+	<excl>Vietnam Natl Univ Agr</excl>
+	<excl>Vietnam National University of Agriculture</excl>
+
+	<excl>VNUF</excl>
+	<excl>Vietnam Natl Univ Forestry</excl>
+	<excl>Vietnam National University of Forestry</excl>
+
+	<excl>vnu%ho chi minh</excl>
+	<excl>ho chi minh%vnu</excl>
+	<excl>Vietnam Natl Univ%Ho chi minh</excl>
+	<excl>Ho chi minh%Vietnam Natl Univ</excl>
+	<excl>Vietnam National University%Ho chi minh</excl>
+	<excl>Ho chi minh%Vietnam National University</excl>
+
+	<ids>University of Science%Hanoi</ids>
+	<excl>University of Science%Ho chi minh</excl>
+	<excl>University of Science and Technology%Hanoi</excl>
+
+	<ids>VNUH</ids>
+	<excl>VNUHCM</excl>
 </affiliation>
+
 <affiliation>
 	<representative>Vietnam National University, Ho Chi Minh City</representative>
-	<ids>VNU-HCM</ids>
-	<ids>VNUHCM</ids>
-	<ids>VNU, HCM</ids>
-	<ids>Vietnam National University, HCM</ids>
-	<ids>Vietnam National University, Ho Chi Minh</ids>
-	<ids>Vietnam National University, HoChiMinh</ids>
-	<ids>Vietnam National University HCM</ids>
-	<ids>Vietnam National University Ho Chi Minh</ids>
-	<ids>Vietnam National University HoChiMinh</ids>
-	<cids>
-		<ids>Hochiminh City University of Technology</ids>
-		<excl>Hochiminh City University of Technology and Education</excl>
-	</cids>
-	<cids>
-		<ids>Vietnam Natl Univ%Ho chi minh</ids>
-		<excl>Vietnam Natl Univ Agr</excl>
-	</cids>
-	<cids>
-		<ids>Vietnam Natl Univ%Hochiminh</ids>
-		<excl>Vietnam Natl Univ Agr</excl>
-	</cids>
-	<cids>
-		<ids>Ho Chi Minh City University of Technology</ids>
-		<excl>Ho Chi Minh City University of Technology and Education</excl>
-	</cids>	
-	<cids>
-		<ids>HCMC University of Technology</ids>
-		<excl>HCMC University of Technology and Education</excl>
-	</cids>
-</affiliation>	
+
+	<ids>VNU%HCM</ids>
+	<ids>HCM%VNU</ids>
+
+	<ids>Vietnam Natl Univ%Ho chi minh</ids>
+	<ids>Ho chi minh%Vietnam Natl Univ</ids>
+	<ids>Vietnam National Univ%Ho Chi Minh</ids>
+	<ids>Ho Chi Minh%Vietnam National Univ</ids>
+
+	<ids>ho chi minh%int univ</ids>
+	<ids>int univ%ho chi minh</ids>
+	<ids>ho chi minh%international univ</ids>
+	<ids>international univ%ho chi minh</ids>
+	<ids>vietnam natl univ%int univ</ids>
+	<ids>int univ%vietnam natl univ</ids>
+	<ids>vietnam national univ%international univ</ids>
+	<ids>international univ%vietnam national univ</ids>
+
+	<ids>Ho Chi Minh%Univ Technol</ids>
+	<ids>Univ Technol%ho chi minh</ids>
+	<ids>University of Technol%ho chi minh</ids>
+	<ids>ho chi minh%university of technol</ids>
+	<ids>HCMCUT</ids>
+	<ids>bach khoa%ho chi minh</ids>
+
+	<ids>Ho Chi Minh%Univ Informat Technol</ids>
+	<ids>Univ Informat Technol%Ho Chi Minh</ids>
+	<ids>Ho Chi Minh%university of information technol</ids>
+	<ids>university of information technol%ho chi minh</ids>
+	<ids>Vietnam national univ%university of information technol</ids>
+	<ids>university of information technol%vietnam national univ</ids>
+
+	<excl>VNUA</excl>
+	<excl>Vietnam Natl Univ Agr</excl>
+	<excl>Vietnam National University of Agriculture</excl>
+
+	<excl>VNUF</excl>
+	<excl>Vietnam Natl Univ Forestry</excl>
+	<excl>Vietnam National University of Forestry</excl>
+
+	<excl>Vietnam Natl Univ%Hanoi</excl>
+	<excl>Hanoi%Vietnam Natl Univ</excl>
+	<excl>Vietnam National University%Hanoi</excl>
+	<excl>Hanoi%Vietnam National University</excl>
+
+	<ids>Ho chi minh%University of Science</ids>
+	<ids>University of Science%Ho chi minh</ids>
+	<ids>Ho chi minh%Univ Sci</ids>
+	<ids>Univ Sci%Ho chi minh</ids>
+	<excl>science and techno</excl>
+	<excl>Vietnam Acad Sci &amp; Technol</excl>
+
+
+	<ids>university of information technol%ho chi minh</ids>
+	<ids>ho chi minh%university of information technol</ids>
+	<excl>Ho Chi Minh%University of Technology and Education</excl>
+	<excl>University of Technology and Education%Ho Chi Minh</excl>
+	<excl>Ho Chi Minh%Univ Technol &amp; Edu</excl>
+	<excl>Univ Technol &amp; Edu%Ho Chi Minh</excl>
+
+	<excl>University of Food Industry</excl>
+	<excl>Univ Food Ind</excl>
+
+	<excl>Univ%Foreign language%informat%techno</excl>
+
+	<excl>RMIT</excl>
+
+	<excl>HUTECH</excl>
+</affiliation>
+
 <affiliation>
 	<representative>Vietnam Academy of Science and Technology</representative>
+
 	<ids>VAST</ids>
-	<ids>Vietnam Academy of Science and Technology</ids>
-	<ids>Vietnamese Academy of Science and Technology</ids>
 	<ids>NCST</ids>
-	<ids>Vietnam Acad Sci </ids>
-</affiliation>	
+	<ids>Vietnam Acad%Sci%Tech</ids>
+	<ids>USTH</ids>
+	<ids>University of Science and Technology of Hanoi</ids>
+
+	<!--The last straw == -->
+	<ids>18%hoang%quoc%viet%hanoi</ids>
+
+	<!--Rare: avoid MTA-->
+	<excl>military</excl>
+</affiliation>
+
 <affiliation>
 	<representative>Ton Duc Thang University</representative>
-	<ids>Ton Duc Thang University</ids>
-	<ids>Ton-Duc-Thang University</ids>
-	<ids>TonDucThang University</ids>	
-</affiliation>	
-<affiliation>
-	<representative>Ton Duc Thang University</representative>
-	<ids>Ton Duc Thang University</ids>
-	<ids>Ton-Duc-Thang University</ids>
-	<ids>TonDucThang University</ids>	
-</affiliation>	
+	<ids>Ton Duc Thang Univ</ids>
+	<ids>Ton-Duc-Thang Univ</ids>
+	<ids>TonDucThang Univ</ids>
+	<ids>Ton Due Thang Univ</ids>
+</affiliation>
+
 <affiliation>
 	<representative>Nguyen Tat Thanh University</representative>
+
 	<ids>Nguyen Tat Thanh University</ids>
 	<ids>Nguyen-Tat-Thanh University</ids>
 	<ids>NguyenTatThanh University</ids>	
-</affiliation>	
-<affiliation>
-	<representative>Hanoi University of Science and Technology</representative>
-	<ids>Hanoi University of Science and Technology</ids>
-	<ids>Hanoi University of Technology</ids>
-	<ids>HUST</ids>	
-</affiliation>	
-<affiliation>
-	<representative>Can Tho University</representative>
-	<ids>Can Tho University</ids>
-	<ids>Cantho University</ids>	
-</affiliation>	
-<affiliation>
-	<representative>Hanoi National University of Education</representative>
-	<ids>Hanoi National University of Education</ids>
-	<ids>HNUE</ids>	
-</affiliation>	
-<affiliation>
-	<representative>Posts and Telecommunications Institute of Technology</representative>
-	<ids>Posts and Telecommunications Institute of Technology</ids>
-	<ids>PTIT</ids>	
-</affiliation>	
+</affiliation>
 
 <affiliation>
+	<representative>Hanoi University of Science and Technology</representative>
+
+	<ids>Hanoi University of Science and Technology</ids>
+	<ids>Hanoi Univ Sci &amp; Tech</ids>
+	<ids>HUST</ids>
+
+	<excl>USTH</excl>
+	<excl>University of Science and Technology of Hanoi</excl>
+	<excl>Univ Sci &amp; Technol of Hanoi</excl>
+	<excl>VAST</excl>
+</affiliation>
+
+<affiliation>
+	<representative>Can Tho University</representative>
+
+	<ids>University of Can tho</ids>
+	<ids>Can tho university,</ids>
+	<ids>can tho univ,</ids>
+	<ids>University of Cantho</ids>
+
+	<excl>Univ Technol</excl>
+	<excl>University of Technology</excl>
+
+	<excl>Can Tho University of Medicine and Pharmacy</excl>
+	<excl>Can Tho Univ Med &amp; Pharm</excl>
+</affiliation>
+
+<affiliation>
+	<representative>Hanoi National University of Education</representative>
+
+	<ids>National University of Education%Hanoi</ids>
+	<ids>HNUE%vietnam</ids>
+</affiliation>
+
+<!--Hanoi and HCMC are just 2 campuses, not 2 separated universities like the case of VNU-->
+<affiliation>
+	<representative>Posts and Telecommunications Institute of Technology</representative>
+
+	<ids>PTIT%vietnam</ids>
+	<ids>post%telecom%inst%hanoi</ids>
+	<ids>post%telecom%inst%hochiminh</ids>
+
+	<excl>Vietnam Acad%Sci%Tech</excl>
+</affiliation>
+
+<!--Careful with the provincial universities-->
+<affiliation>
 	<representative>Da Nang University</representative>
-	<ids>Da Nang University</ids>
-	<ids>Danang University</ids>
-	<ids>University of Da Nang</ids>	
-	<ids>University of Danang</ids>	
-</affiliation>	
+
+	<ids>University of Da Nang</ids>
+	<ids>Da Nang univ,</ids>
+	<ids>univ da nang</ids>
+
+	<ids>Da nang university of technology</ids>
+	<ids>University of science and technol%da nang</ids>
+	<ids>Univ Sci &amp; Technol%da nang</ids>
+
+	<ids>University of Economics%danang</ids>
+	<ids>Da Nang univ econ</ids>
+
+	<excl>Da Nang University of Medical Technology and Pharmacy</excl>
+	<excl>Da Nang univ med technol &amp; pharm</excl>
+
+	<ids>Da Nang university of technology</ids>
+	<ids>Da Nang univ technol</ids>
+	<ids>DUT</ids>
+
+	<ids>Da nang%university of education</ids>
+	<ids>university of education%Da nang</ids>
+	<ids>Da nang%univ edu</ids>
+	<ids>univ edu%Da nang</ids>
+
+	<excl>Da Nang university of architecture</excl>
+	<excl>Da Nang Univ Arch</excl>
+</affiliation>
+
+<affiliation>
+	<representative>Da Nang University of Architecture</representative>
+
+	<ids>Da Nang Univ Arch</ids>
+	<ids>Univ arch%da nang</ids>
+</affiliation>
+
+<affiliation>
+	<representative>Da Nang University of Medical Technology and Pharmacy</representative>
+
+	<ids>Da Nang univ med technol &amp; pharm</ids>
+	<ids>Da Nang University of Medical Technologies and Pharmacy</ids>
+</affiliation>
+
+<affiliation>
+	<representative>Duy Tan University</representative>
+
+	<ids>Duy Tan univ</ids>
+</affiliation>
 
 <affiliation>
 	<representative>Quy Nhon University</representative>
-	<ids>Quy Nhon University</ids>
-	<ids>quynhon University</ids>
-	<ids>quynhon Univ</ids>
-	<ids>quy nhon Univ</ids>
-	<ids>University of Quy Nhon</ids>	
-	<ids>University of Quynhon</ids>	
-</affiliation>	
 
+	<ids>quy nhon Univ</ids>
+	<ids>Univ quy nhon</ids>
+	<ids>University of Quy Nhon</ids>
+</affiliation>
+
+<!--LMAO-->
 <affiliation>
 	<representative>Thai Nguyen University</representative>
-	<ids>Thainguyen University</ids>	
-	<ids>Thai nguyen University</ids>	
-	<ids>University of Thai Nguyen</ids>	
-	<ids>University of Thainguyen</ids>		
-</affiliation>	
+
+	<ids>Univ%Thai Nguyen</ids>
+	<ids>Thai Nguyen%Univ</ids>
+</affiliation>
 
 <affiliation>
-	<representative>Hanoi Agricultural University</representative>
-	<ids>Hanoi Agricultural University</ids>	
-</affiliation>	
+	<representative>Vietnam National University of Agriculture</representative>
+
+	<ids>Hanoi Agricultural University</ids>
+	<ids>Vietnam Natl Univ Agr</ids>
+	<ids>VNUA%vietnam</ids>
+</affiliation>
 
 <affiliation>
 	<representative>Foreign Trade University</representative>
-	<ids>Foreign Trade University</ids>	
+
+	<ids>Foreign Trade Univ%vietnam</ids>
+	<ids>FTU%vietnam</ids>
 </affiliation>	
 
 <affiliation>
 	<representative>Hanoi Medical University</representative>
-	<ids>Hanoi Medical University</ids>	
-	<ids>Ha noi Medical University</ids>	
-</affiliation>	
-<affiliation>
-	<representative>National Economics University</representative>
-	<ids>National Economics University</ids>		
+
+	<ids>Medical university of hanoi</ids>
+	<ids>Hanoi med univ</ids>
 </affiliation>
 
 <affiliation>
 	<representative>National Economics University</representative>
-	<ids>National Economics University</ids>		
-</affiliation>		
+	<ids>National Economics University</ids>
+</affiliation>
+
+<affiliation>
+	<representative>National Economics University</representative>
+</affiliation>
 
 <affiliation>
 	<representative>Hanoi National University of Education</representative>
-	<ids>Hanoi National University of Education</ids>		
-	<ids>Hanoi University of Education</ids>			
-</affiliation>		
+
+	<ids>National University of Education%hanoi</ids>
+	<ids>Hanoi Natl Univ Educ</ids>
+	<ids>HNUE%vietnam</ids>
+</affiliation>
 
 <affiliation>
 	<representative>Hanoi Pedagogical University 2</representative>
-	<ids>Hanoi Pedagogical University</ids>		
+
+	<ids>Hanoi Pedag%Univ%2</ids>
+	<ids>Pedag%Univ%2%hanoi</ids>
 </affiliation>
 
 </affiliations>	
